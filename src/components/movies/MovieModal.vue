@@ -139,7 +139,7 @@ const reviewerColors = {
                   class="pr-2 rounded-full text-white bg-[#3A5A7E] flex items-center gap-2"
                 >
                   <img
-                    src="../../../img/average.jpg"
+                    src="../img/average.jpg"
                     class="w-6 rounded-full"
                   />
                   <span class="block text-sm font-bold">{{
@@ -150,7 +150,7 @@ const reviewerColors = {
                   class="pr-2 rounded-full text-white bg-[#4EBBC5] flex items-center gap-2"
                 >
                   <img
-                    src="../../../img/tmdb.jpg"
+                    src="../img/tmdb.jpg"
                     class="w-6 rounded-full"
                   />
                   <span class="block text-sm font-bold">{{
@@ -167,7 +167,7 @@ const reviewerColors = {
                   class="pr-2 rounded-full text-white bg-[#4EBBC5] flex items-center gap-2"
                 >
                   <img
-                    src="../../../img/tmdb.jpg"
+                    src="../img/tmdb.jpg"
                     class="w-6 rounded-full"
                   />
                   <span class="block text-sm font-bold">{{
