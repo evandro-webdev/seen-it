@@ -1,7 +1,10 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { getDocs, collection, db } from "../services/firebase.js";
+
+import { db, doc, getDocs, collection, addDoc, deleteDoc } from "../services/firebase.js";
 import { getMovie } from "../services/tmdb.js";
+
+import { useSavedMoviesStore } from "./savedMovies.js";
 
 export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMovies = ref([]);
@@ -41,6 +44,36 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     );
   }
 
+  async function saveWatchedMovie(movie, reviews) {
+    if (isAlreadyWatched(movie.id)) return;
+
+    const ratings = Object.values(reviews).map((r) => r.rating);
+    const average_rating = Number(
+      ratings.reduce((a, b) => a + b, 0) / ratings.length,
+    ).toFixed(1);
+
+    const docRef = await addDoc(collection(db, "watchedMovies"), {
+      id: movie.id,
+      title: movie.title,
+      original_title: movie.original_title,
+      poster_path: movie.poster_path,
+      reviews,
+      average_rating,
+      watched_at: new Date().toISOString(),
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    const savedMoviesStore = useSavedMoviesStore();
+    if (savedMoviesStore.isAlreadySaved(movie.id)) {
+      await savedMoviesStore.toggleSaved(movie);
+    }
+  }
+
+  async function deleteWatchedMovie(id) {
+    await deleteDoc(doc(db, "watchedMovies", id));
+  }
+
   function isAlreadyWatched(movieId) {
     return watchedMoviesIds.value.includes(movieId);
   }
@@ -49,6 +82,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     watchedMovies,
     watchedMoviesDetailed,
     loadWatchedMoviesDetailed,
+    saveWatchedMovie,
+    deleteWatchedMovie,
     isAlreadyWatched,
   };
 });

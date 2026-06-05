@@ -25,7 +25,7 @@ onMounted(() => {
 });
 
 const selectedMovie = ref(null);
-const currentTab = ref("watched");
+const currentTab = ref("discover");
 const searchQuery = ref("");
 const searchResults = ref([]);
 
@@ -64,8 +64,6 @@ const moviesCount =
   currentTab === "discover"
     ? discoverMoviesStore.searchResults.length
     : computed(() => filteredMovies.value.length);
-
-console.log(discoverMoviesStore.popularMovies);
 </script>
 
 <template>

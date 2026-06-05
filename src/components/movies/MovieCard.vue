@@ -45,7 +45,7 @@ defineProps({
         }}</span>
       </div>
     </div>
-    <div class="h-[10%] max-w-[160px]">
+    <div class="h-[8%] max-w-[160px]">
       <h3 class="text-sm font-semibold text-gray-700 truncate">
         {{ movie.title }}
       </h3>

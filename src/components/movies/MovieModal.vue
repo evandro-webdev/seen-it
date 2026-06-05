@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { useWatchedMoviesStore } from "../../stores/watchedMovies.js";
 import { useSavedMoviesStore } from "../../stores/savedMovies.js";
 import { formatRuntime } from "../../utils/formatters.js";
+
 import SaveButton from "../buttons/SaveButton.vue";
 import RateMovieButton from "../buttons/RateMovieButton.vue";
 import EditRatedMovieButton from "../buttons/EditRatedMovieButton.vue";
 import RemoveRatedMovieButton from "../buttons/RemoveRatedMovieButton.vue";
+import MovieRateForm from "./MovieRateForm.vue";
 
 import { ArrowLeft, EllipsisVertical } from "@lucide/vue";
 
@@ -28,11 +30,14 @@ onUnmounted(() => {
   document.body.style.overflow = "";
 });
 
+const showRateForm = ref(false);
+
 const reviewerColors = {
   evandro: "bg-[#338CD5]",
   tauane: "bg-[#BF4345]",
   kauane: "bg-[#6941BA]",
 };
+
 </script>
 
 <template>
@@ -84,11 +89,11 @@ const reviewerColors = {
               <h2 class="text-3xl font-semibold text-slate-800">
                 {{ movie.title }}
               </h2>
-              <p class="text-[14px] font-light text-[#8C8C8C]">
+              <p class="text-[14px] font-light text-[#8C8C8C]" v-if="!showRateForm">
                 {{ movie.tagline }}
               </p>
             </div>
-            <div>
+            <div v-if="!showRateForm">
               <div
                 class="mt-2 mb-4 text-xs text-[#5E5E5E] flex items-center flex-wrap gap-2"
               >
@@ -171,25 +176,27 @@ const reviewerColors = {
                 </div>
               </div>
             </div>
+
+            <MovieRateForm v-if="showRateForm" :movie="movie" @close="showRateForm = false" />
           </div>
 
           <div
             v-if="watchedMoviesStore.isAlreadyWatched(movie.id)"
             class="mt-6 flex items-center gap-4"
           >
-            <RemoveRatedMovieButton />
+            <RemoveRatedMovieButton @click="watchedMoviesStore.deleteWatchedMovie(movie.docId)"/>
             <EditRatedMovieButton />
           </div>
 
           <div
-            v-if="!watchedMoviesStore.isAlreadyWatched(movie.id)"
+            v-if="!watchedMoviesStore.isAlreadyWatched(movie.id) && !showRateForm"
             class="mt-6 flex items-center gap-4"
           >
             <SaveButton
               :is-already-saved="savedMoviesStore.isAlreadySaved(movie.id)"
               :movie="movie"
             />
-            <RateMovieButton :movie="movie" />
+            <RateMovieButton :movie="movie" @click="showRateForm = true" />
           </div>
         </div>
       </div>

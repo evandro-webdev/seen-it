@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import {
+  db,
   getDocs,
   collection,
-  db,
   addDoc,
   deleteDoc,
   doc,
@@ -18,10 +18,12 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   async function loadSavedMovies() {
     const snapshot = await getDocs(collection(db, "savedMovies"));
 
-    const movies = snapshot.docs.map((doc) => ({
-      docId: doc.id,
-      ...doc.data(),
-    })).sort((a, b) => b.vote_average - a.vote_average);
+    const movies = snapshot.docs
+      .map((doc) => ({
+        docId: doc.id,
+        ...doc.data(),
+      }))
+      .sort((a, b) => b.vote_average - a.vote_average);
 
     savedMovies.value = movies;
     savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
@@ -62,7 +64,9 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
   async function toggleSaved(movie) {
     if (isAlreadySaved(movie.id)) {
-      const savedEntry = savedMovies.value.find(m => String(m.id) === String(movie.id))
+      const savedEntry = savedMovies.value.find(
+        (m) => String(m.id) === String(movie.id),
+      );
 
       await unsaveMovie(savedEntry.docId);
 
@@ -72,7 +76,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       );
     } else {
       const docRef = await saveMovie(movie);
-      
+
       savedMovies.value.push({
         docId: docRef.id,
         id: movie.id,
@@ -90,9 +94,11 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
   return {
     savedMovies,
+    savedMoviesIds,
     savedMoviesDetailed,
     loadSavedMoviesDetailed,
     isAlreadySaved,
     toggleSaved,
+    unsaveMovie,
   };
 });
