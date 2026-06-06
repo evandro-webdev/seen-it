@@ -36,22 +36,22 @@ defineProps({
 
     <div class="flex flex-col gap-2">
       <div class="space-y-1">
-        <h3 class="text-sm font-semibold text-[#3C3C3C]">{{ movie.title }}</h3>
-        <p class="text-xs text-gray-500">
+        <h3 class="text-sm font-semibold text-[#3C3C3C] dark:text-white">{{ movie.title }}</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-300">
           {{ movie.release_date.slice(0, 4) + " · " + "2h 10m" }}
         </p>
       </div>
       <div class="space-y-1">
-        <p class="text-xs text-gray-500">
+        <p class="text-xs text-gray-500 dark:text-gray-300">
           Diretor:
-          <span class="text-[#0088FF]">{{
+          <span class="text-[#0088FF] dark:text-[#0088FF]">{{
             movie.credits.crew.find((p) => p.job === "Director")?.name ||
             "Desconhecido"
           }}</span>
         </p>
-        <p class="text-xs text-gray-500">
+        <p class="text-xs text-gray-500 dark:text-gray-300">
           Elenco:
-          <span class="text-[#0088FF]">{{
+          <span class="text-[#0088FF] dark:text-[#0088FF]">{{
             movie.credits.cast
               .slice(0, 2)
               .map((p) => p.name)
@@ -63,7 +63,7 @@ defineProps({
         <span
           v-for="genre in movie.genres.slice(0, 3)"
           :key="genre.id"
-          class="px-[8px] py-[2px] rounded-full text-xs font-medium text-gray-600 bg-[#EDEDED]"
+          class="px-[8px] py-[2px] rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 bg-[#EDEDED] dark:bg-[#1D3555]"
           >{{ genre.name }}</span
         >
       </div>

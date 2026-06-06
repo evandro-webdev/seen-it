@@ -1,7 +1,14 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-import { db, doc, getDocs, collection, addDoc, deleteDoc } from "../services/firebase.js";
+import {
+  db,
+  doc,
+  getDocs,
+  collection,
+  addDoc,
+  deleteDoc,
+} from "../services/firebase.js";
 import { getMovie } from "../services/tmdb.js";
 
 import { useSavedMoviesStore } from "./savedMovies.js";
@@ -38,7 +45,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           tagline: tmdbData.tagline,
           release_date: tmdbData.release_date,
           runtime: tmdbData.runtime,
-          average_rating: tmdbData.vote_average.toFixed(1),
+          vote_average: tmdbData.vote_average.toFixed(1),
         };
       }),
     );
@@ -62,6 +69,16 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watched_at: new Date().toISOString(),
       created_at: new Date(),
       updated_at: new Date(),
+    });
+
+    watchedMovies.value.push({
+      docId: docRef.id,
+      genres: movie.genres,
+      overview: movie.overview,
+      tagline: movie.tagline,
+      release_date: movie.release_date,
+      runtime: movie.runtime,
+      average_rating: average_rating,
     });
 
     const savedMoviesStore = useSavedMoviesStore();

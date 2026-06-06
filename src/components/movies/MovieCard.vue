@@ -34,7 +34,7 @@ defineProps({
         "
       />
       <div
-        class="absolute top-2 right-2 p-[6px] rounded-md text-xs font-medium text-white bg-linear-to-t from-[#194476] to-[#215DA2] flex items-center gap-1"
+        class="absolute top-2 right-2 p-[4px] rounded-md text-xs font-medium text-white bg-linear-to-t from-[#194476] to-[#215DA2] flex items-center gap-1"
       >
         <Star
           class="w-[10px] h-[10px]"
@@ -46,7 +46,7 @@ defineProps({
       </div>
     </div>
     <div class="h-[8%] max-w-[160px]">
-      <h3 class="text-sm font-semibold text-gray-700 truncate">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-white truncate">
         {{ movie.title }}
       </h3>
     </div>

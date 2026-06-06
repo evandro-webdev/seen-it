@@ -61,7 +61,7 @@ const filteredMovies = computed(() => {
 });
 
 const moviesCount =
-  currentTab === "discover"
+  currentTab.value === "discover"
     ? discoverMoviesStore.searchResults.length
     : computed(() => filteredMovies.value.length);
 </script>
@@ -84,10 +84,10 @@ const moviesCount =
         <div class="flex items-center gap-1">
           <SlidersHorizontal class="w-4 h-4 text-[#0088FF]" />
 
-          <span class="block text-xs text-gray-700">Ordernar por: Nota</span>
+          <span class="block text-xs text-gray-700 dark:text-gray-300">Ordernar por: Nota</span>
         </div>
 
-        <span class="block text-xs text-gray-600"
+        <span class="block text-xs text-gray-600 dark:text-gray-300"
           >{{ moviesCount }} filmes</span
         >
       </div>
@@ -116,7 +116,7 @@ const moviesCount =
               <div class="flex gap-1 items-center">
                 <Flame class="w-5 h-5 text-[#0088FF]" />
 
-                <h2 class="font-bold text-[#10355E]">Mais vistos do momento</h2>
+                <h2 class="font-bold text-[#10355E] dark:text-white">Mais vistos do momento</h2>
               </div>
               <button class="text-xs font-semibold text-[#0088FF]">
                 Ver todos
@@ -139,7 +139,7 @@ const moviesCount =
               <div class="flex gap-1 items-center">
                 <Award class="w-5 h-5 text-[#0088FF]" />
 
-                <h2 class="font-bold text-[#10355E]">Melhores avaliados</h2>
+                <h2 class="font-bold text-[#10355E] dark:text-white">Melhores avaliados</h2>
               </div>
               <button class="text-xs font-semibold text-[#0088FF]">
                 Ver todos

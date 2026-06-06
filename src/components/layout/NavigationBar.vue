@@ -15,7 +15,7 @@ const currentTab = defineModel();
 <template>
   <nav
     id="navigation-bar"
-    class="fixed bottom-4 p-1 inset-x-4 rounded-lg border border-gray-200 bg-white shadow-sm flex gap-2"
+    class="fixed bottom-4 p-1 inset-x-4 rounded-lg border border-gray-200 dark:border-[#292B37] bg-white dark:bg-[#0F111D] shadow-sm flex gap-2"
   >
     <button
       class="py-[10px] px-[5px] flex flex-1 justify-center items-center gap-2"

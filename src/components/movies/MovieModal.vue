@@ -44,7 +44,7 @@ const reviewerColors = {
   <div
     class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex justify-center items-end"
   >
-    <div class="w-full h-[100%] bg-white rounded-t-2xl overflow-y-auto">
+    <div class="w-full h-[100%] bg-white dark:bg-[#0F111D]  rounded-t-2xl overflow-y-auto">
       <div class="relative w-full overflow-hidden">
         <div class="relative w-full">
           <div
@@ -65,14 +65,14 @@ const reviewerColors = {
           />
 
           <div
-            class="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-white to-transparent pointer-events-none"
+            class="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-white dark:from-[#0F111D] to-transparent pointer-events-none"
           ></div>
           <div
             class="fixed top-0 left-0 w-full h-1/5 bg-gradient-to-b from-black to-transparent pointer-events-none"
           ></div>
 
           <div
-            class="fixed top-0 left-0 w-full px-2 py-3 text-white flex justify-between"
+            class="fixed top-0 left-0 w-full p-4 text-white flex justify-between"
           >
             <button @click="$emit('close')">
               <ArrowLeft class="w-6 h-6" />
@@ -86,22 +86,22 @@ const reviewerColors = {
         <div class="pt-2 pb-4 px-4">
           <div>
             <div>
-              <h2 class="text-3xl font-semibold text-slate-800">
+              <h2 class="text-3xl font-semibold text-slate-800 dark:text-white">
                 {{ movie.title }}
               </h2>
-              <p class="text-[14px] font-light text-[#8C8C8C]" v-if="!showRateForm">
+              <p class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200" v-if="!showRateForm">
                 {{ movie.tagline }}
               </p>
             </div>
             <div v-if="!showRateForm">
               <div
-                class="mt-2 mb-4 text-xs text-[#5E5E5E] flex items-center flex-wrap gap-2"
+                class="mt-2 mb-4 text-xs text-[#5E5E5E] dark:text-white flex items-center flex-wrap gap-2"
               >
                 <div class="flex gap-2">
                   <span
                     v-for="genre in movie.genres"
                     :key="genre.id"
-                    class="px-2 py-[2px] rounded-full font-medium text-nowrap bg-[#EDEDED]"
+                    class="px-2 py-[2px] rounded-full font-medium text-nowrap dark:text-white bg-[#EDEDED] dark:bg-[#314066]"
                     >{{ genre.name }}</span
                   >
                 </div>
@@ -112,7 +112,7 @@ const reviewerColors = {
               </div>
 
               <p
-                class="text-[16px] text-[#8C8C8C] font-light leading-[20px] line-clamp-6"
+                class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px] line-clamp-6"
               >
                 {{ movie.overview }}
               </p>

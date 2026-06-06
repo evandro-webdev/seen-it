@@ -38,6 +38,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
         return {
           ...movie,
+          original_title: tmdbData.original_title,
           genres: tmdbData.genres,
           overview: tmdbData.overview,
           tagline: tmdbData.tagline,
