@@ -1,5 +1,6 @@
 <script setup>
 import { formatRuntime } from "../../utils/formatters.js";
+import MovieGenre from "./MovieGenre.vue";
 
 defineProps({
   movie: {
@@ -36,9 +37,15 @@ defineProps({
 
     <div class="flex flex-col gap-2">
       <div class="space-y-1">
-        <h3 class="text-sm font-semibold text-[#3C3C3C] dark:text-white">{{ movie.title }}</h3>
+        <h3 class="text-sm font-semibold text-[#3C3C3C] dark:text-white">
+          {{ movie.title }}
+        </h3>
         <p class="text-xs text-gray-500 dark:text-gray-300">
-          {{ movie.release_date.slice(0, 4) + " · " + "2h 10m" }}
+          {{
+            movie.release_date.slice(0, 4) +
+            " · " +
+            formatRuntime(movie.runtime)
+          }}
         </p>
       </div>
       <div class="space-y-1">
@@ -60,12 +67,11 @@ defineProps({
         </p>
       </div>
       <div class="flex flex-wrap gap-1 mt-1">
-        <span
+        <MovieGenre
           v-for="genre in movie.genres.slice(0, 3)"
           :key="genre.id"
-          class="px-[8px] py-[2px] rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 bg-[#EDEDED] dark:bg-[#1D3555]"
-          >{{ genre.name }}</span
-        >
+          :genre="genre.name"
+        />
       </div>
     </div>
   </div>

@@ -14,3 +14,7 @@ export function formatRuntime(minutes) {
 export function removeAccents(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
+export function formatRating(rating) {
+  return rating === 10 ? '10' : Number(rating).toFixed(1)
+}

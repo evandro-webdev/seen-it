@@ -2,15 +2,17 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { useWatchedMoviesStore } from "../../stores/watchedMovies.js";
 import { useSavedMoviesStore } from "../../stores/savedMovies.js";
-import { formatRuntime } from "../../utils/formatters.js";
+import { formatRating, formatRuntime } from "../../utils/formatters.js";
 
 import SaveButton from "../buttons/SaveButton.vue";
 import RateMovieButton from "../buttons/RateMovieButton.vue";
 import EditRatedMovieButton from "../buttons/EditRatedMovieButton.vue";
 import RemoveRatedMovieButton from "../buttons/RemoveRatedMovieButton.vue";
 import MovieRateForm from "./MovieRateForm.vue";
+import MovieRating from "./MovieRating.vue";
+import MovieGenre from "./MovieGenre.vue";
 
-import { ArrowLeft, EllipsisVertical } from "@lucide/vue";
+import { ArrowLeft, EllipsisVertical, Star, UsersRound } from "@lucide/vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -31,20 +33,15 @@ onUnmounted(() => {
 });
 
 const showRateForm = ref(false);
-
-const reviewerColors = {
-  evandro: "bg-[#338CD5]",
-  tauane: "bg-[#BF4345]",
-  kauane: "bg-[#6941BA]",
-};
-
 </script>
 
 <template>
   <div
     class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex justify-center items-end"
   >
-    <div class="w-full h-[100%] bg-white dark:bg-[#0F111D]  rounded-t-2xl overflow-y-auto">
+    <div
+      class="w-full h-[100%] bg-white dark:bg-[#0F111D] rounded-t-2xl overflow-y-auto"
+    >
       <div class="relative w-full overflow-hidden">
         <div class="relative w-full">
           <div
@@ -89,7 +86,10 @@ const reviewerColors = {
               <h2 class="text-3xl font-semibold text-slate-800 dark:text-white">
                 {{ movie.title }}
               </h2>
-              <p class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200" v-if="!showRateForm">
+              <p
+                class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200"
+                v-if="!showRateForm"
+              >
                 {{ movie.tagline }}
               </p>
             </div>
@@ -98,12 +98,11 @@ const reviewerColors = {
                 class="mt-2 mb-4 text-xs text-[#5E5E5E] dark:text-white flex items-center flex-wrap gap-2"
               >
                 <div class="flex gap-2">
-                  <span
+                  <MovieGenre
                     v-for="genre in movie.genres"
                     :key="genre.id"
-                    class="px-2 py-[2px] rounded-full font-medium text-nowrap dark:text-white bg-[#EDEDED] dark:bg-[#314066]"
-                    >{{ genre.name }}</span
-                  >
+                    :genre="genre.name"
+                  />
                 </div>
                 <span>·</span>
                 <span>{{ movie.release_date.slice(0, 4) }}</span>
@@ -121,41 +120,66 @@ const reviewerColors = {
                 v-if="
                   watchedMoviesStore.isAlreadyWatched(movie.id) && movie.ratings
                 "
-                class="mt-4 flex items-center gap-2"
+                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
               >
+                <MovieRating
+                  v-for="[user, rating] in Object.entries(movie.ratings)"
+                  :key="user"
+                  :user="user"
+                  :rating="rating"
+                />
+
                 <div
-                  v-for="[user, nota] in Object.entries(movie.ratings)"
-                  class="pr-2 rounded-full text-white flex items-center gap-2"
-                  :class="reviewerColors[user]"
+                  class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
                 >
-                  <img
-                    :src="'/img/' + user + '.jpg'"
-                    class="w-6 rounded-full"
-                  />
-                  <span class="block text-sm font-bold">{{ nota }}</span>
+                  <div class="p-2 rounded-full border border-[#356dd5]">
+                    <UsersRound
+                      class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
+                    />
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1">
+                      <Star
+                        class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
+                        fill="currentColor"
+                      />
+                      <span
+                        class="block text-md font-medium text-[#356dd5] dark:text-[#4787ff]"
+                        >{{ formatRating(movie.average_rating) }}</span
+                      >
+                    </div>
+                    <span
+                      class="text-xs capitalize text-[#356dd5] dark:text-[#4787ff] block"
+                      >Média</span
+                    >
+                  </div>
                 </div>
 
                 <div
-                  class="pr-2 rounded-full text-white bg-[#3A5A7E] flex items-center gap-2"
+                  class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
                 >
-                  <img
-                    src="/img/average.jpg"
-                    class="w-6 rounded-full"
-                  />
-                  <span class="block text-sm font-bold">{{
-                    movie.average_rating
-                  }}</span>
-                </div>
-                <div
-                  class="pr-2 rounded-full text-white bg-[#4EBBC5] flex items-center gap-2"
-                >
-                  <img
-                    src="/img/tmdb.jpg"
-                    class="w-6 rounded-full"
-                  />
-                  <span class="block text-sm font-bold">{{
-                    movie.tmdb_rating ? movie.tmdb_rating.toFixed(1) : "N/A"
-                  }}</span>
+                  <div
+                    class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
+                  >
+                    <img
+                      src="/img/tmdb.svg"
+                      class="w-4 h-4"
+                    />
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1">
+                      <Star
+                        class="w-4 h-4 text-[#399c8d]"
+                        fill="currentColor"
+                      />
+                      <span class="block text-md font-medium text-[#399c8d]">{{
+                        formatRating(movie.vote_average)
+                      }}</span>
+                    </div>
+                    <span class="text-xs capitalize text-[#399c8d] block"
+                      >TMDB</span
+                    >
+                  </div>
                 </div>
               </div>
 
@@ -177,26 +201,37 @@ const reviewerColors = {
               </div>
             </div>
 
-            <MovieRateForm v-if="showRateForm" :movie="movie" @close="showRateForm = false" />
+            <MovieRateForm
+              v-if="showRateForm"
+              :movie="movie"
+              @close="showRateForm = false"
+            />
           </div>
 
           <div
             v-if="watchedMoviesStore.isAlreadyWatched(movie.id)"
             class="mt-6 flex items-center gap-4"
           >
-            <RemoveRatedMovieButton @click="watchedMoviesStore.deleteWatchedMovie(movie.docId)"/>
+            <RemoveRatedMovieButton
+              @click="watchedMoviesStore.deleteWatchedMovie(movie.docId)"
+            />
             <EditRatedMovieButton />
           </div>
 
           <div
-            v-if="!watchedMoviesStore.isAlreadyWatched(movie.id) && !showRateForm"
+            v-if="
+              !watchedMoviesStore.isAlreadyWatched(movie.id) && !showRateForm
+            "
             class="mt-6 flex items-center gap-4"
           >
             <SaveButton
               :is-already-saved="savedMoviesStore.isAlreadySaved(movie.id)"
               :movie="movie"
             />
-            <RateMovieButton :movie="movie" @click="showRateForm = true" />
+            <RateMovieButton
+              :movie="movie"
+              @click="showRateForm = true"
+            />
           </div>
         </div>
       </div>
