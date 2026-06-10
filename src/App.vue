@@ -19,34 +19,33 @@ const savedMoviesStore = useSavedMoviesStore();
 const discoverMoviesStore = useDiscoverMoviesStore();
 
 onMounted(() => {
-  watchedMoviesStore.loadWatchedMoviesDetailed();
-  savedMoviesStore.loadSavedMoviesDetailed();
+  watchedMoviesStore.loadWatchedMovies();
+  savedMoviesStore.loadSavedMovies();
   discoverMoviesStore.loadDiscover();
 });
 
 const selectedMovie = ref(null);
 const currentTab = ref("discover");
 const searchQuery = ref("");
-const searchResults = ref([]);
 
-function openMovieModal(id) {
-  const movie =
-    watchedMoviesStore.watchedMoviesDetailed.find((m) => m.id === id) ||
-    savedMoviesStore.savedMoviesDetailed.find((m) => m.id === id);
+async function openMovieModal(id) {
+  const movie = currentTab.value === 'watched'
+    ? await watchedMoviesStore.loadDetailedMovie(id)
+    : currentTab.value === 'saved'
+    ? await savedMoviesStore.loadDetailedMovie(id)
+    : null;
 
   selectedMovie.value = movie;
 }
 
 watch(currentTab, () => {
   searchQuery.value = "";
-  searchResults.value = [];
   discoverMoviesStore.isSearching = false;
 });
 
 const activeMovies = computed(() => {
-  if (currentTab.value === "watched") return watchedMoviesStore.watchedMovies;
-  if (currentTab.value === "saved") return savedMoviesStore.savedMovies;
-  return searchResults.value;
+  if (currentTab.value === "watched") return watchedMoviesStore.watchedMovies.sort((a, b) => b.average_rating - a.average_rating);
+  if (currentTab.value === "saved") return savedMoviesStore.savedMovies.sort((a, b) => b.vote_average - a.vote_average);
 });
 
 const filteredMovies = computed(() => {
@@ -60,10 +59,10 @@ const filteredMovies = computed(() => {
   );
 });
 
-const moviesCount =
-  currentTab.value === "discover"
-    ? discoverMoviesStore.searchResults.length
-    : computed(() => filteredMovies.value.length);
+const moviesCount = computed(() => {
+  if (currentTab.value === "discover") return discoverMoviesStore.searchResults.length
+  return filteredMovies.value.length
+})
 </script>
 
 <template>
@@ -102,7 +101,7 @@ const moviesCount =
           v-for="movie in filteredMovies"
           :key="movie.id"
           :movie="movie"
-          @click="openMovieModal(movie.id)"
+          @click="async () => await openMovieModal(movie.id)"
         />
       </section>
 

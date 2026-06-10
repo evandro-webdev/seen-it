@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, computed } from "vue";
 import { useWatchedMoviesStore } from "../../stores/watchedMovies.js";
 import { useSavedMoviesStore } from "../../stores/savedMovies.js";
 import { formatRating, formatRuntime } from "../../utils/formatters.js";
@@ -17,7 +17,7 @@ import { ArrowLeft, EllipsisVertical, Star, UsersRound } from "@lucide/vue";
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
 
-defineProps({
+const props = defineProps({
   movie: {
     type: Object,
     required: true,
@@ -31,6 +31,13 @@ onMounted(() => {
 onUnmounted(() => {
   document.body.style.overflow = "";
 });
+
+const isAlreadyWatched = computed(() =>
+  watchedMoviesStore.isAlreadyWatched(props.movie.id),
+);
+const isAlreadySaved = computed(() =>
+  savedMoviesStore.isAlreadySaved(props.movie.id),
+);
 
 const showRateForm = ref(false);
 </script>
@@ -49,11 +56,11 @@ const showRateForm = ref(false);
           ></div>
           <img
             :src="
-              movie.poster_path
-                ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path
+              props.movie.poster_path
+                ? 'https://image.tmdb.org/t/p/w500' + props.movie.poster_path
                 : '/placeholder-image.png'
             "
-            :alt="movie.title"
+            :alt="props.movie.title"
             class="poster w-full h-full object-cover opacity-0 transition-opacity duration-300"
             onload="
               this.classList.add('opacity-100');
@@ -84,13 +91,13 @@ const showRateForm = ref(false);
           <div>
             <div>
               <h2 class="text-3xl font-semibold text-slate-800 dark:text-white">
-                {{ movie.title }}
+                {{ props.movie.title }}
               </h2>
               <p
                 class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200"
                 v-if="!showRateForm"
               >
-                {{ movie.tagline }}
+                {{ props.movie.tagline }}
               </p>
             </div>
             <div v-if="!showRateForm">
@@ -99,31 +106,29 @@ const showRateForm = ref(false);
               >
                 <div class="flex gap-2">
                   <MovieGenre
-                    v-for="genre in movie.genres"
+                    v-for="genre in props.movie.genres"
                     :key="genre.id"
                     :genre="genre.name"
                   />
                 </div>
                 <span>·</span>
-                <span>{{ movie.release_date.slice(0, 4) }}</span>
+                <span>{{ props.movie.release_date.slice(0, 4) }}</span>
                 <span>·</span>
-                <span>{{ formatRuntime(movie.runtime) }}</span>
+                <span>{{ formatRuntime(props.movie.runtime) }}</span>
               </div>
 
               <p
                 class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px] line-clamp-6"
               >
-                {{ movie.overview }}
+                {{ props.movie.overview }}
               </p>
 
               <div
-                v-if="
-                  watchedMoviesStore.isAlreadyWatched(movie.id) && movie.ratings
-                "
+                v-if="isAlreadyWatched && props.movie.ratings"
                 class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
               >
                 <MovieRating
-                  v-for="[user, rating] in Object.entries(movie.ratings)"
+                  v-for="[user, rating] in Object.entries(props.movie.ratings)"
                   :key="user"
                   :user="user"
                   :rating="rating"
@@ -145,7 +150,7 @@ const showRateForm = ref(false);
                       />
                       <span
                         class="block text-md font-medium text-[#356dd5] dark:text-[#4787ff]"
-                        >{{ formatRating(movie.average_rating) }}</span
+                        >{{ formatRating(props.movie.average_rating) }}</span
                       >
                     </div>
                     <span
@@ -173,7 +178,7 @@ const showRateForm = ref(false);
                         fill="currentColor"
                       />
                       <span class="block text-md font-medium text-[#399c8d]">{{
-                        formatRating(movie.vote_average)
+                        formatRating(props.movie.vote_average)
                       }}</span>
                     </div>
                     <span class="text-xs capitalize text-[#399c8d] block"
@@ -184,52 +189,65 @@ const showRateForm = ref(false);
               </div>
 
               <div
-                v-if="!watchedMoviesStore.isAlreadyWatched(movie.id)"
-                class="mt-4 flex items-center gap-2"
+                v-if="!isAlreadyWatched"
+                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
               >
                 <div
-                  class="pr-2 rounded-full text-white bg-[#4EBBC5] flex items-center gap-2"
+                  class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
                 >
-                  <img
-                    src="/img/tmdb.jpg"
-                    class="w-6 rounded-full"
-                  />
-                  <span class="block text-sm font-bold">{{
-                    movie.vote_average.toFixed(1)
-                  }}</span>
+                  <div
+                    class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
+                  >
+                    <img
+                      src="/img/tmdb.svg"
+                      class="w-4 h-4"
+                    />
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1">
+                      <Star
+                        class="w-4 h-4 text-[#399c8d]"
+                        fill="currentColor"
+                      />
+                      <span class="block text-md font-medium text-[#399c8d]">{{
+                        formatRating(props.movie.vote_average)
+                      }}</span>
+                    </div>
+                    <span class="text-xs capitalize text-[#399c8d] block"
+                      >TMDB</span
+                    >
+                  </div>
                 </div>
               </div>
             </div>
 
             <MovieRateForm
               v-if="showRateForm"
-              :movie="movie"
+              :movie="props.movie"
               @close="showRateForm = false"
             />
           </div>
 
           <div
-            v-if="watchedMoviesStore.isAlreadyWatched(movie.id)"
+            v-if="isAlreadyWatched"
             class="mt-6 flex items-center gap-4"
           >
             <RemoveRatedMovieButton
-              @click="watchedMoviesStore.deleteWatchedMovie(movie.docId)"
+              @click="watchedMoviesStore.deleteWatchedMovie(props.movie.id)"
             />
             <EditRatedMovieButton />
           </div>
 
           <div
-            v-if="
-              !watchedMoviesStore.isAlreadyWatched(movie.id) && !showRateForm
-            "
+            v-if="!isAlreadyWatched && !showRateForm"
             class="mt-6 flex items-center gap-4"
           >
             <SaveButton
-              :is-already-saved="savedMoviesStore.isAlreadySaved(movie.id)"
-              :movie="movie"
+              :is-already-saved="isAlreadySaved"
+              :movie="props.movie"
             />
             <RateMovieButton
-              :movie="movie"
+              :movie="props.movie"
               @click="showRateForm = true"
             />
           </div>

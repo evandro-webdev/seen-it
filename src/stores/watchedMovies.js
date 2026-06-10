@@ -16,7 +16,6 @@ import { useSavedMoviesStore } from "./savedMovies.js";
 export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMovies = ref([]);
   const watchedMoviesIds = ref([]);
-  const watchedMoviesDetailed = ref([]);
 
   async function loadWatchedMovies() {
     const snapshot = await getDocs(collection(db, "watchedMovies"));
@@ -27,28 +26,21 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     }));
 
     watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
-
-    watchedMovies.value.sort((a, b) => b.average_rating - a.average_rating);
   }
 
-  async function loadWatchedMoviesDetailed() {
-    await loadWatchedMovies();
+  async function loadDetailedMovie(id) {
+    const movie = watchedMovies.value.find((m) => String(m.id) === String(id));
+    const tmdbData = await getMovie(id);
 
-    watchedMoviesDetailed.value = await Promise.all(
-      watchedMovies.value.map(async (movie) => {
-        const tmdbData = await getMovie(movie.id);
-
-        return {
-          ...movie,
-          genres: tmdbData.genres,
-          overview: tmdbData.overview,
-          tagline: tmdbData.tagline,
-          release_date: tmdbData.release_date,
-          runtime: tmdbData.runtime,
-          vote_average: tmdbData.vote_average.toFixed(1),
-        };
-      }),
-    );
+    return {
+      ...movie,
+      genres: tmdbData.genres,
+      overview: tmdbData.overview,
+      tagline: tmdbData.tagline,
+      release_date: tmdbData.release_date,
+      runtime: tmdbData.runtime,
+      vote_average: tmdbData.vote_average.toFixed(1),
+    };
   }
 
   async function saveWatchedMovie(movie, reviews) {
@@ -72,14 +64,13 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     });
 
     watchedMovies.value.push({
+      ...movie,
       docId: docRef.id,
-      genres: movie.genres,
-      overview: movie.overview,
-      tagline: movie.tagline,
-      release_date: movie.release_date,
-      runtime: movie.runtime,
-      average_rating: average_rating,
+      reviews,
+      average_rating,
     });
+
+    watchedMoviesIds.value.push(movie.id);
 
     const savedMoviesStore = useSavedMoviesStore();
     if (savedMoviesStore.isAlreadySaved(movie.id)) {
@@ -88,7 +79,18 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   }
 
   async function deleteWatchedMovie(id) {
-    await deleteDoc(doc(db, "watchedMovies", id));
+    const movieEntry = watchedMovies.value.find(
+      (m) => String(m.id) === String(id),
+    );
+
+    await deleteDoc(doc(db, "watchedMovies", movieEntry.docId));
+
+    watchedMovies.value = watchedMovies.value.filter(
+      (movie) => movie.id !== id,
+    );
+    watchedMoviesIds.value = watchedMoviesIds.value.filter(
+      (movieId) => movieId !== id,
+    );
   }
 
   function isAlreadyWatched(movieId) {
@@ -97,8 +99,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
   return {
     watchedMovies,
-    watchedMoviesDetailed,
-    loadWatchedMoviesDetailed,
+    loadWatchedMovies,
+    loadDetailedMovie,
     saveWatchedMovie,
     deleteWatchedMovie,
     isAlreadyWatched,

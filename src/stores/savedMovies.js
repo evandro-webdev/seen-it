@@ -13,41 +13,33 @@ import { getMovie } from "../services/tmdb.js";
 export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const savedMovies = ref([]);
   const savedMoviesIds = ref([]);
-  const savedMoviesDetailed = ref([]);
 
   async function loadSavedMovies() {
     const snapshot = await getDocs(collection(db, "savedMovies"));
 
-    const movies = snapshot.docs
-      .map((doc) => ({
-        docId: doc.id,
-        ...doc.data(),
-      }))
-      .sort((a, b) => b.vote_average - a.vote_average);
+    const movies = snapshot.docs.map((doc) => ({
+      docId: doc.id,
+      ...doc.data(),
+    }));
 
     savedMovies.value = movies;
     savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
   }
 
-  async function loadSavedMoviesDetailed() {
-    await loadSavedMovies();
+  async function loadDetailedMovie(id) {
+    const movie = savedMovies.value.find((m) => String(m.id) === String(id));
+    const tmdbData = await getMovie(id);
 
-    savedMoviesDetailed.value = await Promise.all(
-      savedMovies.value.map(async (movie) => {
-        const tmdbData = await getMovie(movie.id);
-
-        return {
-          ...movie,
-          original_title: tmdbData.original_title,
-          genres: tmdbData.genres,
-          overview: tmdbData.overview,
-          tagline: tmdbData.tagline,
-          release_date: tmdbData.release_date,
-          runtime: tmdbData.runtime,
-          average_rating: tmdbData.vote_average.toFixed(1),
-        };
-      }),
-    );
+    return {
+      ...movie,
+      original_title: tmdbData.original_title,
+      genres: tmdbData.genres,
+      overview: tmdbData.overview,
+      tagline: tmdbData.tagline,
+      release_date: tmdbData.release_date,
+      runtime: tmdbData.runtime,
+      vote_average: tmdbData.vote_average,
+    };
   }
 
   async function saveMovie(movie) {
@@ -96,10 +88,9 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   return {
     savedMovies,
     savedMoviesIds,
-    savedMoviesDetailed,
-    loadSavedMoviesDetailed,
+    loadSavedMovies,
+    loadDetailedMovie,
     isAlreadySaved,
     toggleSaved,
-    unsaveMovie,
   };
 });
