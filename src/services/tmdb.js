@@ -28,7 +28,7 @@ export async function getMovieWithCredits(movieId) {
 }
 
 export async function getPopularMovies() {
-  const res = await fetch(`${BASE_URL}/movie/popular?language=pt-BR&page=1`, options)
+  const res = await fetch(`${BASE_URL}/movie/popular?include_adult=false&language=pt-BR&page=1`, options)
   return res.json()
 }
 

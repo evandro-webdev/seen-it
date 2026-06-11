@@ -2,13 +2,6 @@
 
 import { BookHeart, Compass, Bookmark } from "@lucide/vue";
 
-defineProps({
-  currentTab: {
-    type: String,
-    required: true,
-  },
-});
-
 const currentTab = defineModel();
 </script>
 

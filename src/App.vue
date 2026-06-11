@@ -33,7 +33,7 @@ async function openMovieModal(id) {
     ? await watchedMoviesStore.loadDetailedMovie(id)
     : currentTab.value === 'saved'
     ? await savedMoviesStore.loadDetailedMovie(id)
-    : null;
+    : await discoverMoviesStore.loadDetailedMovie(id);
 
   selectedMovie.value = movie;
 }
@@ -128,7 +128,7 @@ const moviesCount = computed(() => {
                 :key="movie.id"
                 :movie="movie"
                 class="flex-shrink-0"
-                @click="selectedMovie = movie"
+                @click="async () => await openMovieModal(movie.id)"
               />
             </div>
           </div>
@@ -151,7 +151,7 @@ const moviesCount = computed(() => {
                 :key="movie.id"
                 :movie="movie"
                 class="flex-shrink-0"
-                @click="selectedMovie = movie"
+                @click="async () => await openMovieModal(movie.id)"
               />
             </div>
           </div>

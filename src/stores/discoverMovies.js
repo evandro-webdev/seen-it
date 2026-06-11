@@ -2,11 +2,14 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import {
   getMovieWithCredits,
+  getMovie,
   searchMovies,
   getPopularMovies,
   getTopRatedMovies,
   getUpcomingMovies,
 } from "../services/tmdb.js";
+
+import { useWatchedMoviesStore } from "./watchedMovies.js";
 
 export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   const searchResults = ref([]);
@@ -25,6 +28,26 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     popularMovies.value = popular.results;
     topRatedMovies.value = topRated.results;
     upcomingMovies.value = upcoming.results;
+  }
+
+  async function loadDetailedMovie(id) {
+    const watchedMoviesStore = useWatchedMoviesStore();
+
+    const tmdbData = await getMovie(id);
+
+    if (watchedMoviesStore.isAlreadyWatched(id)) {
+      const watchedEntry = watchedMoviesStore.watchedMovies.find(
+        (m) => String(m.id) === String(id),
+      );
+
+      return {
+        ...watchedEntry,
+        ...tmdbData
+      }
+    }
+
+
+    return tmdbData;
   }
 
   async function searchForMovies(query) {
@@ -50,5 +73,6 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     isSearching,
     clearSearch,
     loadDiscover,
+    loadDetailedMovie,
   };
 });

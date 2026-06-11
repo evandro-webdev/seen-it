@@ -40,6 +40,7 @@ const isAlreadySaved = computed(() =>
 );
 
 const showRateForm = ref(false);
+const showFullOverview = ref(false);
 </script>
 
 <template>
@@ -117,15 +118,25 @@ const showRateForm = ref(false);
                 <span>{{ formatRuntime(props.movie.runtime) }}</span>
               </div>
 
-              <p
-                class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px] line-clamp-6"
-              >
-                {{ props.movie.overview }}
-              </p>
+              <div>
+                <p
+                  class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px]"
+                  :class="showFullOverview ? '' : 'line-clamp-6'"
+                >
+                  {{ props.movie.overview }}
+                </p>
+                <button
+                  v-if="props.movie.overview?.length > 200"
+                  @click="showFullOverview = !showFullOverview"
+                  class="mt-1 text-sm text-[#0088FF]"
+                >
+                  {{ showFullOverview ? "Ler menos" : "Ler mais" }}
+                </button>
+              </div>
 
               <div
                 v-if="isAlreadyWatched && props.movie.ratings"
-                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
+                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex grow-0 items-center gap-x-3 overflow-x-auto"
               >
                 <MovieRating
                   v-for="[user, rating] in Object.entries(props.movie.ratings)"
@@ -190,7 +201,7 @@ const showRateForm = ref(false);
 
               <div
                 v-if="!isAlreadyWatched"
-                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
+                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex grow-0 items-center gap-x-3 overflow-x-auto"
               >
                 <div
                   class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
