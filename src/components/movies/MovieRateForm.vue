@@ -3,8 +3,10 @@ import { ref, computed } from "vue";
 import { useWatchedMoviesStore } from "../../stores/watchedMovies";
 import { ArrowRight, X, Check } from "@lucide/vue";
 
-import { useDarkMode } from '../../composables/useDarkMode'
-const { isDarkMode } = useDarkMode()
+import MovieRating from "./MovieRating.vue";
+
+import { useDarkMode } from "../../composables/useDarkMode";
+const { isDarkMode } = useDarkMode();
 
 const props = defineProps(["movie"]);
 const emit = defineEmits(["close"]);
@@ -31,7 +33,7 @@ const currentReviewer = computed(() => reviewers[currentStep.value]);
 
 function nextStep() {
   reviews.value[currentReviewer.value] = {
-    rating: sliderValue.value,
+    rating: Number(sliderValue.value),
     comment: comment.value,
   };
 
@@ -126,29 +128,17 @@ async function saveRatings() {
   </div>
 
   <div v-else>
-    <p class="text-[16px] font-light text-[#8C8C8C] text-center">
+    <p class="text-[16px] font-light text-[#8C8C8C]">
       Confira o resumo das notas:
     </p>
 
-    <div class="max-w-50 my-8 mx-auto space-y-4">
-      <div
+    <div class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex grow-0 justify-center items-center gap-x-3 overflow-x-auto">
+      <MovieRating
         v-for="reviewer in reviewers"
         :key="reviewer"
-        class="flex items-center relative"
-      >
-        <img
-          :src="`/img/${reviewer}.jpg`"
-          class="w-12 rounded-full absolute -left-2 top-1/2 -translate-y-1/2 z-10"
-        />
-        <div
-          class="w-full py-2 px-14 rounded-lg"
-          :class="reviewerColors[reviewer]"
-        >
-          <span class="text-[14px] font-bold capitalize text-white"
-            >{{ reviewer }}: {{ reviews[reviewer].rating }}</span
-          >
-        </div>
-      </div>
+        :user="reviewer"
+        :rating="reviews[reviewer].rating"
+      />
     </div>
 
     <div class="flex justify-center gap-4 mt-6">

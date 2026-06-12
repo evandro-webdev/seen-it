@@ -29,15 +29,19 @@ export async function getMovieWithCredits(movieId) {
 
 export async function getPopularMovies() {
   const res = await fetch(`${BASE_URL}/movie/popular?include_adult=false&language=pt-BR&page=1`, options)
-  return res.json()
+  const data = await res.json()
+  return {
+    ...data,
+    results: data.results.filter(movie => movie.vote_count > 100)
+  }
 }
 
 export async function getTopRatedMovies() {
-  const res = await fetch(`${BASE_URL}/movie/top_rated?language=pt-BR&page=1`, options)
+  const res = await fetch(`${BASE_URL}/movie/top_rated?include_adult=false&language=pt-BR&page=1`, options)
   return res.json()
 }
 
 export async function getUpcomingMovies() {
-    const res = await fetch(`${BASE_URL}/movie/upcoming?language=pt-BR&page=1`, options)
+    const res = await fetch(`${BASE_URL}/movie/upcoming?include_adult=false&language=pt-BR&page=1`, options)
     return res.json()
 }

@@ -4,10 +4,10 @@ import { useWatchedMoviesStore } from "../../stores/watchedMovies.js";
 import { useSavedMoviesStore } from "../../stores/savedMovies.js";
 import { formatRating, formatRuntime } from "../../utils/formatters.js";
 
-import SaveButton from "../buttons/SaveButton.vue";
-import RateMovieButton from "../buttons/RateMovieButton.vue";
-import EditRatedMovieButton from "../buttons/EditRatedMovieButton.vue";
-import RemoveRatedMovieButton from "../buttons/RemoveRatedMovieButton.vue";
+import SaveButton from "./buttons/SaveButton.vue";
+import RateMovieButton from "./buttons/RateMovieButton.vue";
+import EditRatedMovieButton from "./buttons/EditRatedMovieButton.vue";
+import RemoveRatedMovieButton from "./buttons/RemoveRatedMovieButton.vue";
 import MovieRateForm from "./MovieRateForm.vue";
 import MovieRating from "./MovieRating.vue";
 import MovieGenre from "./MovieGenre.vue";

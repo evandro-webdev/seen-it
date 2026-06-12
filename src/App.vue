@@ -1,18 +1,18 @@
 <script setup>
 import Header from "./components/layout/Header.vue";
 import NavigationBar from "./components/layout/NavigationBar.vue";
-import SearchBar from "./components/forms/SearchBar.vue";
+import SearchBar from "./components/layout/SearchBar.vue";
 import MovieCard from "./components/movies/MovieCard.vue";
 import MovieCardDetailed from "./components/movies/MovieCardDetailed.vue";
 import MovieModal from "./components/movies/MovieModal.vue";
 
-import { onMounted, ref, computed, watch } from "vue";
+import { onMounted, ref, computed, watch, Transition } from "vue";
 import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
 import { useSavedMoviesStore } from "./stores/savedMovies.js";
 import { useDiscoverMoviesStore } from "./stores/discoverMovies.js";
 import { removeAccents } from "./utils/formatters.js";
 
-import { SlidersHorizontal, Flame, Award } from "@lucide/vue";
+import { SlidersHorizontal, Flame, Award, Clapperboard } from "@lucide/vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -29,11 +29,12 @@ const currentTab = ref("discover");
 const searchQuery = ref("");
 
 async function openMovieModal(id) {
-  const movie = currentTab.value === 'watched'
-    ? await watchedMoviesStore.loadDetailedMovie(id)
-    : currentTab.value === 'saved'
-    ? await savedMoviesStore.loadDetailedMovie(id)
-    : await discoverMoviesStore.loadDetailedMovie(id);
+  const movie =
+    currentTab.value === "watched"
+      ? await watchedMoviesStore.loadDetailedMovie(id)
+      : currentTab.value === "saved"
+        ? await savedMoviesStore.loadDetailedMovie(id)
+        : await discoverMoviesStore.loadDetailedMovie(id);
 
   selectedMovie.value = movie;
 }
@@ -44,8 +45,14 @@ watch(currentTab, () => {
 });
 
 const activeMovies = computed(() => {
-  if (currentTab.value === "watched") return watchedMoviesStore.watchedMovies.sort((a, b) => b.average_rating - a.average_rating);
-  if (currentTab.value === "saved") return savedMoviesStore.savedMovies.sort((a, b) => b.vote_average - a.vote_average);
+  if (currentTab.value === "watched")
+    return watchedMoviesStore.watchedMovies.sort(
+      (a, b) => b.average_rating - a.average_rating,
+    );
+  if (currentTab.value === "saved")
+    return savedMoviesStore.savedMovies.sort(
+      (a, b) => b.vote_average - a.vote_average,
+    );
 });
 
 const filteredMovies = computed(() => {
@@ -60,9 +67,10 @@ const filteredMovies = computed(() => {
 });
 
 const moviesCount = computed(() => {
-  if (currentTab.value === "discover") return discoverMoviesStore.searchResults.length
-  return filteredMovies.value.length
-})
+  if (currentTab.value === "discover")
+    return discoverMoviesStore.searchResults.length;
+  return filteredMovies.value.length;
+});
 </script>
 
 <template>
@@ -83,7 +91,9 @@ const moviesCount = computed(() => {
         <div class="flex items-center gap-1">
           <SlidersHorizontal class="w-4 h-4 text-[#0088FF]" />
 
-          <span class="block text-xs text-gray-700 dark:text-gray-300">Ordernar por: Nota</span>
+          <span class="block text-xs text-gray-700 dark:text-gray-300"
+            >Ordernar por: Nota</span
+          >
         </div>
 
         <span class="block text-xs text-gray-600 dark:text-gray-300"
@@ -115,7 +125,9 @@ const moviesCount = computed(() => {
               <div class="flex gap-1 items-center">
                 <Flame class="w-5 h-5 text-[#0088FF]" />
 
-                <h2 class="font-bold text-[#10355E] dark:text-white">Mais vistos do momento</h2>
+                <h2 class="font-bold text-[#10355E] dark:text-white">
+                  Mais vistos do momento
+                </h2>
               </div>
               <button class="text-xs font-semibold text-[#0088FF]">
                 Ver todos
@@ -138,7 +150,9 @@ const moviesCount = computed(() => {
               <div class="flex gap-1 items-center">
                 <Award class="w-5 h-5 text-[#0088FF]" />
 
-                <h2 class="font-bold text-[#10355E] dark:text-white">Melhores avaliados</h2>
+                <h2 class="font-bold text-[#10355E] dark:text-white">
+                  Melhores avaliados
+                </h2>
               </div>
               <button class="text-xs font-semibold text-[#0088FF]">
                 Ver todos
@@ -148,6 +162,31 @@ const moviesCount = computed(() => {
             <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
               <MovieCard
                 v-for="movie in discoverMoviesStore.topRatedMovies"
+                :key="movie.id"
+                :movie="movie"
+                class="flex-shrink-0"
+                @click="async () => await openMovieModal(movie.id)"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex gap-1 items-center">
+                <Clapperboard class="w-5 h-5 text-[#0088FF]" />
+
+                <h2 class="font-bold text-[#10355E] dark:text-white">
+                  Mais esperados
+                </h2>
+              </div>
+              <button class="text-xs font-semibold text-[#0088FF]">
+                Ver todos
+              </button>
+            </div>
+
+            <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
+              <MovieCard
+                v-for="movie in discoverMoviesStore.upcomingMovies"
                 :key="movie.id"
                 :movie="movie"
                 class="flex-shrink-0"
@@ -178,11 +217,13 @@ const moviesCount = computed(() => {
 
   <footer class="w-full px-4 py-10 text-center"></footer>
 
-  <MovieModal
-    v-if="selectedMovie"
-    :movie="selectedMovie"
-    @close="selectedMovie = null"
-  />
+  <Transition name="slide-up">
+    <MovieModal
+      v-if="selectedMovie"
+      :movie="selectedMovie"
+      @close="selectedMovie = null"
+    />
+  </Transition>
 
   <NavigationBar v-model="currentTab" />
 </template>

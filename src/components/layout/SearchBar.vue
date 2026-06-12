@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue";
+import { Search } from "@lucide/vue";
 
 const props = defineProps({
   currentTab: {
@@ -34,22 +35,9 @@ const emit = defineEmits("search");
     />
     <button
       v-if="currentTab === 'discover'"
-      type="submit"
       class="absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-xl text-white bg-linear-to-t from-[#194476] to-[#215DA2] transition-all"
     >
-      <svg
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-6 h-6"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-        />
-      </svg>
+      <Search class="w-6 h-6 text-white" />
     </button>
   </form>
 </template>
