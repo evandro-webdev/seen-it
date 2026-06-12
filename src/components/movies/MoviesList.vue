@@ -1,5 +1,5 @@
 <script setup>
-import MovieCard from "./components/movies/MovieCard.vue";
+import MovieCard from "./MovieCard.vue";
 
 defineProps({
   title: {
@@ -10,14 +10,19 @@ defineProps({
     type: Array,
     required: true,
   },
+  icon: {
+    required: true,
+  },
 });
+
+const emit = defineEmits(['open-modal']);
 </script>
 
 <template>
   <div>
     <div class="flex justify-between items-center mb-4">
       <div class="flex gap-1 items-center">
-        <Flame class="w-5 h-5 text-[#0088FF]" />
+        <component :is="icon" class="w-5 h-5 text-[#0088FF]" />
 
         <h2 class="font-bold text-[#10355E] dark:text-white">
           {{ title }}
@@ -32,7 +37,8 @@ defineProps({
         :key="movie.id"
         :movie="movie"
         class="flex-shrink-0"
-        @click="async () => await openMovieModal(movie.id)"
+        @click="emit('open-modal', movie.id)"
+        fixed-width
       />
     </div>
   </div>

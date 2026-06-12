@@ -14,6 +14,8 @@ import { removeAccents } from "./utils/formatters.js";
 
 import { SlidersHorizontal, Flame, Award, Clapperboard } from "@lucide/vue";
 
+import MoviesList from "./components/movies/MoviesList.vue";
+
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
 const discoverMoviesStore = useDiscoverMoviesStore();
@@ -120,80 +122,26 @@ const moviesCount = computed(() => {
           v-if="!discoverMoviesStore.isSearching"
           class="space-y-6"
         >
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <div class="flex gap-1 items-center">
-                <Flame class="w-5 h-5 text-[#0088FF]" />
+          <MoviesList
+            :icon="Flame"
+            title="Mais vistos do momento"
+            :movies="discoverMoviesStore.popularMovies"
+            @open-modal="openMovieModal"
+          />
 
-                <h2 class="font-bold text-[#10355E] dark:text-white">
-                  Mais vistos do momento
-                </h2>
-              </div>
-              <button class="text-xs font-semibold text-[#0088FF]">
-                Ver todos
-              </button>
-            </div>
+          <MoviesList
+            :icon="Award"
+            title="Melhores avaliados"
+            :movies="discoverMoviesStore.topRatedMovies"
+            @open-modal="openMovieModal"
+          />
 
-            <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
-              <MovieCard
-                v-for="movie in discoverMoviesStore.popularMovies"
-                :key="movie.id"
-                :movie="movie"
-                class="flex-shrink-0"
-                @click="async () => await openMovieModal(movie.id)"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <div class="flex gap-1 items-center">
-                <Award class="w-5 h-5 text-[#0088FF]" />
-
-                <h2 class="font-bold text-[#10355E] dark:text-white">
-                  Melhores avaliados
-                </h2>
-              </div>
-              <button class="text-xs font-semibold text-[#0088FF]">
-                Ver todos
-              </button>
-            </div>
-
-            <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
-              <MovieCard
-                v-for="movie in discoverMoviesStore.topRatedMovies"
-                :key="movie.id"
-                :movie="movie"
-                class="flex-shrink-0"
-                @click="async () => await openMovieModal(movie.id)"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-4">
-              <div class="flex gap-1 items-center">
-                <Clapperboard class="w-5 h-5 text-[#0088FF]" />
-
-                <h2 class="font-bold text-[#10355E] dark:text-white">
-                  Mais esperados
-                </h2>
-              </div>
-              <button class="text-xs font-semibold text-[#0088FF]">
-                Ver todos
-              </button>
-            </div>
-
-            <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
-              <MovieCard
-                v-for="movie in discoverMoviesStore.upcomingMovies"
-                :key="movie.id"
-                :movie="movie"
-                class="flex-shrink-0"
-                @click="async () => await openMovieModal(movie.id)"
-              />
-            </div>
-          </div>
+          <MoviesList
+            :icon="Clapperboard"
+            title="Mais esperados"
+            :movies="discoverMoviesStore.upcomingMovies"
+            @open-modal="openMovieModal"
+          />
         </div>
 
         <div

@@ -6,23 +6,19 @@ defineProps({
     type: Object,
     required: true,
   },
-//   size: {
-//     type: String,
-//     default: "md",
-//   },
+  fixedWidth: {
+    type: Boolean,
+    default: false,
+  },
 });
-
-// const posterSizes = {
-//   sm: "w-[160px]",
-//   md: "w-[160px]",
-// };
 </script>
 
 <template>
-  <div class="space-y-1 overflow-hidden cursor-pointer flex flex-col">
-    <div
-      class="relative w-160px max-w-[160px] aspect-[185/280] rounded-lg overflow-hidden"
-    >
+  <div
+    class="space-y-1 overflow-hidden cursor-pointer flex flex-col"
+    :class="{ 'max-w-[140px]': fixedWidth }"
+  >
+    <div class="relative w-full aspect-[185/280] rounded-lg overflow-hidden">
       <div class="skeleton absolute inset-0 bg-gray-300 animate-pulse"></div>
       <img
         :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
@@ -45,7 +41,7 @@ defineProps({
         }}</span>
       </div>
     </div>
-    <div class="h-[8%] max-w-[160px]">
+    <div class="h-5 max-w-[160px]">
       <h3 class="text-sm font-semibold text-gray-700 dark:text-white truncate">
         {{ movie.title }}
       </h3>
