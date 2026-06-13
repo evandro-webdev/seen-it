@@ -1,7 +1,7 @@
 <script setup>
 import { formatRating } from "../../utils/formatters.js";
 
-import { Star } from "@lucide/vue";
+import { Star, Quote } from "@lucide/vue";
 
 defineProps({
   user: {
@@ -12,6 +12,10 @@ defineProps({
     type: [Number, String],
     required: true,
   },
+  hasComment: {
+    type: Boolean,
+    required: true
+  }
 });
 
 const reviewerColors = {
@@ -26,11 +30,20 @@ const reviewerColors = {
     class="text-white flex flex-shrink-0 items-center gap-2"
     :class="reviewerColors[user]"
   >
-    <img
-      :src="'/img/' + user + '.jpg'"
-      class="w-9 rounded-full border"
-      :style="{ borderColor: reviewerColors[user] }"
-    />
+    <div class="relative">
+      <img
+        :src="'/img/' + user + '.jpg'"
+        class="w-9 rounded-full border"
+        :style="{ borderColor: reviewerColors[user] }"
+      />
+      <div
+        v-if="hasComment"
+        class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+        :style="{ backgroundColor: reviewerColors[user] }"
+      >
+        <Quote class="w-2 h-2 text-white" fill="white"/>
+      </div>
+    </div>
     <div>
       <div class="flex items-center gap-1">
         <Star

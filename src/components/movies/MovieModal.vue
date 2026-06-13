@@ -16,7 +16,13 @@ import MovieRateForm from "./MovieRateForm.vue";
 import MovieRating from "./MovieRating.vue";
 import MovieGenre from "./MovieGenre.vue";
 
-import { ArrowLeft, EllipsisVertical, Star, UsersRound } from "@lucide/vue";
+import {
+  ArrowLeft,
+  EllipsisVertical,
+  Star,
+  UsersRound,
+  Quote,
+} from "@lucide/vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -45,6 +51,7 @@ const isAlreadySaved = computed(() =>
 
 const showRateForm = ref(false);
 const showFullOverview = ref(false);
+const selectedReviewer = ref(null);
 </script>
 
 <template>
@@ -129,7 +136,7 @@ const showFullOverview = ref(false);
                   {{
                     showFullOverview
                       ? props.movie.overview
-                      : truncateText(props.movie.overview, OVERVIEW_LIMIT)
+                      : truncateText(props.movie.overview, 250)
                   }}
                 </p>
 
@@ -143,14 +150,18 @@ const showFullOverview = ref(false);
               </div>
 
               <div
-                v-if="isAlreadyWatched && props.movie.ratings"
+                v-if="isAlreadyWatched && props.movie.reviews"
                 class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
               >
                 <MovieRating
-                  v-for="[user, rating] in Object.entries(props.movie.ratings)"
+                  v-for="[user, review] in Object.entries(props.movie.reviews)"
                   :key="user"
                   :user="user"
-                  :rating="rating"
+                  :rating="review.rating"
+                  :has-comment="review.comment ? true : false"
+                  @click="
+                    selectedReviewer = selectedReviewer === user ? null : user
+                  "
                 />
 
                 <div
@@ -205,6 +216,25 @@ const showFullOverview = ref(false);
                     >
                   </div>
                 </div>
+              </div>
+
+              <div
+                v-if="
+                  selectedReviewer &&
+                  props.movie.reviews[selectedReviewer].comment
+                "
+                class="mt-3 p-3 bg-[#1e3653] rounded-lg rounded-tl-none relative overflow-hidden"
+              >
+                <Quote
+                  class="absolute -top-1 -right-1 w-10 h-10 text-white/10"
+                />
+
+                <span class="text-xs text-gray-400 capitalize block mb-1">
+                  {{ selectedReviewer }}
+                </span>
+                <p class="text-sm text-white pl-2">
+                  {{ props.movie.reviews[selectedReviewer].comment }}
+                </p>
               </div>
 
               <div

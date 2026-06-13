@@ -58,7 +58,6 @@ const activeMovies = computed(() => {
 });
 
 const filteredMovies = computed(() => {
-  if (currentTab.value === "discover") return activeMovies.value;
   if (!searchQuery.value.trim()) return activeMovies.value;
 
   const query = removeAccents(searchQuery.value.toLowerCase());
@@ -153,9 +152,7 @@ const moviesCount = computed(() => {
             :key="movie.id"
             :movie="movie"
             @click="
-              selectedMovie = discoverMoviesStore.searchResults.find(
-                (m) => m.id === movie.id,
-              )
+              selectedMovie = movie
             "
           />
         </div>
