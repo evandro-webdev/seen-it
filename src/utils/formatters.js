@@ -16,13 +16,12 @@ export function removeAccents(str) {
 }
 
 export function formatRating(rating) {
-  return rating === 10 ? '10' : Number(rating).toFixed(1)
+  return rating === 10 || rating === '10.0' ? '10' : Number(rating).toFixed(1)
 }
 
 export function truncateText(text, limit = 250) {
   if (!text) return "";
   if (text.length <= limit) return text;
 
-  // Corta o texto e remove pontos finais/reticências grudados no final do corte
   return text.slice(0, limit).replace(/\.+$/, "") + "...";
 }

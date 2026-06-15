@@ -138,6 +138,7 @@ async function saveRatings() {
         :key="reviewer"
         :user="reviewer"
         :rating="reviews[reviewer].rating"
+        :has-comment="reviews[reviewer].comment ? true : false"
       />
     </div>
 

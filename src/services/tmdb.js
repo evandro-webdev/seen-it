@@ -1,5 +1,4 @@
 const BASE_URL = 'https://api.themoviedb.org/3';
-const BASE_IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const options = {
   method: 'GET',
@@ -42,6 +41,6 @@ export async function getTopRatedMovies() {
 }
 
 export async function getUpcomingMovies() {
-    const res = await fetch(`${BASE_URL}/movie/upcoming?include_adult=false&language=pt-BR&page=1`, options)
+    const res = await fetch(`${BASE_URL}/movie/upcoming?include_adult=false&region=BR&language=pt-BR&page=1`, options)
     return res.json()
 }

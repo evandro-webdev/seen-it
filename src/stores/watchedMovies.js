@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { formatRating } from "@/utils/formatters.js";
 
 import {
   db,

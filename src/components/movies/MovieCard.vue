@@ -1,5 +1,6 @@
 <script setup>
 import { Star } from "@lucide/vue";
+import { formatRating } from "@/utils/formatters";
 
 defineProps({
   movie: {
@@ -37,7 +38,7 @@ defineProps({
           fill="white"
         />
         <span class="text-[10px] font-medium">{{
-          movie.average_rating ?? movie.vote_average.toFixed(1)
+          movie.average_rating ? formatRating(movie.average_rating) : formatRating(movie.vote_average)
         }}</span>
       </div>
     </div>

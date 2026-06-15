@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, defineEmits } from "vue";
 import { Search } from "@lucide/vue";
 
 const props = defineProps({
@@ -17,7 +17,7 @@ const placeholder = computed(() => {
 
 const searchQuery = defineModel();
 
-const emit = defineEmits("search");
+const emit = defineEmits(["search"]);
 </script>
 
 <template>

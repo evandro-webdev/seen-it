@@ -112,173 +112,182 @@ const selectedReviewer = ref(null);
                 {{ props.movie.tagline }}
               </p>
             </div>
-            <div v-if="!showRateForm">
-              <div
-                class="mt-2 mb-4 text-xs text-[#5E5E5E] dark:text-white flex items-center flex-wrap gap-2"
-              >
-                <div class="flex gap-2">
-                  <MovieGenre
-                    v-for="genre in props.movie.genres"
-                    :key="genre.id"
-                    :genre="genre.name"
-                  />
-                </div>
-                <span>·</span>
-                <span>{{ props.movie.release_date.slice(0, 4) }}</span>
-                <span>·</span>
-                <span>{{ formatRuntime(props.movie.runtime) }}</span>
-              </div>
-
-              <div>
-                <p
-                  class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px]"
-                >
-                  {{
-                    showFullOverview
-                      ? props.movie.overview
-                      : truncateText(props.movie.overview, 250)
-                  }}
-                </p>
-
-                <button
-                  v-if="props.movie.overview?.length > 250"
-                  @click="showFullOverview = !showFullOverview"
-                  class="mt-1 text-sm text-[#0088FF]"
-                >
-                  {{ showFullOverview ? "Ler menos" : "Ler mais" }}
-                </button>
-              </div>
-
-              <div
-                v-if="isAlreadyWatched && props.movie.reviews"
-                class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
-              >
-                <MovieRating
-                  v-for="[user, review] in Object.entries(props.movie.reviews)"
-                  :key="user"
-                  :user="user"
-                  :rating="review.rating"
-                  :has-comment="review.comment ? true : false"
-                  @click="
-                    selectedReviewer = selectedReviewer === user ? null : user
-                  "
-                />
-
+            <Transition
+              name="fade"
+              mode="out-in"
+            >
+              <div v-if="!showRateForm">
                 <div
-                  class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
+                  class="mt-2 mb-4 text-xs text-[#5E5E5E] dark:text-white flex items-center flex-wrap gap-2"
                 >
-                  <div class="p-2 rounded-full border border-[#356dd5]">
-                    <UsersRound
-                      class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
+                  <div class="flex gap-2">
+                    <MovieGenre
+                      v-for="genre in props.movie.genres"
+                      :key="genre.id"
+                      :genre="genre.name"
                     />
                   </div>
-                  <div>
-                    <div class="flex items-center gap-1">
-                      <Star
+                  <span>·</span>
+                  <span>{{ props.movie.release_date.slice(0, 4) }}</span>
+                  <span>·</span>
+                  <span>{{ formatRuntime(props.movie.runtime) }}</span>
+                </div>
+
+                <div>
+                  <p
+                    class="text-[16px] text-[#8C8C8C] dark:text-gray-200 font-light leading-[20px]"
+                  >
+                    {{
+                      showFullOverview
+                        ? props.movie.overview
+                        : truncateText(props.movie.overview, 250)
+                    }}
+                  </p>
+
+                  <button
+                    v-if="props.movie.overview?.length > 250"
+                    @click="showFullOverview = !showFullOverview"
+                    class="mt-1 text-sm text-[#0088FF]"
+                  >
+                    {{ showFullOverview ? "Ler menos" : "Ler mais" }}
+                  </button>
+                </div>
+
+                <div
+                  v-if="isAlreadyWatched && props.movie.reviews"
+                  class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
+                >
+                  <MovieRating
+                    v-for="[user, review] in Object.entries(
+                      props.movie.reviews,
+                    )"
+                    :key="user"
+                    :user="user"
+                    :rating="review.rating"
+                    :has-comment="review.comment ? true : false"
+                    @click="
+                      selectedReviewer = selectedReviewer === user ? null : user
+                    "
+                  />
+
+                  <div
+                    class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
+                  >
+                    <div class="p-2 rounded-full border border-[#356dd5]">
+                      <UsersRound
                         class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
-                        fill="currentColor"
                       />
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1">
+                        <Star
+                          class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
+                          fill="currentColor"
+                        />
+                        <span
+                          class="block text-md font-medium text-[#356dd5] dark:text-[#4787ff]"
+                          >{{ formatRating(props.movie.average_rating) }}</span
+                        >
+                      </div>
                       <span
-                        class="block text-md font-medium text-[#356dd5] dark:text-[#4787ff]"
-                        >{{ formatRating(props.movie.average_rating) }}</span
+                        class="text-xs capitalize text-[#356dd5] dark:text-[#4787ff] block"
+                        >Média</span
                       >
                     </div>
-                    <span
-                      class="text-xs capitalize text-[#356dd5] dark:text-[#4787ff] block"
-                      >Média</span
+                  </div>
+
+                  <div
+                    class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
+                  >
+                    <div
+                      class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
                     >
+                      <img
+                        src="/img/tmdb.svg"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1">
+                        <Star
+                          class="w-4 h-4 text-[#399c8d]"
+                          fill="currentColor"
+                        />
+                        <span
+                          class="block text-md font-medium text-[#399c8d]"
+                          >{{ formatRating(props.movie.vote_average) }}</span
+                        >
+                      </div>
+                      <span class="text-xs capitalize text-[#399c8d] block"
+                        >TMDB</span
+                      >
+                    </div>
                   </div>
                 </div>
 
                 <div
-                  class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
+                  v-if="
+                    selectedReviewer &&
+                    props.movie.reviews[selectedReviewer].comment
+                  "
+                  class="mt-3 p-3 bg-[#1e3653] rounded-lg rounded-tl-none relative overflow-hidden"
                 >
-                  <div
-                    class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
-                  >
-                    <img
-                      src="/img/tmdb.svg"
-                      class="w-4 h-4"
-                    />
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1">
-                      <Star
-                        class="w-4 h-4 text-[#399c8d]"
-                        fill="currentColor"
-                      />
-                      <span class="block text-md font-medium text-[#399c8d]">{{
-                        formatRating(props.movie.vote_average)
-                      }}</span>
-                    </div>
-                    <span class="text-xs capitalize text-[#399c8d] block"
-                      >TMDB</span
-                    >
-                  </div>
+                  <Quote
+                    class="absolute -top-1 -right-1 w-10 h-10 text-white/10"
+                  />
+
+                  <span class="text-xs text-gray-400 capitalize block mb-1">
+                    {{ selectedReviewer }}
+                  </span>
+                  <p class="text-sm text-white pl-2">
+                    {{ props.movie.reviews[selectedReviewer].comment }}
+                  </p>
                 </div>
-              </div>
 
-              <div
-                v-if="
-                  selectedReviewer &&
-                  props.movie.reviews[selectedReviewer].comment
-                "
-                class="mt-3 p-3 bg-[#1e3653] rounded-lg rounded-tl-none relative overflow-hidden"
-              >
-                <Quote
-                  class="absolute -top-1 -right-1 w-10 h-10 text-white/10"
-                />
-
-                <span class="text-xs text-gray-400 capitalize block mb-1">
-                  {{ selectedReviewer }}
-                </span>
-                <p class="text-sm text-white pl-2">
-                  {{ props.movie.reviews[selectedReviewer].comment }}
-                </p>
-              </div>
-
-              <div
-                v-if="!isAlreadyWatched"
-                class="mt-4 w-max"
-              >
                 <div
-                  class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
+                  v-if="!isAlreadyWatched"
+                  class="mt-4 w-max"
                 >
                   <div
-                    class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
+                    class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
                   >
-                    <img
-                      src="/img/tmdb.svg"
-                      class="w-4 h-4"
-                    />
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1">
-                      <Star
-                        class="w-4 h-4 text-[#399c8d]"
-                        fill="currentColor"
-                      />
-                      <span class="block text-md font-medium text-[#399c8d]">{{
-                        formatRating(props.movie.vote_average)
-                      }}</span>
-                    </div>
-                    <span class="text-xs capitalize text-[#399c8d] block"
-                      >TMDB</span
+                    <div
+                      class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]"
                     >
+                      <img
+                        src="/img/tmdb.svg"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1">
+                        <Star
+                          class="w-4 h-4 text-[#399c8d]"
+                          fill="currentColor"
+                        />
+                        <span
+                          class="block text-md font-medium text-[#399c8d]"
+                          >{{ formatRating(props.movie.vote_average) }}</span
+                        >
+                      </div>
+                      <span class="text-xs capitalize text-[#399c8d] block"
+                        >TMDB</span
+                      >
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <MovieRateForm
-              v-if="showRateForm"
-              :movie="props.movie"
-              @close="showRateForm = false"
-            />
+              <MovieRateForm
+                v-else
+                :movie="props.movie"
+                @close="showRateForm = false"
+              />
+            </Transition>
           </div>
 
           <div
-            v-if="isAlreadyWatched"
+            v-if="isAlreadyWatched && !showRateForm"
             class="mt-6 flex items-center gap-4"
           >
             <RemoveRatedMovieButton
