@@ -29,6 +29,7 @@ defineProps({
           this.classList.add('opacity-100');
           this.previousElementSibling.remove();
         "
+        onerror="this.src = '../img/placeholder.jpg'"
       />
       <div
         class="absolute top-2 right-2 p-[4px] rounded-md text-xs font-medium text-white bg-linear-to-t from-[#194476] to-[#215DA2] flex items-center gap-1"

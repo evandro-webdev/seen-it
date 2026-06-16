@@ -85,78 +85,90 @@ const moviesCount = computed(() => {
         @search="discoverMoviesStore.searchForMovies(searchQuery)"
       />
 
-      <div
-        v-if="currentTab !== 'discover' || discoverMoviesStore.isSearching"
-        class="flex justify-between items-center"
+      <Transition
+        name="fade-tab"
+        mode="out-in"
       >
-        <div class="flex items-center gap-1">
-          <SlidersHorizontal class="w-4 h-4 text-[#0088FF]" />
+        <div
+          v-if="currentTab !== 'discover' || discoverMoviesStore.isSearching"
+          class="flex justify-between items-center"
+        >
+          <div class="flex items-center gap-1">
+            <SlidersHorizontal class="w-4 h-4 text-[#0088FF]" />
 
-          <span class="block text-xs text-gray-700 dark:text-gray-300"
-            >Ordernar por: Nota</span
+            <span class="block text-xs text-gray-700 dark:text-gray-300"
+              >Ordernar por: Nota</span
+            >
+          </div>
+
+          <span class="block text-xs text-gray-600 dark:text-gray-300"
+            >{{ moviesCount }} filmes</span
           >
         </div>
-
-        <span class="block text-xs text-gray-600 dark:text-gray-300"
-          >{{ moviesCount }} filmes</span
-        >
-      </div>
+      </Transition>
     </div>
 
     <div class="py-2 px-4">
-      <section
-        v-if="currentTab === 'watched' || currentTab === 'saved'"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
+      <Transition
+        name="fade-tab"
+        mode="out-in"
       >
-        <MovieCard
-          v-for="movie in filteredMovies"
-          :key="movie.id"
-          :movie="movie"
-          @click="async () => await openMovieModal(movie.id)"
-        />
-      </section>
-
-      <section v-if="currentTab === 'discover'">
-        <div
-          v-if="!discoverMoviesStore.isSearching"
-          class="space-y-6"
+        <section
+          v-if="currentTab === 'watched' || currentTab === 'saved'"
+          :key="currentTab"
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
         >
-          <MoviesList
-            :icon="Flame"
-            title="Mais vistos do momento"
-            :movies="discoverMoviesStore.popularMovies"
-            @open-modal="openMovieModal"
-          />
-
-          <MoviesList
-            :icon="Award"
-            title="Melhores avaliados"
-            :movies="discoverMoviesStore.topRatedMovies"
-            @open-modal="openMovieModal"
-          />
-
-          <MoviesList
-            :icon="Clapperboard"
-            title="Mais esperados"
-            :movies="discoverMoviesStore.upcomingMovies"
-            @open-modal="openMovieModal"
-          />
-        </div>
-
-        <div
-          v-if="discoverMoviesStore.isSearching"
-          class="space-y-4"
-        >
-          <MovieCardDetailed
-            v-for="movie in discoverMoviesStore.searchResults"
+          <MovieCard
+            v-for="movie in filteredMovies"
             :key="movie.id"
             :movie="movie"
-            @click="
-              selectedMovie = movie
-            "
+            @click="async () => await openMovieModal(movie.id)"
           />
-        </div>
-      </section>
+        </section>
+
+        <section
+          v-else-if="currentTab === 'discover'"
+          key="discover"
+        >
+          <div
+            v-if="!discoverMoviesStore.isSearching || !searchQuery"
+            class="space-y-6"
+          >
+            <MoviesList
+              :icon="Flame"
+              title="Mais vistos do momento"
+              :movies="discoverMoviesStore.popularMovies"
+              @open-modal="openMovieModal"
+            />
+
+            <MoviesList
+              :icon="Award"
+              title="Melhores avaliados"
+              :movies="discoverMoviesStore.topRatedMovies"
+              @open-modal="openMovieModal"
+            />
+
+            <MoviesList
+              :icon="Clapperboard"
+              title="Mais esperados"
+              :movies="discoverMoviesStore.upcomingMovies"
+              @open-modal="openMovieModal"
+            />
+          </div>
+
+          <div
+            v-if="discoverMoviesStore.isSearching"
+            class="space-y-4"
+          >
+            <MovieCardDetailed
+              v-for="movie in discoverMoviesStore.searchResults"
+              :key="movie.id"
+              :movie="movie"
+              @click="selectedMovie = movie"
+            />
+          </div>
+        </section>
+      </Transition>
     </div>
   </main>
 

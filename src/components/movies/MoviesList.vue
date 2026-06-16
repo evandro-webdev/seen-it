@@ -24,7 +24,7 @@ const emit = defineEmits(['open-modal']);
       <div class="flex gap-1 items-center">
         <component :is="icon" class="w-5 h-5 text-[#0088FF]" />
 
-        <h2 class="font-bold text-[#10355E] dark:text-white">
+        <h2 class="font-bold text-[#10355E] dark:text-[#B0D5FE]">
           {{ title }}
         </h2>
       </div>
