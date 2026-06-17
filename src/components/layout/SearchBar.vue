@@ -29,7 +29,7 @@ const emit = defineEmits(["search"]);
       id="search-input"
       type="search"
       v-model="searchQuery"
-      class="w-full p-4 rounded-2xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#292B37] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+      class="w-full p-4 rounded-2xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
       :class="{ 'pr-12': currentTab === 'discover' }"
       :placeholder="placeholder"
     />

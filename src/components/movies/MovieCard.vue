@@ -17,7 +17,7 @@ defineProps({
 <template>
   <div
     class="space-y-1 overflow-hidden cursor-pointer flex flex-col"
-    :class="{ 'max-w-[140px]': fixedWidth }"
+    :class="{ 'w-[140px]': fixedWidth }"
   >
     <div class="relative w-full aspect-[185/280] rounded-lg overflow-hidden">
       <div class="skeleton absolute inset-0 bg-gray-300 animate-pulse"></div>

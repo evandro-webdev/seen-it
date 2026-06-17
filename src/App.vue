@@ -10,6 +10,7 @@ import { onMounted, ref, computed, watch, Transition } from "vue";
 import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
 import { useSavedMoviesStore } from "./stores/savedMovies.js";
 import { useDiscoverMoviesStore } from "./stores/discoverMovies.js";
+import { useAuthStore } from "./stores/auth.js";
 import { removeAccents } from "./utils/formatters.js";
 
 import { SlidersHorizontal, Flame, Award, Clapperboard } from "@lucide/vue";
@@ -19,6 +20,7 @@ import MoviesList from "./components/movies/MoviesList.vue";
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
 const discoverMoviesStore = useDiscoverMoviesStore();
+const authStore = useAuthStore();
 
 onMounted(() => {
   watchedMoviesStore.loadWatchedMovies();
@@ -108,7 +110,22 @@ const moviesCount = computed(() => {
       </Transition>
     </div>
 
-    <div class="py-2 px-4">
+    <div
+      v-if="!authStore.isAuthenticated"
+      class="flex justify-center items-center"
+    >
+      <button
+        @click="authStore.loginWithGoogle()"
+        class="py-2 px-6 rounded-lg border border-slate-600 dark:text-white"
+      >
+        Entrar com Google
+      </button>
+    </div>
+
+    <div
+      v-else
+      class="py-2 px-4"
+    >
       <Transition
         name="fade-tab"
         mode="out-in"

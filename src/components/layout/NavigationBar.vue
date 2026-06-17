@@ -1,6 +1,6 @@
 <script setup>
-
 import { BookHeart, Compass, Bookmark } from "@lucide/vue";
+import NavButton from "./navigation/NavButton.vue";
 
 const currentTab = defineModel();
 </script>
@@ -10,43 +10,25 @@ const currentTab = defineModel();
     id="navigation-bar"
     class="fixed bottom-4 p-1 inset-x-4 rounded-lg border border-gray-200 dark:border-[#292B37] bg-white dark:bg-[#0F111D] shadow-sm flex gap-2"
   >
-    <button
-      class="py-[10px] px-[5px] flex flex-1 justify-center items-center gap-2"
-      :class="{
-        'text-[#0088FF]': currentTab === 'watched',
-        'text-gray-400': currentTab !== 'watched',
-      }"
+    <NavButton
       @click="currentTab = 'watched'"
-    >
-      <BookHeart class="w-4 h-4" />
+      :current-tab="currentTab === 'watched'"
+      :icon="BookHeart"
+      label="Assistidos"
+    />
 
-      <span class="text-sm font-medium text-nowrap">Meus filmes</span>
-    </button>
-
-    <button
-      class="py-[10px] px-[5px] flex flex-1 justify-center items-center gap-2"
-      :class="{
-        'text-[#0088FF]': currentTab === 'discover',
-        'text-gray-400': currentTab !== 'discover',
-      }"
+    <NavButton
       @click="currentTab = 'discover'"
-    >
-      <Compass class="w-4 h-4" />
+      :current-tab="currentTab === 'discover'"
+      :icon="Compass"
+      label="Descobrir"
+    />
 
-      <span class="text-sm font-medium text-nowrap">Descobrir</span>
-    </button>
-
-    <button
-      class="py-[10px] px-[5px] flex flex-1 justify-center items-center gap-2"
-      :class="{
-        'text-[#0088FF]': currentTab === 'saved',
-        'text-gray-400': currentTab !== 'saved',
-      }"
+    <NavButton
       @click="currentTab = 'saved'"
-    >
-      <Bookmark class="w-4 h-4" />
-
-      <span class="text-sm font-medium text-nowrap">Salvos</span>
-    </button>
+      :current-tab="currentTab === 'saved'"
+      :icon="Bookmark"
+      label="Salvos"
+    />
   </nav>
 </template>

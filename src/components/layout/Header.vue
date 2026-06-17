@@ -1,14 +1,20 @@
 <script setup>
-import { Menu, Sun, Moon, Bell, CircleUserRound } from "@lucide/vue";
+import { ref } from "vue";
+import { Sun, Moon, Bell, CircleUserRound } from "@lucide/vue";
 
 import { useDarkMode } from "../../composables/useDarkMode";
 const { isDarkMode, toggleDarkMode } = useDarkMode();
+
+const isMenuOpen = ref(false);
 </script>
 
 <template>
   <header class="p-4">
-    <div class="flex justify-between items-center">
-      <button class="text-[#0088FF]">
+    <div class="flex justify-between items-center relative">
+      <button
+        class="text-[#0088FF]"
+        @click="isMenuOpen = !isMenuOpen"
+      >
         <CircleUserRound class="w-6 h-6" />
       </button>
 
@@ -30,6 +36,32 @@ const { isDarkMode, toggleDarkMode } = useDarkMode();
           <Bell class="w-6 h-6" />
         </button>
       </div>
+
+      <Transition
+        name="fade"
+        mode="out-in"
+      >
+        <div
+          v-if="isMenuOpen"
+          class="absolute z-10 left-0 top-10 rounded-lg border border-gray-200 dark:border-[#242942] bg-[#f7f7f7] dark:bg-[#0f111c] overflow-hidden flex flex-col"
+        >
+          <a
+            href=""
+            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 transition-colors 300ms"
+            >Perfil</a
+          >
+          <a
+            href=""
+            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 transition-colors 300ms"
+            >Configurações</a
+          >
+          <a
+            href=""
+            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 transition-colors 300ms"
+            >Sair</a
+          >
+        </div>
+      </Transition>
     </div>
   </header>
 </template>

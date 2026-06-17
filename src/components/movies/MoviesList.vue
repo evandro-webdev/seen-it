@@ -15,14 +15,17 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['open-modal']);
+const emit = defineEmits(["open-modal"]);
 </script>
 
 <template>
   <div>
     <div class="flex justify-between items-center mb-4">
       <div class="flex gap-1 items-center">
-        <component :is="icon" class="w-5 h-5 text-[#0088FF]" />
+        <component
+          :is="icon"
+          class="w-5 h-5 text-[#0088FF]"
+        />
 
         <h2 class="font-bold text-[#10355E] dark:text-[#B0D5FE]">
           {{ title }}
