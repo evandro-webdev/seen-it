@@ -79,8 +79,11 @@ const moviesCount = computed(() => {
 <template>
   <Header />
 
-  <main class="max-w-7xl mx-auto">
-    <div class="py-2 px-4 lg:py-14 mb-2 space-y-3">
+  <main class="max-w-7xl mx-auto h-[90%]">
+    <div
+      v-if="authStore.isAuthenticated || currentTab === 'discover'"
+      class="py-2 px-4 lg:py-14 mb-2 space-y-3"
+    >
       <SearchBar
         v-model="searchQuery"
         :current-tab="currentTab"
@@ -110,28 +113,41 @@ const moviesCount = computed(() => {
       </Transition>
     </div>
 
-    <div
-      v-if="!authStore.isAuthenticated"
-      class="flex justify-center items-center"
-    >
-      <button
-        @click="authStore.loginWithGoogle()"
-        class="py-2 px-6 rounded-lg border border-slate-600 dark:text-white"
-      >
-        Entrar com Google
-      </button>
-    </div>
-
-    <div
-      v-else
-      class="py-2 px-4"
-    >
+    <div class="h-[100%] py-2 px-4 flex flex-col">
       <Transition
         name="fade-tab"
         mode="out-in"
       >
+        <div
+          v-if="
+            !authStore.isAuthenticated &&
+            (currentTab === 'watched' || currentTab === 'saved')
+          "
+          key="login-screen"
+          class="my-auto flex flex-col justify-center items-center gap-2"
+        >
+          <div>
+            <p
+              class="text-center text-gray-800 dark:text-white [text-wrap:balance]"
+            >
+              Você precisa estar logado para acessar essa aba
+            </p>
+          </div>
+          <button
+            @click="authStore.loginWithGoogle()"
+            class="py-2 px-6 rounded-lg border border-slate-600 text-gray-800 dark:text-white flex items-center gap-2 active:scale-95"
+          >
+            <img
+              src="/img/google.svg"
+              class="w-4"
+              alt="Icone logo do google"
+            />
+            <span>Entrar com o Google</span>
+          </button>
+        </div>
+
         <section
-          v-if="currentTab === 'watched' || currentTab === 'saved'"
+          v-else-if="currentTab === 'watched' || currentTab === 'saved'"
           :key="currentTab"
           class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
         >
@@ -188,8 +204,6 @@ const moviesCount = computed(() => {
       </Transition>
     </div>
   </main>
-
-  <footer class="w-full px-4 py-10 text-center"></footer>
 
   <Transition name="slide-up">
     <MovieModal

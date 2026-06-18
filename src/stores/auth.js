@@ -3,9 +3,10 @@ import { ref, computed } from "vue";
 import { auth } from "../services/firebase";
 import {
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   onAuthStateChanged,
+  getRedirectResult
 } from "firebase/auth";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -19,8 +20,12 @@ export const useAuthStore = defineStore("auth", () => {
     loading.value = false;
   });
 
+  getRedirectResult(auth).catch(err => {
+    console.error('Erro no redirect:', err)
+  })
+
   async function loginWithGoogle() {
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
   }
 
   async function logout(){
