@@ -11,10 +11,17 @@ const authStore = useAuthStore();
 
 const isMenuOpen = ref(false);
 const menuRef = ref(null);
+const menuButtonRef = ref(null);
 
-onClickOutside(menuRef, () => {
-  isMenuOpen.value = false;
-});
+onClickOutside(
+  menuRef,
+  () => {
+    isMenuOpen.value = false;
+  },
+  {
+    ignore: [menuButtonRef],
+  },
+);
 </script>
 
 <template>
@@ -23,6 +30,7 @@ onClickOutside(menuRef, () => {
       <button
         class="text-[#0088FF]"
         @click="isMenuOpen = !isMenuOpen"
+        ref="menuButtonRef"
       >
         <CircleUserRound class="w-6 h-6" />
       </button>
