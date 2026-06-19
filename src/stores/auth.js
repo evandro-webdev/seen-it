@@ -4,9 +4,10 @@ import { auth } from "../services/firebase";
 import {
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
-  getRedirectResult
+  getRedirectResult,
 } from "firebase/auth";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -20,19 +21,27 @@ export const useAuthStore = defineStore("auth", () => {
     loading.value = false;
   });
 
-  getRedirectResult(auth).catch(err => {
-    console.error('Erro no redirect:', err)
-  })
+  getRedirectResult(auth).catch((err) => {
+    console.error("Erro no redirect:", err);
+  });
 
   async function loginWithGoogle() {
-    await signInWithRedirect(auth, provider);
+    const isMobileOrPWA =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+    if (isMobileOrPWA) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   }
 
-  async function logout(){
+  async function logout() {
     await signOut(auth);
   }
 
   const isAuthenticated = computed(() => !!user.value);
 
-  return { user, loading, isAuthenticated, loginWithGoogle, logout }
+  return { user, loading, isAuthenticated, loginWithGoogle, logout };
 });
