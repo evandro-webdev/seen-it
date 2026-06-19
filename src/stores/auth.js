@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { auth } from "../services/firebase";
 import {
   GoogleAuthProvider,
-  signInWithRedirect,
   signInWithPopup,
   signOut,
   onAuthStateChanged,
@@ -26,15 +25,7 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   async function loginWithGoogle() {
-    const isMobileOrPWA =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      /Android|iPhone|iPad/i.test(navigator.userAgent);
-
-    if (isMobileOrPWA) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
+    await signInWithPopup(auth, provider);
   }
 
   async function logout() {
