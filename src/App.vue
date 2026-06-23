@@ -5,6 +5,7 @@ import SearchBar from "./components/layout/SearchBar.vue";
 import MovieCard from "./components/movies/MovieCard.vue";
 import MovieCardDetailed from "./components/movies/MovieCardDetailed.vue";
 import MovieModal from "./components/movies/MovieModal.vue";
+import AuthForm from "./components/auth/AuthForm.vue";
 
 import { onMounted, ref, computed, watch, Transition } from "vue";
 import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
@@ -13,6 +14,8 @@ import { useDiscoverMoviesStore } from "./stores/discoverMovies.js";
 import { useAuthStore } from "./stores/auth.js";
 import { removeAccents } from "./utils/formatters.js";
 
+const authStore = useAuthStore();
+
 import { SlidersHorizontal, Flame, Award, Clapperboard } from "@lucide/vue";
 
 import MoviesList from "./components/movies/MoviesList.vue";
@@ -20,7 +23,6 @@ import MoviesList from "./components/movies/MoviesList.vue";
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
 const discoverMoviesStore = useDiscoverMoviesStore();
-const authStore = useAuthStore();
 
 onMounted(() => {
   watchedMoviesStore.loadWatchedMovies();
@@ -118,33 +120,13 @@ const moviesCount = computed(() => {
         name="fade-tab"
         mode="out-in"
       >
-        <div
+        <AuthForm
           v-if="
             !authStore.isAuthenticated &&
             (currentTab === 'watched' || currentTab === 'saved')
           "
           key="login-screen"
-          class="my-auto flex flex-col justify-center items-center gap-2"
-        >
-          <div>
-            <p
-              class="text-center text-gray-800 dark:text-white [text-wrap:balance]"
-            >
-              Você precisa estar logado para acessar essa aba
-            </p>
-          </div>
-          <button
-            @click="authStore.loginWithGoogle()"
-            class="py-2 px-6 rounded-lg border border-slate-600 text-gray-800 dark:text-white flex items-center gap-2 active:scale-95"
-          >
-            <img
-              src="/img/google.svg"
-              class="w-4"
-              alt="Icone logo do google"
-            />
-            <span>Entrar com o Google</span>
-          </button>
-        </div>
+        />
 
         <section
           v-else-if="currentTab === 'watched' || currentTab === 'saved'"

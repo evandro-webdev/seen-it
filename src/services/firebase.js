@@ -5,7 +5,8 @@ import {
   collection, 
   doc,  
   addDoc, 
-  getDocs, 
+  getDocs,
+  setDoc, 
   deleteDoc 
 } from "firebase/firestore";
 
@@ -30,7 +31,8 @@ export {
   collection, 
   doc, 
   addDoc, 
-  getDocs, 
+  getDocs,
+  setDoc,
   deleteDoc,
   auth
 };

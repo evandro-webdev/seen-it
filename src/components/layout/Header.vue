@@ -22,20 +22,31 @@ onClickOutside(
     ignore: [menuButtonRef],
   },
 );
+
+async function handleLogout() {
+  isMenuOpen.value = false;
+
+  try {
+    await authStore.logout();
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+  }
+}
 </script>
 
 <template>
   <header class="p-4">
     <div class="flex justify-between items-center relative">
       <button
-        class="text-[#0088FF]"
         @click="isMenuOpen = !isMenuOpen"
+        v-if="authStore.isAuthenticated"
         ref="menuButtonRef"
+        class="text-[#0088FF]"
       >
         <CircleUserRound class="w-6 h-6" />
       </button>
 
-      <div class="space-x-3 flex items-center">
+      <div class="space-x-3 flex items-center ml-auto">
         <button
           class="text-[#0088FF]"
           @click="toggleDarkMode"
@@ -49,7 +60,10 @@ onClickOutside(
             class="w-6 h-6"
           />
         </button>
-        <button class="text-[#0088FF]">
+        <button
+          v-if="authStore.isAuthenticated"
+          class="text-[#0088FF]"
+        >
           <Bell class="w-6 h-6" />
         </button>
       </div>
@@ -65,14 +79,14 @@ onClickOutside(
         >
           <a
             class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
-            >Perfil</a
+            >{{ authStore.user.displayName }}</a
           >
           <a
             class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
             >Configurações</a
           >
           <a
-            @click="authStore.logout"
+            @click="handleLogout"
             class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
             >Sair</a
           >

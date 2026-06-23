@@ -1,31 +1,40 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { auth } from "../services/firebase";
+import { auth, db, doc, setDoc } from "../services/firebase";
 import {
-  GoogleAuthProvider,
-  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  getRedirectResult,
+  updateProfile,
 } from "firebase/auth";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const loading = ref(true);
 
-  const provider = new GoogleAuthProvider();
-
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
     loading.value = false;
   });
 
-  getRedirectResult(auth).catch((err) => {
-    console.error("Erro no redirect:", err);
-  });
+  async function register(email, password, name) {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+    await updateProfile(userCredential.user, { displayName: name });
 
-  async function loginWithGoogle() {
-    await signInWithPopup(auth, provider);
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      name,
+      email,
+      color: "#1D4776",
+    });
+  }
+
+  async function login(email, password) {
+    await signInWithEmailAndPassword(auth, email, password);
   }
 
   async function logout() {
@@ -34,5 +43,5 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isAuthenticated = computed(() => !!user.value);
 
-  return { user, loading, isAuthenticated, loginWithGoogle, logout };
+  return { user, loading, isAuthenticated, login, register, logout };
 });
