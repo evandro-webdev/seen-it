@@ -24,6 +24,7 @@ export const useAuthStore = defineStore("auth", () => {
       email,
       password,
     );
+
     await updateProfile(userCredential.user, { displayName: name });
 
     await setDoc(doc(db, "users", userCredential.user.uid), {
@@ -43,5 +44,12 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isAuthenticated = computed(() => !!user.value);
 
-  return { user, loading, isAuthenticated, login, register, logout };
+  return {
+    user,
+    loading,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+  };
 });

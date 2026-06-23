@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "../../stores/auth.js";
+import { Loader2 } from "@lucide/vue";
 
 const authStore = useAuthStore();
 
@@ -9,6 +10,7 @@ const email = ref("");
 const password = ref("");
 
 const currentForm = ref("login");
+const isSubmiting = ref(false);
 
 const formTexts = computed(() => {
   return currentForm.value === "register"
@@ -28,12 +30,22 @@ function toggleForm() {
 }
 
 async function handleAuthentication() {
-  if (currentForm.value === "register") {
-    await authStore.register(email.value, password.value, name.value);
-  } else {
-    await authStore.login(email.value, password.value);
+  if (isSubmiting.value) return;
+
+  isSubmiting.value = true;
+
+  try {
+    if (currentForm.value === "register") {
+      await authStore.register(email.value, password.value, name.value);
+    } else {
+      await authStore.login(email.value, password.value);
+    }
+  } catch (error) {
+    console.error("Erro na autenticação: ", error);
+    isSubmiting.value = false;
   }
 }
+
 </script>
 
 <template>
@@ -94,9 +106,16 @@ async function handleAuthentication() {
 
       <button
         type="submit"
-        class="w-full py-3.5 px-6 rounded-xl font-semibold text-white bg-[#0088FF] shadow-md shadow-blue-500/10 active:scale-98 transition-transform"
+        :disabled="isSubmiting"
+        class="w-full py-3.5 px-6 rounded-xl font-semibold text-white bg-[#0088FF] flex items-center justify-center gap-2 shadow-md shadow-blue-500/10 active:scale-98 transition-transform"
       >
-        {{ currentForm === "register" ? "Criar conta" : "Entrar" }}
+        <Loader2
+          v-if="isSubmiting"
+          class="w-4 h-4 animate-spin text-current"
+        />
+        <span>
+          {{ currentForm === "register" ? "Criar conta" : "Entrar" }}
+        </span>
       </button>
     </form>
   </div>
