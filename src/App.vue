@@ -12,13 +12,16 @@ import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
 import { useSavedMoviesStore } from "./stores/savedMovies.js";
 import { useDiscoverMoviesStore } from "./stores/discoverMovies.js";
 import { useAuthStore } from "./stores/auth.js";
+import { useGroupsStore } from "./stores/groups.js";
 import { removeAccents } from "./utils/formatters.js";
 
 const authStore = useAuthStore();
+const groupsStore = useGroupsStore();
 
 import { SlidersHorizontal, Flame, Award, Clapperboard } from "@lucide/vue";
 
 import MoviesList from "./components/movies/MoviesList.vue";
+import GroupListModal from "./components/groups/GroupListModal.vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -28,6 +31,7 @@ onMounted(() => {
   watchedMoviesStore.loadWatchedMovies();
   savedMoviesStore.loadSavedMovies();
   discoverMoviesStore.loadDiscover();
+  groupsStore.getGroups();
 });
 
 const selectedMovie = ref(null);
@@ -192,6 +196,13 @@ const moviesCount = computed(() => {
       v-if="selectedMovie"
       :movie="selectedMovie"
       @close="selectedMovie = null"
+    />
+  </Transition>
+
+  <Transition name="slide-up">
+    <GroupListModal
+      v-if="groupsStore.isGroupsModalOpen"
+      :groups="groupsStore.groups"
     />
   </Transition>
 

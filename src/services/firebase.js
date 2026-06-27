@@ -7,7 +7,8 @@ import {
   addDoc, 
   getDocs,
   setDoc, 
-  deleteDoc 
+  deleteDoc,
+  updateDoc
 } from "firebase/firestore";
 
 import { getAuth } from "firebase/auth";
@@ -34,5 +35,6 @@ export {
   getDocs,
   setDoc,
   deleteDoc,
+  updateDoc,
   auth
 };

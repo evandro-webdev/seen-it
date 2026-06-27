@@ -45,6 +45,7 @@ onUnmounted(() => {
 const isAlreadyWatched = computed(() =>
   watchedMoviesStore.isAlreadyWatched(props.movie.id),
 );
+
 const isAlreadySaved = computed(() =>
   savedMoviesStore.isAlreadySaved(props.movie.id),
 );

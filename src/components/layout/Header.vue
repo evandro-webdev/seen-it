@@ -1,13 +1,23 @@
 <script setup>
 import { ref } from "vue";
-import { Sun, Moon, Bell, CircleUserRound } from "@lucide/vue";
+import {
+  Sun,
+  Moon,
+  Bell,
+  CircleUserRound,
+  SquareArrowRightExit,
+  Menu,
+  UsersRound,
+} from "@lucide/vue";
 import { onClickOutside } from "@vueuse/core";
 
 import { useAuthStore } from "../../stores/auth.js";
+import { useGroupsStore } from "../../stores/groups.js";
 import { useDarkMode } from "../../composables/useDarkMode";
 
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 const authStore = useAuthStore();
+const groupsStore = useGroupsStore();
 
 const isMenuOpen = ref(false);
 const menuRef = ref(null);
@@ -43,7 +53,7 @@ async function handleLogout() {
         ref="menuButtonRef"
         class="text-[#0088FF]"
       >
-        <CircleUserRound class="w-6 h-6" />
+        <Menu class="w-6 h-6" />
       </button>
 
       <div class="space-x-3 flex items-center ml-auto">
@@ -78,17 +88,25 @@ async function handleLogout() {
           class="absolute z-10 left-0 top-10 rounded-lg border border-gray-200 dark:border-[#242942] bg-[#f7f7f7] dark:bg-[#0f111c] overflow-hidden flex flex-col"
         >
           <a
-            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
-            >{{ authStore.user.displayName }}</a
+            class="py-3 pl-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms flex items-center gap-2"
+          >
+            <CircleUserRound class="w-5 h-5 text-[#0088FF]" />
+
+            {{ authStore.user.displayName }}</a
           >
           <a
-            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
-            >Configurações</a
+            @click="groupsStore.openGroupsModal"
+            class="py-3 pl-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms flex items-center gap-2"
+          >
+            <UsersRound class="w-5 h-5 text-[#0088FF]" />
+            Grupos</a
           >
           <a
             @click="handleLogout"
-            class="p-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms"
-            >Sair</a
+            class="py-3 pl-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms flex items-center gap-2"
+          >
+            <SquareArrowRightExit class="w-5 h-5 scale-x-[-1] text-[#0088FF]" />
+            Sair</a
           >
         </div>
       </Transition>

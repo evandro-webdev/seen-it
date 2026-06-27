@@ -25,7 +25,7 @@ const emit = defineEmits(["search"]);
     @submit.prevent="emit('search', searchQuery)"
     class="relative"
     >
-    <Search class="w-6 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+    <Search class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
     <input
       id="search-input"
       type="search"
