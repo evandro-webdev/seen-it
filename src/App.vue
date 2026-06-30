@@ -80,6 +80,27 @@ const moviesCount = computed(() => {
     return discoverMoviesStore.searchResults.length;
   return filteredMovies.value.length;
 });
+
+const myGroups = ref([]);
+const isLoading = ref(true);
+
+async function fetchGroups() {
+  if (!authStore.user?.uid) return;
+
+  isLoading.value = true;
+  myGroups.value = await groupsStore.getGroups(); 
+  isLoading.value = false;
+}
+
+watch(
+  () => authStore.user?.uid,
+  (newUid) => {
+    if (newUid) {
+      fetchGroups();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

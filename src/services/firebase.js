@@ -3,12 +3,15 @@ import { initializeApp } from "firebase/app";
 import { 
   getFirestore, 
   collection, 
-  doc,  
+  doc, 
+  query,
+  where, 
   addDoc, 
   getDocs,
   setDoc, 
   deleteDoc,
-  updateDoc
+  updateDoc,
+  arrayUnion
 } from "firebase/firestore";
 
 import { getAuth } from "firebase/auth";
@@ -31,10 +34,13 @@ export {
   db, 
   collection, 
   doc, 
+  query,
+  where,
   addDoc, 
   getDocs,
   setDoc,
   deleteDoc,
   updateDoc,
+  arrayUnion,
   auth
 };

@@ -1,5 +1,12 @@
 <script setup>
 import { Bookmark, ChevronRight, Eye, UsersRound } from "@lucide/vue";
+
+defineProps({
+  group: {
+    type: Object,
+    required: true,
+  },
+});
 </script>
 
 <template>
@@ -13,7 +20,7 @@ import { Bookmark, ChevronRight, Eye, UsersRound } from "@lucide/vue";
         <UsersRound class="w-6 h-6 text-white" />
       </div>
       <div>
-        <h3 class="text-lg font-bold text-white">Grupo 1</h3>
+        <h3 class="text-lg font-bold text-white">{{ group.name }}</h3>
         <p class="text-sm text-[#ABB3C3]">John, Jane, Josh</p>
       </div>
     </div>
