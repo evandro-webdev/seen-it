@@ -15,7 +15,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["open-modal"]);
+const emit = defineEmits(["open-movie-modal"]);
 </script>
 
 <template>
@@ -40,7 +40,7 @@ const emit = defineEmits(["open-modal"]);
         :key="movie.id"
         :movie="movie"
         class="flex-shrink-0"
-        @click="emit('open-modal', movie.id)"
+        @click="emit('open-movie-modal', movie.id)"
         fixed-width
       />
     </div>

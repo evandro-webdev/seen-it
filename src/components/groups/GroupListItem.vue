@@ -16,24 +16,29 @@ defineProps({
     <div class="flex items-center gap-2.5">
       <div
         class="p-3 rounded-full bg-gradient-to-tr from-[#205FE2] to-[#29A4FF]"
+        :style="{
+          backgroundImage: `linear-gradient(135deg, ${group.color.primary}, ${group.color.secondary})`,
+        }"
       >
         <UsersRound class="w-6 h-6 text-white" />
       </div>
       <div>
         <h3 class="text-lg font-bold text-white">{{ group.name }}</h3>
-        <p class="text-sm text-[#ABB3C3]">John, Jane, Josh</p>
+        <p class="text-sm text-[#ABB3C3]">
+          {{ group.members.map((m) => m.name.split(" ")[0]).join(", ") }}
+        </p>
       </div>
     </div>
 
     <div class="pl-4 border-l border-[#40475A] flex items-center gap-4">
-      <div>
-        <div class="text-[#29A4FF] flex items-center gap-1.5">
+      <div :style="{ color: `${group.color.secondary}` }">
+        <div class="flex items-center gap-1.5">
           <Eye class="w-4" />
-          <span class="text-sm">20</span>
+          <span class="text-sm">{{ group.watchedMovies ? group.watchedMovies.length : '0' }}</span>
         </div>
-        <div class="text-[#29A4FF] flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5">
           <Bookmark class="w-4" />
-          <span class="text-sm">20</span>
+          <span class="text-sm">{{ group.bookmarkedMovies ? group.savedMovies.length : '0' }}</span>
         </div>
       </div>
 

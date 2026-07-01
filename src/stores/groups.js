@@ -32,7 +32,7 @@ export const useGroupsStore = defineStore("groups", () => {
 
     const q = query(
       collection(db, "groups"),
-      where("members", "array-contains", authStore.user.uid),
+      where("membersIds", "array-contains", authStore.user.uid),
     );
     
     const querySnapshot = await getDocs(q);
@@ -48,7 +48,7 @@ export const useGroupsStore = defineStore("groups", () => {
     const currentUserId = authStore.user.uid;
     const currentUserEmail = authStore.user.email;
 
-    let memberIds = [currentUserId];
+    let memberObjects = [{ id: currentUserId, name: authStore.user.displayName }];
 
     if (emails && emails.length > 0) {
       const emailsToSearch = emails.filter(
@@ -64,10 +64,12 @@ export const useGroupsStore = defineStore("groups", () => {
         const querySnapshot = await getDocs(usersQuery);
 
         querySnapshot.forEach((doc) => {
-          memberIds.push(doc.id);
+          const userData = doc.data();
+
+          memberObjects.push({ id: doc.id, name: userData.name });
         });
 
-        if (querySnapshot.length < emailsToSearch.length) {
+        if (querySnapshot.size < emailsToSearch.length) {
           throw new Error(
             "Um ou mais e-mails digitados não possuem conta no aplicativo. Verifique a lista.",
           );
@@ -78,15 +80,16 @@ export const useGroupsStore = defineStore("groups", () => {
     const groupRef = await addDoc(collection(db, "groups"), {
       name: groupName,
       created_by: currentUserId,
-      members: memberIds,
+      members: memberObjects,
+      membersIds: memberObjects.map(member => member.id),
       color: color,
       created_at: new Date(),
     });
 
     const newGroupId = groupRef.id;
 
-    for (const memberId of memberIds) {
-      await updateDoc(doc(db, "users", memberId), {
+    for (const member of memberObjects) {
+      await updateDoc(doc(db, "users", member.id), {
         my_groups: arrayUnion(newGroupId),
       });
     }
