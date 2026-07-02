@@ -8,8 +8,7 @@ import {
   collection,
   addDoc,
   deleteDoc,
-} from "../services/firebase.js";
-import { getMovie } from "../services/tmdb.js";
+} from "@/services/firebase.js";
 
 import { useSavedMoviesStore } from "./savedMovies.js";
 
@@ -26,21 +25,6 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     }));
 
     watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
-  }
-
-  async function loadDetailedMovie(id) {
-    const movie = watchedMovies.value.find((m) => String(m.id) === String(id));
-    const tmdbData = await getMovie(id);
-
-    return {
-      ...movie,
-      genres: tmdbData.genres,
-      overview: tmdbData.overview,
-      tagline: tmdbData.tagline,
-      release_date: tmdbData.release_date,
-      runtime: tmdbData.runtime,
-      vote_average: tmdbData.vote_average.toFixed(1),
-    };
   }
 
   async function saveWatchedMovie(movie, reviews) {
@@ -100,7 +84,6 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   return {
     watchedMovies,
     loadWatchedMovies,
-    loadDetailedMovie,
     saveWatchedMovie,
     deleteWatchedMovie,
     isAlreadyWatched,

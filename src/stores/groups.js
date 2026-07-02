@@ -4,11 +4,11 @@ import {
   collection,
   db,
   query,
-  where, 
+  where,
   doc,
   getDocs,
   updateDoc,
-  arrayUnion
+  arrayUnion,
 } from "../services/firebase";
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
@@ -16,6 +16,7 @@ import { ref } from "vue";
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
   const isGroupsModalOpen = ref(false);
+  const isLoading = ref(false);
 
   function openGroupsModal() {
     isGroupsModalOpen.value = true;
@@ -30,17 +31,23 @@ export const useGroupsStore = defineStore("groups", () => {
 
     if (!authStore.user?.uid) return [];
 
-    const q = query(
-      collection(db, "groups"),
-      where("membersIds", "array-contains", authStore.user.uid),
-    );
-    
-    const querySnapshot = await getDocs(q);
+    isLoading.value = true;
 
-    groups.value = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    try {
+      const q = query(
+        collection(db, "groups"),
+        where("membersIds", "array-contains", authStore.user.uid),
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      groups.value = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   async function createGroup({ groupName, emails, color }) {
@@ -48,7 +55,9 @@ export const useGroupsStore = defineStore("groups", () => {
     const currentUserId = authStore.user.uid;
     const currentUserEmail = authStore.user.email;
 
-    let memberObjects = [{ id: currentUserId, name: authStore.user.displayName }];
+    let memberObjects = [
+      { id: currentUserId, name: authStore.user.displayName },
+    ];
 
     if (emails && emails.length > 0) {
       const emailsToSearch = emails.filter(
@@ -81,7 +90,7 @@ export const useGroupsStore = defineStore("groups", () => {
       name: groupName,
       created_by: currentUserId,
       members: memberObjects,
-      membersIds: memberObjects.map(member => member.id),
+      membersIds: memberObjects.map((member) => member.id),
       color: color,
       created_at: new Date(),
     });

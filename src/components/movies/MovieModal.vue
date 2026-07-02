@@ -29,8 +29,9 @@ const savedMoviesStore = useSavedMoviesStore();
 
 const props = defineProps({
   movie: {
-    type: Object,
-    required: true,
+    type: [Object, null],
+    required: false,
+    default: null,
   },
 });
 
@@ -56,11 +57,13 @@ const selectedReviewer = ref(null);
 </script>
 
 <template>
-  <div
-    class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex justify-center items-end"
+  <Transition
+    name="slide-full"
+    appear
   >
     <div
-      class="w-full h-[100%] bg-white dark:bg-[#0F111D] rounded-t-2xl overflow-y-auto"
+      v-if="movie"
+      class="fixed inset-0 z-50 bg-white dark:bg-[#0F111D] overflow-y-auto"
     >
       <div class="relative w-full overflow-hidden">
         <div class="relative w-full">
@@ -313,5 +316,5 @@ const selectedReviewer = ref(null);
         </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
