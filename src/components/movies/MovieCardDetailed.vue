@@ -1,5 +1,5 @@
 <script setup>
-import { formatRuntime } from "../../utils/formatters.js";
+import { formatRuntime } from "@/utils/formatters.js";
 import MovieGenre from "./MovieGenre.vue";
 
 defineProps({

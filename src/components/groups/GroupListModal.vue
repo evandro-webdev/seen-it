@@ -2,7 +2,7 @@
 import { Frown, UsersRound, X } from "@lucide/vue";
 import GroupListItem from "./GroupListItem.vue";
 import { ref, onMounted, onUnmounted } from "vue";
-import { useGroupsStore } from "../../stores/groups.js";
+import { useGroupsStore } from "@/stores/groups.js";
 import GroupCreateForm from "./GroupCreateForm.vue";
 
 defineProps({
@@ -22,7 +22,6 @@ onUnmounted(() => {
 
 const groupsStore = useGroupsStore();
 const showCreateGroupForm = ref(false);
-
 </script>
 
 <template>
@@ -63,7 +62,10 @@ const showCreateGroupForm = ref(false);
           v-if="groups.length > 0"
           class="space-y-2.5"
         >
-          <GroupListItem v-for="group in groups" :group="group"/>
+          <GroupListItem
+            v-for="group in groups"
+            :group="group"
+          />
         </div>
 
         <div
@@ -80,7 +82,10 @@ const showCreateGroupForm = ref(false);
         </div>
       </div>
 
-      <GroupCreateForm v-else @close-form="showCreateGroupForm = false" />
+      <GroupCreateForm
+        v-else
+        @close-form="showCreateGroupForm = false"
+      />
 
       <button
         v-if="!showCreateGroupForm"

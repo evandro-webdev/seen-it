@@ -11,9 +11,9 @@ import {
 } from "@lucide/vue";
 import { onClickOutside } from "@vueuse/core";
 
-import { useAuthStore } from "../../stores/auth.js";
-import { useGroupsStore } from "../../stores/groups.js";
-import { useDarkMode } from "../../composables/useDarkMode";
+import { useAuthStore } from "@/stores/auth.js";
+import { useGroupsStore } from "@/stores/groups.js";
+import { useDarkMode } from "@/composables/useDarkMode";
 
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 const authStore = useAuthStore();

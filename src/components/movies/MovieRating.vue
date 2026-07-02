@@ -1,5 +1,5 @@
 <script setup>
-import { formatRating } from "../../utils/formatters.js";
+import { formatRating } from "@/utils/formatters.js";
 
 import { Star, Quote } from "@lucide/vue";
 

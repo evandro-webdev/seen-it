@@ -1,7 +1,7 @@
 <script setup>
-import { useSavedMoviesStore } from "../../../stores/savedMovies.js";
+import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import { defineProps, ref } from "vue";
-import { Bookmark, Loader, Loader2 } from "@lucide/vue";
+import { Bookmark, Loader2 } from "@lucide/vue";
 
 const savedMoviesStore = useSavedMoviesStore();
 

@@ -1,12 +1,12 @@
 <script setup>
 import { onMounted, onUnmounted, ref, computed } from "vue";
-import { useWatchedMoviesStore } from "../../stores/watchedMovies.js";
-import { useSavedMoviesStore } from "../../stores/savedMovies.js";
+import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
+import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import {
   formatRating,
   formatRuntime,
   truncateText,
-} from "../../utils/formatters.js";
+} from "@/utils/formatters.js";
 
 import SaveButton from "./buttons/SaveButton.vue";
 import RateMovieButton from "./buttons/RateMovieButton.vue";

@@ -1,5 +1,5 @@
 <script setup>
-import { useGroupsStore } from "../../stores/groups.js";
+import { useGroupsStore } from "@/stores/groups.js";
 import {
   ArrowLeft,
   Check,

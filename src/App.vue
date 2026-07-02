@@ -62,15 +62,18 @@ watch(
 
   <main class="max-w-7xl mx-auto h-[90%]">
     <router-view v-slot="{ Component }">
-      <component
-        :is="Component"
-        @open-movie-modal="openMovieModal"
-      />
+      <Transition
+        name="fade-tab"
+        mode="out-in"
+      >
+        <component
+          :is="Component"
+          @open-movie-modal="openMovieModal"
+        />
+      </Transition>
     </router-view>
 
-    <footer
-      class="h-33"
-    ></footer>
+    <!-- <footer class="h-20"></footer> -->
   </main>
 
   <Transition name="slide-up">

@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed } from "vue";
-import { useWatchedMoviesStore } from "../../stores/watchedMovies";
+import { useWatchedMoviesStore } from "@/stores/watchedMovies";
 import { ArrowRight, X, Check } from "@lucide/vue";
 
 import MovieRating from "./MovieRating.vue";
 
-import { useDarkMode } from "../../composables/useDarkMode";
+import { useDarkMode } from "@/composables/useDarkMode";
 const { isDarkMode } = useDarkMode();
 
 const props = defineProps(["movie"]);

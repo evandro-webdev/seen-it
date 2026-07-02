@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { useAuthStore } from "../../stores/auth.js";
+import { useAuthStore } from "@/stores/auth.js";
 import { Loader2 } from "@lucide/vue";
 
 const authStore = useAuthStore();

@@ -51,6 +51,7 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   }
 
   async function searchForMovies(query) {
+    searchResults.value = [];
     isSearching.value = true;
     const data = await searchMovies(query);
 
