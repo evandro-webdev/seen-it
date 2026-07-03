@@ -1,9 +1,10 @@
 <script setup>
 import { Frown, UsersRound, X } from "@lucide/vue";
 import GroupListItem from "./GroupListItem.vue";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import GroupCreateForm from "./GroupCreateForm.vue";
+import { onClickOutside } from "@vueuse/core";
 
 defineProps({
   groups: {
@@ -12,13 +13,13 @@ defineProps({
   },
 });
 
-onMounted(() => {
+function lockScroll() {
   document.body.style.overflow = "hidden";
-});
+}
 
-onUnmounted(() => {
+function unlockScroll() {
   document.body.style.overflow = "";
-});
+}
 
 const groupsStore = useGroupsStore();
 const showCreateGroupForm = ref(false);
@@ -28,6 +29,8 @@ const showCreateGroupForm = ref(false);
   <Transition
     name="modal"
     appear
+    @enter="lockScroll"
+    @after-leave="unlockScroll"
   >
     <div
       v-if="groupsStore.isGroupsModalOpen"

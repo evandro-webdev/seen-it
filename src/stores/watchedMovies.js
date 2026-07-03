@@ -17,6 +17,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMoviesIds = ref([]);
 
   async function loadWatchedMovies() {
+    if (watchedMovies.value.length > 0) return;
+
     const snapshot = await getDocs(collection(db, "watchedMovies"));
 
     watchedMovies.value = snapshot.docs.map((doc) => ({

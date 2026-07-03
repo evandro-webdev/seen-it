@@ -14,6 +14,8 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const savedMoviesIds = ref([]);
 
   async function loadSavedMovies() {
+    if (savedMovies.value.length > 0) return;
+
     const snapshot = await getDocs(collection(db, "savedMovies"));
 
     const movies = snapshot.docs.map((doc) => ({

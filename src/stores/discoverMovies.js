@@ -15,8 +15,11 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   const topRatedMovies = ref([]);
   const upcomingMovies = ref([]);
   const isSearching = ref(false);
+  const isLoading = ref(false);
 
   async function loadDiscover() {
+    if (popularMovies.value.length > 0) return;
+    
     const [popular, topRated, upcoming] = await Promise.all([
       getPopularMovies(),
       getTopRatedMovies(),
@@ -29,13 +32,23 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   }
 
   async function searchForMovies(query) {
+    if (!query.trim()) return;
+
     searchResults.value = [];
     isSearching.value = true;
-    const data = await searchMovies(query);
+    isLoading.value = true;
 
-    searchResults.value = await Promise.all(
-      data.results.map((movie) => getMovieWithCredits(movie.id)),
-    );
+    try {
+      const data = await searchMovies(query);
+
+      searchResults.value = await Promise.all(
+        data.results.map((movie) => getMovieWithCredits(movie.id)),
+      );
+    } catch (error) {
+      console.error("Erro ao buscar filmes:", error);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   function clearSearch() {
@@ -50,6 +63,7 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     upcomingMovies,
     searchForMovies,
     isSearching,
+    isLoading,
     clearSearch,
     loadDiscover,
   };

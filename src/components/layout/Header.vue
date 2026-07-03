@@ -42,6 +42,11 @@ async function handleLogout() {
     console.error("Erro ao fazer logout:", error);
   }
 }
+
+function openGroupsModal() {
+  isMenuOpen.value = false;
+  groupsStore.openGroupsModal();
+}
 </script>
 
 <template>
@@ -95,7 +100,7 @@ async function handleLogout() {
             {{ authStore.user.displayName }}</a
           >
           <a
-            @click="groupsStore.openGroupsModal"
+            @click="openGroupsModal"
             class="py-3 pl-2 pr-6 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-[#1a1d30] transition-colors 300ms flex items-center gap-2"
           >
             <UsersRound class="w-5 h-5 text-[#0088FF]" />

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, computed } from "vue";
+import { ref, computed } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import {
@@ -35,13 +35,13 @@ const props = defineProps({
   },
 });
 
-onMounted(() => {
+function lockScroll() {
   document.body.style.overflow = "hidden";
-});
+}
 
-onUnmounted(() => {
+function unlockScroll() {
   document.body.style.overflow = "";
-});
+}
 
 const isAlreadyWatched = computed(() =>
   watchedMoviesStore.isAlreadyWatched(props.movie.id),
@@ -60,6 +60,8 @@ const selectedReviewer = ref(null);
   <Transition
     name="slide-full"
     appear
+    @enter="lockScroll"
+    @after-leave="unlockScroll"
   >
     <div
       v-if="movie"

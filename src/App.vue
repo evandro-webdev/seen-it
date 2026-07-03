@@ -4,7 +4,7 @@ import NavigationBar from "./components/layout/NavigationBar.vue";
 import MovieModal from "./components/movies/MovieModal.vue";
 import GroupListModal from "./components/groups/GroupListModal.vue";
 
-import { watch, Transition } from "vue";
+import { watch } from "vue";
 import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";
@@ -44,7 +44,6 @@ watch(
   </main>
 
   <MovieModal
-    v-if="movieDetailsStore.selectedMovie"
     :movie="movieDetailsStore.selectedMovie"
     @close="movieDetailsStore.closeMovie"
   />
