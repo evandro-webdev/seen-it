@@ -22,7 +22,7 @@ watch(
 
 const sortedMovies = computed(() => {
   return [...savedMoviesStore.savedMovies].sort(
-    (a, b) => b.average_rating - a.average_rating,
+    (a, b) => b.vote_average - a.vote_average,
   );
 });
 </script>

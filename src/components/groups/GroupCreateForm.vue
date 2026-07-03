@@ -72,7 +72,7 @@ async function handleCreateGroup() {
       <input
         type="text"
         v-model="groupName"
-        class="w-full p-4 pl-13.5 rounded-2xl border text-[#9EB2CD] dark:text-gray-300 border-[#242C3C] bg-[#F7F7F7] dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        class="w-full p-4 pl-13.5 rounded-2xl border text-gray-900 placeholder-gray-400 dark:text-gray-300 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         placeholder="Digite o nome do grupo"
       />
     </div>
@@ -86,15 +86,15 @@ async function handleCreateGroup() {
         <input
           v-model="currentMember"
           type="email"
-          class="w-full p-4 pl-13.5 rounded-2xl border text-[#9EB2CD] dark:text-gray-300 border-[#242C3C] bg-[#F7F7F7] dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          class="w-full p-4 pl-13.5 rounded-2xl border text-gray-900 placeholder-gray-400 dark:text-gray-300 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           placeholder="Digite o email do participante"
         />
         <button
           @click="addMember"
           type="button"
-          class="absolute right-5 top-1/2 -translate-y-1/2"
+          class="absolute right-5 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
         >
-          <Plus class="w-5 h-5 text-[#A7B0C9]" />
+          <Plus class="w-5 h-5 text-gray-500 dark:text-[#A7B0C9]" />
         </button>
       </div>
 
@@ -102,12 +102,13 @@ async function handleCreateGroup() {
         <span
           v-for="member in members"
           :key="member"
-          class="py-1 px-3 rounded-xl text-sm text-white bg-[#242C3C] flex items-center gap-2"
+          class="py-1.5 px-3 rounded-xl text-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-[#242C3C] border border-gray-200 dark:border-transparent flex items-center gap-2"
         >
           {{ member }}
           <button
             type="button"
             @click="removeMember(member)"
+            class="hover:text-red-500 transition-colors"
           >
             <X class="w-4" />
           </button>
@@ -116,7 +117,7 @@ async function handleCreateGroup() {
     </div>
 
     <div class="space-y-2.5">
-      <label class="font-medium text-white block"
+      <label class="font-medium text-gray-700 dark:text-white block"
         >Escolha a cor do grupo:
       </label>
       <div class="flex gap-2">
@@ -125,34 +126,34 @@ async function handleCreateGroup() {
           @click="selectedColor = color"
           :key="index"
           type="button"
-          class="w-8 h-8 rounded-full active:scale-95 flex items-center justify-center"
+          class="w-8 h-8 rounded-full active:scale-95 flex items-center justify-center transition-transform"
           :style="{
             backgroundImage: `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
           }"
         >
           <Check
             v-if="selectedColor.primary === color.primary"
-            class="text-white"
+            class="text-white w-4 h-4"
           />
         </button>
       </div>
     </div>
 
-    <div class="flex gap-2">
+    <div class="flex gap-2 pt-2">
       <button
         @click="$emit('closeForm')"
         type="button"
-        class="py-2 px-4 rounded-lg text-white hover:bg-gray-100 dark:hover:bg-[#314066] flex justify-center items-center gap-2"
+        class="py-2 px-4 rounded-lg text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-[#314066] flex justify-center items-center gap-2 transition-colors"
       >
         <ArrowLeft class="w-4 h-4" />
         <span class="font-medium text-nowrap">Voltar</span>
       </button>
 
       <button
-        class="w-full py-2 px-3 rounded-lg text-white bg-[#0088FF] hover:bg-blue-600 flex justify-center items-center gap-2"
+        class="w-full py-3 px-3 rounded-xl text-white bg-[#0088FF] hover:bg-blue-600 active:scale-99 transition-all flex justify-center items-center gap-2 shadow-lg shadow-blue-500/10"
       >
         <UsersRound class="w-4 h-4" />
-        <span class="font-medium text-nowrap">Novo Grupo</span>
+        <span class="font-medium text-nowrap">Criar Grupo</span>
       </button>
     </div>
   </form>
