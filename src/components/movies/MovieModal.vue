@@ -64,7 +64,10 @@ const selectedReviewer = ref(null);
     name="slide-full"
     appear
     @enter="lockScroll"
-    @after-leave="(unlockScroll, (showRateForm = false))"
+    @after-leave="
+      unlockScroll();
+      showRateForm = false;
+    "
   >
     <div
       v-if="movie"
@@ -170,8 +173,10 @@ const selectedReviewer = ref(null);
                     v-for="(reviewData, uid) in movie.reviews"
                     :key="uid"
                     :uid="uid"
-                    :review="reviewData" 
-                    :color="groupStore.activeGroupMembers[uid]?.color || '#338CD5'"
+                    :review="reviewData"
+                    :color="
+                      groupStore.activeGroupMembers[uid]?.color || '#338CD5'
+                    "
                     :has-comment="!!reviewData.comment"
                     @click="
                       selectedReviewer = selectedReviewer === uid ? null : uid

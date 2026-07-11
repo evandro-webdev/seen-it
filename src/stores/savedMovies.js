@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import {
   db,
   getDocs,
@@ -32,6 +32,8 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
       savedMovies.value = movies;
       savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
+
+      return;
     }
 
     const snapshot = await getDocs(
@@ -45,6 +47,22 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
     savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
   }
+
+  const groupStore = useGroupsStore();
+  watch(
+    () => groupStore.activeGroup,
+    async (newGroup) => {
+      savedMovies.value = [];
+      savedMoviesIds.value = [];
+
+      if (newGroup) {
+        await groupStore.loadActiveGroupMembers();
+      }
+
+      await loadSavedMovies();
+    },
+    { immediate: true },
+  );
 
   async function saveMovie(movie) {
     const groupStore = useGroupsStore();

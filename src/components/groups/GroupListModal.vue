@@ -35,7 +35,10 @@ function unlockScroll() {
     name="modal"
     appear
     @enter="lockScroll"
-    @after-leave="(unlockScroll, (showCreateGroupForm = false))"
+    @after-leave="
+      unlockScroll();
+      showCreateGroupForm = false;
+    "
   >
     <div
       v-if="groupsStore.isGroupsModalOpen"
