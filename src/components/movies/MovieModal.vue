@@ -2,6 +2,8 @@
 import { ref, computed } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
+import { useGroupsStore } from "@/stores/groups";
+
 import {
   formatRating,
   formatRuntime,
@@ -26,6 +28,7 @@ import {
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
+const groupStore = useGroupsStore();
 
 const props = defineProps({
   movie: {
@@ -61,7 +64,7 @@ const selectedReviewer = ref(null);
     name="slide-full"
     appear
     @enter="lockScroll"
-    @after-leave="unlockScroll"
+    @after-leave="(unlockScroll, (showRateForm = false))"
   >
     <div
       v-if="movie"
@@ -164,15 +167,14 @@ const selectedReviewer = ref(null);
                   class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
                 >
                   <MovieRating
-                    v-for="[user, review] in Object.entries(
-                      props.movie.reviews,
-                    )"
-                    :key="user"
-                    :user="user"
-                    :rating="review.rating"
-                    :has-comment="review.comment ? true : false"
+                    v-for="(reviewData, uid) in movie.reviews"
+                    :key="uid"
+                    :uid="uid"
+                    :review="reviewData" 
+                    :color="groupStore.activeGroupMembers[uid]?.color || '#338CD5'"
+                    :has-comment="!!reviewData.comment"
                     @click="
-                      selectedReviewer = selectedReviewer === user ? null : user
+                      selectedReviewer = selectedReviewer === uid ? null : uid
                     "
                   />
 
@@ -243,7 +245,7 @@ const selectedReviewer = ref(null);
                   />
 
                   <span class="text-xs text-gray-400 capitalize block mb-1">
-                    {{ selectedReviewer }}
+                    {{ props.movie.reviews[selectedReviewer].name }}
                   </span>
                   <p class="text-sm text-white pl-2">
                     {{ props.movie.reviews[selectedReviewer].comment }}

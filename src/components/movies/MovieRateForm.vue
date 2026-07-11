@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies";
 import { ArrowRight, X, Check } from "@lucide/vue";
+import { useAuthStore } from "@/stores/auth";
 
 import MovieRating from "./MovieRating.vue";
 
@@ -11,44 +12,28 @@ const { isDarkMode } = useDarkMode();
 const props = defineProps(["movie"]);
 const emit = defineEmits(["close"]);
 
+const authStore = useAuthStore();
+
 const watchedMoviesStore = useWatchedMoviesStore();
 
-const reviewers = ["evandro", "tauane", "kauane"];
-
-const reviewerColors = {
-  evandro: "bg-[#338CD5]",
-  tauane: "bg-[#BF4345]",
-  kauane: "bg-[#6941BA]",
-};
-
-const currentStep = ref(0);
-
-const reviews = ref({});
+const review = ref({});
 const sliderValue = ref(5);
 const comment = ref("");
 
 const showSummary = ref(false);
 
-const currentReviewer = computed(() => reviewers[currentStep.value]);
-
-function nextStep() {
-  reviews.value[currentReviewer.value] = {
+function confirmRating() {
+  review.value[authStore.user.uid] = {
+    name: authStore.user.displayName.split(' ')[0],
     rating: Number(sliderValue.value),
     comment: comment.value,
   };
 
-  sliderValue.value = 5;
-  comment.value = "";
-
-  if (currentStep.value < reviewers.length - 1) {
-    currentStep.value++;
-  } else {
-    showSummary.value = true;
-  }
+  showSummary.value = true;
 }
 
-async function saveRatings() {
-  await watchedMoviesStore.saveWatchedMovie(props.movie, reviews.value);
+async function saveRating() {
+  await watchedMoviesStore.saveWatchedMovie(props.movie, review.value);
   emit("close");
 }
 </script>
@@ -60,14 +45,12 @@ async function saveRatings() {
   >
     <div v-if="!showSummary">
       <p class="text-[16px] font-light text-[#8C8C8C] dark:text-gray-200">
-        {{
-          currentReviewer.charAt(0).toUpperCase() + currentReviewer.slice(1)
-        }}, que nota você dá para esse filme?
+        {{ authStore.user.displayName }}, que nota você dá para esse filme?
       </p>
 
       <div class="mt-8 flex items-center gap-4">
         <img
-          :src="`/img/${currentReviewer}.jpg`"
+          :src="`/img/${authStore.user.displayName.split(' ')[0].toLowerCase()}.jpg`"
           class="w-13 rounded-full"
         />
 
@@ -124,7 +107,7 @@ async function saveRatings() {
       ></textarea>
 
       <button
-        @click="nextStep"
+        @click="confirmRating"
         class="ml-auto py-2 px-4 rounded-lg text-white bg-[#0088FF] hover:bg-blue-600 flex justify-center items-center gap-2"
       >
         <span class="font-medium">Próximo</span>
@@ -138,14 +121,12 @@ async function saveRatings() {
       </p>
 
       <div
-        class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex grow-0 justify-center items-center gap-x-3 overflow-x-auto"
+        class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex flex-col items-start gap-3 overflow-x-auto"
       >
         <MovieRating
-          v-for="reviewer in reviewers"
-          :key="reviewer"
-          :user="reviewer"
-          :rating="reviews[reviewer].rating"
-          :has-comment="reviews[reviewer].comment ? true : false"
+          :user="authStore.user.displayName.split(' ')[0].toLowerCase()"
+          :rating="review[authStore.user.uid].rating"
+          :has-comment="review[authStore.user.uid].comment ? true : false"
         />
       </div>
 
@@ -159,7 +140,7 @@ async function saveRatings() {
         </button>
 
         <button
-          @click="saveRatings"
+          @click="saveRating"
           class="w-full py-2 px-3 rounded-lg text-white bg-[#0088FF] hover:bg-blue-600 flex justify-center items-center gap-2"
         >
           <Check class="w-5 h-5" />

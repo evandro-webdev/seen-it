@@ -1,47 +1,56 @@
 <script setup>
 import { formatRating } from "@/utils/formatters.js";
-
 import { Star, Quote } from "@lucide/vue";
+import { computed } from "vue";
+
+import { useDarkMode } from "@/composables/useDarkMode";
+
+const { isDarkMode } = useDarkMode();
 
 defineProps({
-  user: {
+  uid: {
     type: String,
     required: true,
   },
-  rating: {
-    type: [Number, String],
+  review: {
+    type: Object,
+    required: true,
+  },
+  color: {
+    type: String,
     required: true,
   },
   hasComment: {
     type: Boolean,
-    required: true
-  }
+    required: true,
+  },
 });
 
-const reviewerColors = {
-  evandro: "#338CD5",
-  tauane: "#d75870",
-  kauane: "#9367eb",
-};
+const defaultAvatar = computed(() => {
+  return isDarkMode.value
+    ? "/img/avatars/default-dark.jpg"
+    : "/img/avatars/default-light.jpg";
+});
 </script>
 
 <template>
-  <div
-    class="text-white flex flex-shrink-0 items-center gap-2"
-    :class="reviewerColors[user]"
-  >
+  <div class="text-white flex flex-shrink-0 items-center gap-2">
     <div class="relative">
       <img
-        :src="'/img/' + user + '.jpg'"
-        class="w-9 rounded-full border"
-        :style="{ borderColor: reviewerColors[user] }"
+        :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${uid}.jpg`"
+        @error="$event.target.src = defaultAvatar"
+        class="w-9 h-9 rounded-full border object-cover"
+        :style="{ borderColor: color }"
       />
       <div
         v-if="hasComment"
         class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
-        :style="{ backgroundColor: reviewerColors[user] }"
+        :style="{ backgroundColor: color }"
       >
-        <Quote class="w-2 h-2 text-white" fill="white"/>
+        <Quote
+          class="w-2 h-2 text-white"
+          fill="white"
+        />
       </div>
     </div>
     <div>
@@ -49,16 +58,16 @@ const reviewerColors = {
         <Star
           class="w-4 h-4"
           :style="{
-            color: reviewerColors[user],
-            fill: reviewerColors[user],
+            color: color,
+            fill: color,
           }"
         />
         <span class="block text-md font-medium text-gray-800 dark:text-white">{{
-          formatRating(rating)
+          formatRating(review.rating)
         }}</span>
       </div>
       <span class="text-xs capitalize text-gray-500 dark:text-gray-200 block">{{
-        user
+        review.name.toLowerCase()
       }}</span>
     </div>
 

@@ -1,20 +1,23 @@
 import { initializeApp } from "firebase/app";
 
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
+import {
+  getFirestore,
+  collection,
+  doc,
   query,
-  where, 
-  addDoc, 
+  where,
+  addDoc,
   getDocs,
-  setDoc, 
+  getDoc,
+  setDoc,
   deleteDoc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  onSnapshot,
+  orderBy,
 } from "firebase/firestore";
 
-import { getAuth } from "firebase/auth";
+import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -22,7 +25,7 @@ const firebaseConfig = {
   projectId: "my-movie-circle",
   storageBucket: "my-movie-circle.appspot.com",
   messagingSenderId: "509365004119",
-  appId: "1:509365004119:web:cac637bcf57aaaef1c4012"
+  appId: "1:509365004119:web:cac637bcf57aaaef1c4012",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,17 +33,22 @@ const db = getFirestore(app);
 
 const auth = getAuth(app);
 
-export { 
-  db, 
-  collection, 
-  doc, 
+export {
+  db,
+  collection,
+  doc,
   query,
   where,
-  addDoc, 
+  addDoc,
   getDocs,
+  getDoc,
+  getAuth,
+  updateFirebaseProfile,
   setDoc,
   deleteDoc,
   updateDoc,
   arrayUnion,
-  auth
+  auth,
+  onSnapshot,
+  orderBy,
 };

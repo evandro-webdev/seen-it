@@ -14,6 +14,8 @@ defineProps({
 });
 
 const groupModalRef = ref(null);
+const groupsStore = useGroupsStore();
+const showCreateGroupForm = ref(false);
 
 onClickOutside(groupModalRef, () => {
   groupsStore.closeGroupsModal();
@@ -26,9 +28,6 @@ function lockScroll() {
 function unlockScroll() {
   document.body.style.overflow = "";
 }
-
-const groupsStore = useGroupsStore();
-const showCreateGroupForm = ref(false);
 </script>
 
 <template>
@@ -36,7 +35,7 @@ const showCreateGroupForm = ref(false);
     name="modal"
     appear
     @enter="lockScroll"
-    @after-leave="unlockScroll"
+    @after-leave="(unlockScroll, (showCreateGroupForm = false))"
   >
     <div
       v-if="groupsStore.isGroupsModalOpen"

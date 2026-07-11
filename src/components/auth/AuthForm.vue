@@ -45,14 +45,13 @@ async function handleAuthentication() {
     isSubmiting.value = false;
   }
 }
-
 </script>
 
 <template>
   <div
     class="max-w-sm mx-auto w-full flex flex-1 flex-col justify-center gap-6"
   >
-    <div class="text-gray-800 dark:text-gray-200 space-y-1">
+    <div class="text-center text-gray-800 dark:text-gray-200 space-y-1">
       <h1 class="text-3xl font-bold tracking-tight">{{ formTexts.title }}</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 [text-wrap:balance]">
         {{ formTexts.subtitle }}

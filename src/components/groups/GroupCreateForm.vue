@@ -52,7 +52,6 @@ async function handleCreateGroup() {
 
     groupName.value = "";
     members.value = [];
-    groupsStore.closeGroupsModal();
   } catch (error) {
     console.error(error.message);
   }

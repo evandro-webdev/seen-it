@@ -15,6 +15,10 @@ import { ref } from "vue";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
+  const activeGroup = ref(
+    JSON.parse(localStorage.getItem("activeGroup")) || null,
+  );
+  const activeGroupMembers = ref({});
   const isGroupsModalOpen = ref(false);
   const isLoading = ref(false);
 
@@ -24,6 +28,17 @@ export const useGroupsStore = defineStore("groups", () => {
 
   function closeGroupsModal() {
     isGroupsModalOpen.value = false;
+  }
+
+  function setActiveGroup(group) {
+    activeGroup.value = group;
+    localStorage.setItem("activeGroup", JSON.stringify(group));
+    closeGroupsModal();
+  }
+
+  function clearActiveGroup() {
+    activeGroup.value = null;
+    localStorage.removeItem("activeGroup");
   }
 
   async function getGroups() {
@@ -86,24 +101,54 @@ export const useGroupsStore = defineStore("groups", () => {
       }
     }
 
-    const groupRef = await addDoc(collection(db, "groups"), {
+    const newGroupPayload = {
       name: groupName,
       created_by: currentUserId,
       members: memberObjects,
       membersIds: memberObjects.map((member) => member.id),
       color: color,
       created_at: new Date(),
-    });
+    };
 
-    const newGroupId = groupRef.id;
+    const groupRef = await addDoc(collection(db, "groups"), newGroupPayload);
 
     for (const member of memberObjects) {
       await updateDoc(doc(db, "users", member.id), {
-        my_groups: arrayUnion(newGroupId),
+        my_groups: arrayUnion(groupRef.id),
       });
     }
 
-    return newGroupId;
+    const createdGroup = {
+      id: groupRef.id,
+      ...newGroupPayload,
+    };
+
+    groups.value.push(createdGroup);
+    setActiveGroup(createdGroup);
+
+    closeGroupsModal();
+  }
+
+  async function loadActiveGroupMembers() {
+    if (!activeGroup.value || !activeGroup.value.membersIds) return;
+
+    try {
+      const q = query(
+        collection(db, "users"),
+        where("__name__", "in", activeGroup.value.membersIds),
+      );
+
+      const snapshot = await getDocs(q);
+
+      const membersMap = {};
+      snapshot.forEach((doc) => {
+        membersMap[doc.id] = doc.data();
+      });
+
+      activeGroupMembers.value = membersMap;
+    } catch (error) {
+      console.error("Erro ao carregar membros do grupo:", error);
+    }
   }
 
   return {
@@ -113,5 +158,10 @@ export const useGroupsStore = defineStore("groups", () => {
     isGroupsModalOpen,
     openGroupsModal,
     closeGroupsModal,
+    activeGroup,
+    setActiveGroup,
+    clearActiveGroup,
+    loadActiveGroupMembers,
+    activeGroupMembers,
   };
 });

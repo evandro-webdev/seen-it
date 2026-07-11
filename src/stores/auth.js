@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { auth, db, doc, setDoc } from "../services/firebase";
+import { auth, db, doc, setDoc, getDoc } from "../services/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -13,8 +13,21 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const loading = ref(true);
 
-  onAuthStateChanged(auth, (firebaseUser) => {
-    user.value = firebaseUser;
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      const docSnap = await getDoc(doc(db, "users", firebaseUser.uid));
+      const userData = docSnap.exists() ? docSnap.data() : {};
+
+      user.value = {
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName,
+        email: firebaseUser.email,
+        color: userData.color,
+        avatar_url: userData.avatar_url || null,
+      };
+    } else {
+      user.value = null;
+    }
     loading.value = false;
   });
 
