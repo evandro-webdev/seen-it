@@ -66,8 +66,8 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
   async function saveMovie(movie) {
     const groupStore = useGroupsStore();
-    const notificationsStore = useNotificationsStore();
     const authStore = useAuthStore();
+    const notificationsStore = useNotificationsStore();
     const activeGroup = groupStore.activeGroup;
 
     if (!activeGroup) {
@@ -87,11 +87,10 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       title: movie.title,
       poster_path: movie.poster_path,
       vote_average: movie.vote_average,
+      saved_by: authStore.user.uid,
     });
 
     await notificationsStore.dispatchSavedMovieNotification(
-      authStore.user.uid,
-      authStore.user.displayName,
       movie.id,
       movie.title,
     );

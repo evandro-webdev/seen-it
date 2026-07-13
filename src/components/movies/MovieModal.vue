@@ -169,19 +169,21 @@ const selectedReviewer = ref(null);
                   v-if="isAlreadyWatched && props.movie.reviews"
                   class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
                 >
-                  <MovieRating
-                    v-for="(reviewData, uid) in movie.reviews"
+                  <template
+                    v-for="(member, uid) in groupStore.activeGroupMembers"
                     :key="uid"
-                    :uid="uid"
-                    :review="reviewData"
-                    :color="
-                      groupStore.activeGroupMembers[uid]?.color || '#338CD5'
-                    "
-                    :has-comment="!!reviewData.comment"
-                    @click="
-                      selectedReviewer = selectedReviewer === uid ? null : uid
-                    "
-                  />
+                  >
+                    <MovieRating
+                      v-if="props.movie.reviews && props.movie.reviews[uid]"
+                      :uid="uid"
+                      :review="props.movie.reviews[uid]"
+                      :color="member.color || '#338CD5'"
+                      :has-comment="!!props.movie.reviews[uid].comment"
+                      @click="
+                        selectedReviewer = selectedReviewer === uid ? null : uid
+                      "
+                    />
+                  </template>
 
                   <div
                     class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"

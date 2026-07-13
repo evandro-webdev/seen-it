@@ -75,9 +75,14 @@ function openProfileModal() {
         <button
           v-if="authStore.isAuthenticated"
           @click="notificationsStore.openNotificationsModal"
-          class="text-[#0088FF]"
+          class="relative text-[#0088FF]"
         >
           <Bell class="w-6 h-6" />
+          <span
+            v-if="notificationsStore.unreadCount > 0"
+            class="absolute -top-1.5 -right-1.5 w-4 h-4 text-xs font-semibold rounded-full text-white bg-red-600 block"
+            >{{ notificationsStore.unreadCount }}</span
+          >
         </button>
       </div>
 

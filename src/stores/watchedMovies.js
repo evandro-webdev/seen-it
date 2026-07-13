@@ -13,6 +13,7 @@ import {
   deleteDoc,
   updateDoc,
 } from "@/services/firebase.js";
+import { useNotificationsStore } from "./notifications.js";
 
 export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMovies = ref([]);
@@ -136,10 +137,13 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watchedMoviesIds.value.push(movie.id);
     }
 
-    // const savedMoviesStore = useSavedMoviesStore();
-    // if (savedMoviesStore.isAlreadySaved(movie.id)) {
-    //   await savedMoviesStore.toggleSaved(movie);
-    // }
+    const notificationsStore = useNotificationsStore();
+    notificationsStore.dispatchWatchedMovieNotification(movie);
+
+    const savedMoviesStore = useSavedMoviesStore();
+    if (savedMoviesStore.isAlreadySaved(movie.id)) {
+      await savedMoviesStore.toggleSaved(movie);
+    }
   }
 
   async function deleteWatchedMovie(id) {

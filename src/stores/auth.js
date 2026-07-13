@@ -8,6 +8,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from "firebase/auth";
+import { useNotificationsStore } from "./notifications";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -52,6 +53,9 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function logout() {
+    const notificationsStore = useNotificationsStore();
+    notificationsStore.stopListening();
+
     await signOut(auth);
   }
 
