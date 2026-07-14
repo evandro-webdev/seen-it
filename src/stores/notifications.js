@@ -98,11 +98,8 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     const membersIds = Object.keys(groupStore.activeGroupMembers);
 
-    const alreadyRated = movie.reviews ? Object.keys(movie.reviews) : [];
-
     const membersToNotificate = membersIds.filter(
-      (memberId) =>
-        !alreadyRated.includes(memberId) && memberId !== authStore.user.uid,
+      (memberId) => memberId !== authStore.user.uid,
     );
 
     const promises = membersToNotificate.map((uid) => {

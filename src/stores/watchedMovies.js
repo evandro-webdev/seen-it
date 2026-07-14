@@ -9,9 +9,10 @@ import {
   doc,
   getDocs,
   collection,
-  addDoc,
+  getDoc,
   deleteDoc,
   updateDoc,
+  setDoc,
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";
 
@@ -23,24 +24,19 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     if (watchedMovies.value.length > 0) return;
 
     const groupStore = useGroupsStore();
+    const authStore = useAuthStore();
     const activeGroup = groupStore.activeGroup;
 
+    let targetCollectionPath = "";
+
     if (!activeGroup) {
-      const snapshot = await getDocs(collection(db, "watchedMovies"));
-
-      watchedMovies.value = snapshot.docs.map((doc) => ({
-        docId: doc.id,
-        ...doc.data(),
-      }));
-
-      watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
-
-      return;
+      if (!authStore.user?.uid) return;
+      targetCollectionPath = `users/${authStore.user.uid}/watchedMovies`;
+    } else {
+      targetCollectionPath = `groups/${activeGroup.id}/watchedMovies`;
     }
 
-    const snapshot = await getDocs(
-      collection(db, "groups", activeGroup.id, "watchedMovies"),
-    );
+    const snapshot = await getDocs(collection(db, targetCollectionPath));
 
     watchedMovies.value = snapshot.docs.map((doc) => ({
       docId: doc.id,
@@ -68,96 +64,115 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
   async function saveWatchedMovie(movie, review) {
     const groupStore = useGroupsStore();
+    const authStore = useAuthStore();
+    const notificationsStore = useNotificationsStore();
+    const savedMoviesStore = useSavedMoviesStore();
+
     const activeGroup = groupStore.activeGroup;
+    let targetCollectionPath = "";
 
     if (!activeGroup) {
-      // Handle the case when there is no active group
-      return;
+      if (!authStore.user?.uid) return;
+      targetCollectionPath = `users/${authStore.user.uid}/watchedMovies`;
+    } else {
+      targetCollectionPath = `groups/${activeGroup.id}/watchedMovies`;
     }
 
-    const groupMoviesCollectionRef = collection(
-      db,
-      "groups",
-      activeGroup.id,
-      "watchedMovies",
-    );
+    const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
 
-    const existingGroupMovie = watchedMovies.value.find(
-      (m) => m.id === movie.id,
-    );
+    const docSnap = await getDoc(movieDocRef);
+    const isAlreadyWatched = docSnap.exists();
 
-    if (existingGroupMovie) {
-      const updatedReviews = { ...existingGroupMovie.reviews, ...review };
+    let updatedReviews = {};
+    let average_rating = "0.0";
+
+    if (isAlreadyWatched) {
+      const existingData = docSnap.data();
+      updatedReviews = { ...existingData.reviews, ...review };
 
       const ratings = Object.values(updatedReviews).map((r) =>
         Number(r.rating),
       );
-      const average_rating = Number(
+
+      average_rating = Number(
         ratings.reduce((a, b) => a + b, 0) / ratings.length,
       ).toFixed(1);
-
-      const movieDocRef = doc(
-        db,
-        "groups",
-        activeGroup.id,
-        "watchedMovies",
-        existingGroupMovie.docId,
-      );
 
       await updateDoc(movieDocRef, {
         reviews: updatedReviews,
         average_rating,
         updated_at: new Date(),
       });
-
-      existingGroupMovie.reviews = updatedReviews;
-      existingGroupMovie.average_rating = average_rating;
     } else {
-      const ratings = Object.values(review).map((r) => Number(r.rating));
-      const average_rating = Number(
+      updatedReviews = { ...review };
+
+      const ratings = Object.values(updatedReviews).map((r) =>
+        Number(r.rating),
+      );
+
+      average_rating = Number(
         ratings.reduce((a, b) => a + b, 0) / ratings.length,
       ).toFixed(1);
 
-      const docRef = await addDoc(groupMoviesCollectionRef, {
+      await setDoc(movieDocRef, {
         id: movie.id,
         title: movie.title,
         original_title: movie.original_title,
         poster_path: movie.poster_path,
-        reviews: review,
+        reviews: updatedReviews,
         average_rating,
         created_at: new Date(),
       });
+    }
 
-      watchedMovies.value.push({
-        ...movie,
-        docId: docRef.id,
-        reviews: review,
-        average_rating,
-      });
+    const existingLocalIndex = watchedMovies.value.findIndex(
+      (m) => String(m.id) === String(movie.id),
+    );
+
+    const localMovieData = {
+      ...movie,
+      docId: String(movie.id),
+      reviews: updatedReviews,
+      average_rating,
+    };
+
+    if (existingLocalIndex !== -1) {
+      watchedMovies.value[existingLocalIndex] = localMovieData;
+    } else {
+      watchedMovies.value.push(localMovieData);
       watchedMoviesIds.value.push(movie.id);
     }
 
-    const notificationsStore = useNotificationsStore();
-    notificationsStore.dispatchWatchedMovieNotification(movie);
+    if (activeGroup) {
+      await notificationsStore.dispatchWatchedMovieNotification(movie);
+    }
 
-    const savedMoviesStore = useSavedMoviesStore();
     if (savedMoviesStore.isAlreadySaved(movie.id)) {
       await savedMoviesStore.toggleSaved(movie);
     }
   }
 
   async function deleteWatchedMovie(id) {
-    const movieEntry = watchedMovies.value.find(
-      (m) => String(m.id) === String(id),
-    );
+    const groupStore = useGroupsStore();
+    const authStore = useAuthStore();
+    const activeGroup = groupStore.activeGroup();
 
-    await deleteDoc(doc(db, "watchedMovies", movieEntry.docId));
+    if (!activeGroup) {
+      if (!authStore.user?.uid) return;
+      await deleteDoc(
+        doc(db, "users", authStore.user.uid, "watchedMovies", String(id)),
+      );
+    } else {
+      await deleteDoc(
+        doc(db, "groups", activeGroup.id, "watchedMovies", String(id)),
+      );
+    }
 
     watchedMovies.value = watchedMovies.value.filter(
-      (movie) => movie.id !== id,
+      (movie) => String(movie.id) !== String(id),
     );
     watchedMoviesIds.value = watchedMoviesIds.value.filter(
-      (movieId) => movieId !== id,
+      (id) => String(id) !== String(id),
     );
   }
 
@@ -166,7 +181,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     const groupStore = useGroupsStore();
 
     const activeGroup = groupStore.activeGroup;
-    const currentUserId = authStore.user.uid;
+    const currentUserId = authStore.user?.uid;
+
+    if (!currentUserId) return false;
 
     if (!activeGroup) {
       return watchedMoviesIds.value.includes(movieId);

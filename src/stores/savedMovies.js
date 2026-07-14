@@ -7,6 +7,7 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  setDoc,
 } from "@/services/firebase.js";
 import { useGroupsStore } from "./groups";
 import { useNotificationsStore } from "./notifications";
@@ -20,25 +21,19 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     if (savedMovies.value.length > 0) return;
 
     const groupStore = useGroupsStore();
+    const authStore = useAuthStore();
     const activeGroup = groupStore.activeGroup;
 
+    let targetCollectionPath = "";
+
     if (!activeGroup) {
-      const snapshot = await getDocs(collection(db, "savedMovies"));
-
-      const movies = snapshot.docs.map((doc) => ({
-        docId: doc.id,
-        ...doc.data(),
-      }));
-
-      savedMovies.value = movies;
-      savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
-
-      return;
+      if (!authStore.user?.uid) return;
+      targetCollectionPath = `users/${authStore.user.uid}/savedMovies`;
+    } else {
+      targetCollectionPath = `groups/${activeGroup.id}/savedMovies`;
     }
 
-    const snapshot = await getDocs(
-      collection(db, "groups", activeGroup.id, "savedMovies"),
-    );
+    const snapshot = await getDocs(collection(db, targetCollectionPath));
 
     savedMovies.value = snapshot.docs.map((doc) => ({
       docId: doc.id,
@@ -68,46 +63,56 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     const groupStore = useGroupsStore();
     const authStore = useAuthStore();
     const notificationsStore = useNotificationsStore();
+
     const activeGroup = groupStore.activeGroup;
+    let targetCollectionPath = "";
 
     if (!activeGroup) {
-      // Handle the case when there is no active group
-      return;
+      if (!authStore.user?.uid) return;
+      targetCollectionPath = `users/${authStore.user.uid}/savedMovies`;
+    } else {
+      targetCollectionPath = `groups/${activeGroup.id}/savedMovies`;
     }
 
-    const groupMoviesCollectionRef = collection(
-      db,
-      "groups",
-      activeGroup.id,
-      "savedMovies",
-    );
-
-    const docRef = await addDoc(groupMoviesCollectionRef, {
+    const movieData = {
       id: movie.id,
       title: movie.title,
       poster_path: movie.poster_path,
       vote_average: movie.vote_average,
-      saved_by: authStore.user.uid,
-    });
+    };
 
-    await notificationsStore.dispatchSavedMovieNotification(
-      movie.id,
-      movie.title,
-    );
+    if (activeGroup) {
+      movieData.saved_by = authStore.user.uid;
+    }
 
-    return docRef;
+    const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
+    await setDoc(movieDocRef, movieData);
+
+    if (activeGroup) {
+      await notificationsStore.dispatchSavedMovieNotification(
+        movie.id,
+        movie.title,
+      );
+    }
+
+    return movieDocRef;
   }
 
   async function unsaveMovie(docId) {
     const groupStore = useGroupsStore();
-
+    const authStore = useAuthStore();
     const activeGroup = groupStore.activeGroup;
 
     if (!activeGroup) {
-      return await deleteDoc(doc(db, "savedMovies", docId));
+      if (!authStore.user?.uid) return;
+      await deleteDoc(
+        doc(db, "users", authStore.user.uid, "savedMovies", String(docId)),
+      );
+    } else {
+      await deleteDoc(
+        doc(db, "groups", activeGroup.id, "savedMovies", String(docId)),
+      );
     }
-
-    await deleteDoc(doc(db, "groups", activeGroup.id, "savedMovies", docId));
   }
 
   async function toggleSaved(movie) {
@@ -125,14 +130,16 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     } else {
       const docRef = await saveMovie(movie);
 
-      savedMovies.value.push({
-        docId: docRef.id,
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        vote_average: movie.vote_average,
-      });
-      savedMoviesIds.value.push(movie.id);
+      if (docRef) {
+        savedMovies.value.push({
+          docId: docRef.id,
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          vote_average: movie.vote_average,
+        });
+        savedMoviesIds.value.push(movie.id);
+      }
     }
   }
 
