@@ -21,7 +21,11 @@ const emit = defineEmits(["cancel", "save"]);
       class="p-4 mt-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F] flex flex-col gap-4"
     >
       <div
-        class="flex items-center justify-between w-full pb-3 border-b border-gray-100 dark:border-[#242C3C]"
+        class="flex items-center justify-between w-full"
+        :class="{
+          'p-3 border-b border-gray-100 dark:border-[#242C3C]':
+            userReview?.comment,
+        }"
       >
         <span class="text-sm text-gray-500 dark:text-gray-400">Sua Nota</span>
 

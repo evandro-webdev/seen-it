@@ -35,10 +35,12 @@ async function handleNotificationClick(notification) {
       v-if="notificationsStore.isNotificationsModalOpen"
       class="fixed inset-0 z-40 px-4 bg-black/40 backdrop-blur-sm flex justify-center items-center"
     >
+      <!-- 1. Adicionamos 'overflow-hidden' aqui para garantir que o scroll que "vazou" não quebre o arredondamento (rounded-2xl) do modal -->
       <div
         ref="notificationsModalRef"
         class="w-full max-h-[70vh] h-[550px] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
       >
+        <!-- Cabeçalho (Fixo) -->
         <div
           class="flex justify-between items-center pb-5 border-b border-gray-100 dark:border-[#1e293b]"
         >
@@ -60,8 +62,15 @@ async function handleNotificationClick(notification) {
           </button>
         </div>
 
+        <!-- 
+      Lista de Notificações (Scroll)
+      MUDANÇA AQUI:
+      - '-mr-3': Expande a largura do container de scroll para fora do modal na direita em 12px.
+      - 'pr-3': Adiciona um padding de 12px na direita. Isso compensa o recuo dos cards e os mantém 
+                com 100% da largura original, jogando APENAS a barra de scroll para a área "vazada".
+    -->
         <div
-          class="flex-1 overflow-y-auto py-5 pr-1 space-y-2.5 standard-scrollbar"
+          class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 space-y-2.5 standard-scrollbar"
         >
           <div
             v-if="notificationsStore.notifications.length === 0"
@@ -72,11 +81,17 @@ async function handleNotificationClick(notification) {
             </p>
           </div>
 
-          <NotificationItem
-            v-for="notification in notificationsStore.notifications"
-            @click="handleNotificationClick(notification)"
-            :notification="notification"
-          />
+          <!-- 
+        Adicionamos um container em volta dos itens ou aplicamos uma margem de segurança para 
+        garantir que as notificações fiquem perfeitamente alinhadas com o cabeçalho acima.
+      -->
+          <div class="space-y-2.5 mr-0.5">
+            <NotificationItem
+              v-for="notification in notificationsStore.notifications"
+              @click="handleNotificationClick(notification)"
+              :notification="notification"
+            />
+          </div>
         </div>
       </div>
     </div>

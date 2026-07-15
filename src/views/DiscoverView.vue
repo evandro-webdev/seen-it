@@ -57,18 +57,21 @@ watch(searchQuery, (newQuery) => {
           title="Mais vistos do momento"
           :movies="discoverMoviesStore.popularMovies"
           @open-movie-modal="$emit('open-movie-modal', $event)"
+          :loading="discoverMoviesStore.isLoading"
         />
         <MoviesList
           :icon="Award"
           title="Melhores avaliados"
           :movies="discoverMoviesStore.topRatedMovies"
           @open-movie-modal="$emit('open-movie-modal', $event)"
+          :loading="discoverMoviesStore.isLoading"
         />
         <MoviesList
           :icon="Clapperboard"
           title="Mais esperados"
           :movies="discoverMoviesStore.upcomingMovies"
           @open-movie-modal="$emit('open-movie-modal', $event)"
+          :loading="discoverMoviesStore.isLoading"
         />
       </div>
 

@@ -19,16 +19,24 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
 
   async function loadDiscover() {
     if (popularMovies.value.length > 0) return;
-    
-    const [popular, topRated, upcoming] = await Promise.all([
-      getPopularMovies(),
-      getTopRatedMovies(),
-      getUpcomingMovies(),
-    ]);
 
-    popularMovies.value = popular.results;
-    topRatedMovies.value = topRated.results;
-    upcomingMovies.value = upcoming.results;
+    try {
+      isLoading.value = true;
+
+      const [popular, topRated, upcoming] = await Promise.all([
+        getPopularMovies(),
+        getTopRatedMovies(),
+        getUpcomingMovies(),
+      ]);
+
+      popularMovies.value = popular.results;
+      topRatedMovies.value = topRated.results;
+      upcomingMovies.value = upcoming.results;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   async function searchForMovies(query) {

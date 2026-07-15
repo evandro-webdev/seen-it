@@ -1,4 +1,5 @@
 <script setup>
+import MovieCardSkeleton from "../ui/MovieCardSkeleton.vue";
 import MovieCard from "./MovieCard.vue";
 
 defineProps({
@@ -12,6 +13,10 @@ defineProps({
   },
   icon: {
     required: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -35,14 +40,24 @@ const emit = defineEmits(["open-movie-modal"]);
     </div>
 
     <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
-      <MovieCard
-        v-for="movie in movies"
-        :key="movie.id"
-        :movie="movie"
-        class="flex-shrink-0"
-        @click="emit('open-movie-modal', movie.id)"
-        fixed-width
-      />
+      <template v-if="loading">
+        <MovieCardSkeleton
+          v-for="n in 4"
+          :key="'skeleton-' + n"
+          fixed-width
+        />
+      </template>
+
+      <template v-else>
+        <MovieCard
+          v-for="movie in movies"
+          :key="movie.id"
+          :movie="movie"
+          class="flex-shrink-0"
+          @click="emit('open-movie-modal', movie.id)"
+          fixed-width
+        />
+      </template>
     </div>
   </div>
 </template>
