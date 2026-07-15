@@ -28,8 +28,8 @@ defineProps({
 
 const defaultAvatar = computed(() => {
   return isDarkMode.value
-    ? "/img/avatars/default-dark.jpg"
-    : "/img/avatars/default-light.jpg";
+    ? "/img/avatars/default-dark.svg"
+    : "/img/avatars/default-light.svg";
 });
 </script>
 

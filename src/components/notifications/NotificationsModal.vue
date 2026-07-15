@@ -37,15 +37,17 @@ async function handleNotificationClick(notification) {
     >
       <div
         ref="notificationsModalRef"
-        class="w-full max-h-[70vh] py-6 px-4 bg-white dark:bg-[#121825] rounded-2xl overflow-y-auto space-y-8 modal-content"
+        class="w-full max-h-[70vh] h-[550px] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
       >
-        <div class="flex justify-between items-center">
+        <div
+          class="flex justify-between items-center pb-5 border-b border-gray-100 dark:border-[#1e293b]"
+        >
           <div class="flex items-center gap-2">
             <div class="p-2 rounded-full bg-blue-50 dark:bg-[#162845]">
               <Bell class="text-[#0088FF]" />
             </div>
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Notificaçoes
+              Notificações
             </h2>
           </div>
 
@@ -58,7 +60,9 @@ async function handleNotificationClick(notification) {
           </button>
         </div>
 
-        <div class="space-y-2">
+        <div
+          class="flex-1 overflow-y-auto py-5 pr-1 space-y-2.5 standard-scrollbar"
+        >
           <div
             v-if="notificationsStore.notifications.length === 0"
             class="px-2.5 py-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]"

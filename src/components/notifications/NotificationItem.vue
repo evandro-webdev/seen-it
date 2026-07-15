@@ -15,8 +15,8 @@ const props = defineProps({
 
 const defaultAvatar = computed(() => {
   return isDarkMode.value
-    ? "/img/avatars/default-dark.jpg"
-    : "/img/avatars/default-light.jpg";
+    ? "/img/avatars/default-dark.svg"
+    : "/img/avatars/default-light.svg";
 });
 
 const actionDescription =
@@ -35,17 +35,17 @@ const actionDescription =
     ]"
   >
     <div
-      class="flex items-center gap-3 transition-opacity duration-300"
+      class="flex items-start gap-3 transition-opacity duration-300 min-w-0 w-full"
       :class="notification.isRead ? 'opacity-65' : 'opacity-100'"
     >
       <img
         :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${notification.sender_id}.jpg`"
         @error="$event.target.src = defaultAvatar"
-        class="w-11 h-11 rounded-full object-cover border border-gray-100 dark:border-[#242C3C]"
+        class="w-11 h-11 rounded-full object-cover border border-gray-100 dark:border-[#242C3C] shrink-0"
       />
 
-      <div>
-        <h3 class="text-sm/5 text-gray-500 dark:text-[#ABB3C3]">
+      <div class="min-w-0 flex-1 flex flex-col gap-1.5">
+        <h3 class="text-sm/5 text-gray-500 dark:text-[#ABB3C3] break-words">
           <span
             class="font-semibold"
             :class="
@@ -64,7 +64,7 @@ const actionDescription =
           </span>
         </h3>
 
-        <div class="flex items-center gap-2 mt-1">
+        <div class="flex items-center gap-2">
           <span class="text-xs text-gray-400 dark:text-[#8892b0]">
             {{ formatRelativeTime(notification.created_at) }}
           </span>
@@ -79,7 +79,7 @@ const actionDescription =
     </div>
 
     <ChevronRight
-      class="w-5 h-5 transition-opacity"
+      class="w-5 h-5 transition-opacity shrink-0 ml-2"
       :class="
         notification.isRead
           ? 'text-gray-300 dark:text-[#242C3C] opacity-50'

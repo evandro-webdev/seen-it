@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useGroupsStore } from "./groups";
 import {
   addDoc,
@@ -36,15 +36,18 @@ export const useNotificationsStore = defineStore("notifications", () => {
     stopListening();
 
     const authStore = useAuthStore();
+    const groupStore = useGroupsStore();
     const uid = authStore.user?.uid;
+    const activeGroup = groupStore.activeGroup;
 
-    if (!uid) return;
+    if (!uid || !activeGroup.id) return;
 
     loading.value = true;
 
     const q = query(
       collection(db, "notifications"),
       where("userId", "==", uid),
+      where("group_id", "==", activeGroup.id),
       orderBy("created_at", "desc"),
     );
 
@@ -57,12 +60,27 @@ export const useNotificationsStore = defineStore("notifications", () => {
     });
   }
 
+  const groupStore = useGroupsStore();
+  watch(
+    () => groupStore.activeGroup,
+    (newGroup) => {
+      if (newGroup?.id) {
+        listenToNotifications();
+      } else {
+        // Se o grupo ativo ficou nulo (ex: logout ou saiu do grupo), desliga tudo
+        stopListening();
+      }
+    },
+    { immediate: true },
+  );
+
   function stopListening() {
     if (unsubscribe) {
       unsubscribe();
       unsubscribe = null;
     }
     notifications.value = [];
+    loading.value = false;
   }
 
   async function dispatchSavedMovieNotification(movieId, movieTitle) {
@@ -140,5 +158,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
     unreadCount,
     markAsRead,
     stopListening,
+    loading,
   };
 });
