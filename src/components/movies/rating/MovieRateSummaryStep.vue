@@ -1,6 +1,6 @@
 <script setup>
 import { X, Check, Quote } from "@lucide/vue";
-import MovieRating from "./MovieRating.vue";
+import MovieRating from "../ui/MovieRating.vue";
 
 defineProps({
   userId: String,

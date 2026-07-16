@@ -40,7 +40,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     const uid = authStore.user?.uid;
     const activeGroup = groupStore.activeGroup;
 
-    if (!uid || !activeGroup.id) return;
+    if (!uid || !activeGroup?.id) return;
 
     loading.value = true;
 

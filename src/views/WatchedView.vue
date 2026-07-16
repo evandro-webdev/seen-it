@@ -3,7 +3,7 @@ import { watch, computed } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useAuthStore } from "@/stores/auth.js";
 
-import MoviesCollection from "@/components/movies/MoviesCollection.vue";
+import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
 const authStore = useAuthStore();
 const watchedMoviesStore = useWatchedMoviesStore();
@@ -31,5 +31,6 @@ const sortedMovies = computed(() => {
   <MoviesCollection
     :movies="sortedMovies"
     @open-movie-modal="$emit('open-movie-modal', $event)"
+    type="watched"
   />
 </template>

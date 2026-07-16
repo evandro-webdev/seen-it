@@ -20,15 +20,10 @@ defineProps({
     :class="{ 'w-[140px]': fixedWidth }"
   >
     <div class="relative w-full aspect-[185/280] rounded-lg overflow-hidden">
-      <div class="skeleton absolute inset-0 bg-gray-300 animate-pulse"></div>
       <img
         :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
         :alt="movie.title"
-        class="poster w-full h-full object-cover opacity-0 transition-opacity duration-300"
-        onload="
-          this.classList.add('opacity-100');
-          this.previousElementSibling.remove();
-        "
+        class="poster w-full h-full object-cover duration-300"
         onerror="this.src = '../img/placeholder.jpg'"
       />
       <div

@@ -1,9 +1,9 @@
 <script setup>
 import { watch, computed } from "vue";
-import { useSavedMoviesStore } from "../stores/savedMovies.js";
-import { useAuthStore } from "../stores/auth.js";
+import { useSavedMoviesStore } from "@/stores/savedMovies.js";
+import { useAuthStore } from "@/stores/auth.js";
 
-import MoviesCollection from "@/components/movies/MoviesCollection.vue";
+import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
 const authStore = useAuthStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -31,5 +31,6 @@ const sortedMovies = computed(() => {
   <MoviesCollection
     :movies="sortedMovies"
     @open-movie-modal="$emit('open-movie-modal', $event)"
+    type="saved"
   />
 </template>

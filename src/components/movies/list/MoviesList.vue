@@ -1,6 +1,6 @@
 <script setup>
-import MovieCardSkeleton from "../ui/MovieCardSkeleton.vue";
-import MovieCard from "./MovieCard.vue";
+import MovieCardSkeleton from "../cards/MovieCardSkeleton.vue";
+import MovieCard from "../cards/MovieCard.vue";
 
 defineProps({
   title: {

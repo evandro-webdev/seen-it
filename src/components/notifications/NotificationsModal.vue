@@ -37,7 +37,7 @@ async function handleNotificationClick(notification) {
     >
       <div
         ref="notificationsModalRef"
-        class="w-full max-h-[70vh] h-[550px] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
+        class="w-full max-h-[70vh] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
       >
         <div
           class="flex justify-between items-center pb-5 border-b border-gray-100 dark:border-[#1e293b]"
@@ -61,7 +61,7 @@ async function handleNotificationClick(notification) {
         </div>
 
         <div
-          class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 space-y-2.5 standard-scrollbar"
+          class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 standard-scrollbar"
         >
           <div
             v-if="notificationsStore.notifications.length === 0"

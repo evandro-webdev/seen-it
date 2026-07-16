@@ -9,6 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { useNotificationsStore } from "./notifications";
+import { useGroupsStore } from "./groups";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -54,7 +55,9 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function logout() {
     const notificationsStore = useNotificationsStore();
+    const groupsStore = useGroupsStore();
     notificationsStore.stopListening();
+    groupsStore.activeGroup = null;
 
     await signOut(auth);
   }

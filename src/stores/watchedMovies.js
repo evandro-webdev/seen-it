@@ -155,7 +155,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   async function deleteWatchedMovie(id) {
     const groupStore = useGroupsStore();
     const authStore = useAuthStore();
-    const activeGroup = groupStore.activeGroup();
+    const activeGroup = groupStore.activeGroup;
 
     if (!activeGroup) {
       if (!authStore.user?.uid) return;

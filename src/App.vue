@@ -1,7 +1,7 @@
 <script setup>
 import Header from "./components/layout/Header.vue";
 import NavigationBar from "./components/layout/NavigationBar.vue";
-import MovieModal from "./components/movies/MovieModal.vue";
+import MovieModal from "./components/movies/modal/MovieModal.vue";
 import GroupListModal from "./components/groups/GroupListModal.vue";
 import ProfileModal from "./components/profile/ProfileModal.vue";
 
@@ -9,13 +9,13 @@ import { watch } from "vue";
 import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";
-import NotificationsModal from "./components/notifications/NotificationsModal.vue";
 import { useNotificationsStore } from "./stores/notifications.js";
+import NotificationsModal from "./components/notifications/NotificationsModal.vue";
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
 const movieDetailsStore = useMovieDetailsStore();
-const notificationsStore = useNotificationsStore()
+const notificationsStore = useNotificationsStore();
 
 watch(
   () => authStore.user?.uid,
@@ -32,7 +32,7 @@ watch(
 <template>
   <Header />
 
-  <main class="max-w-7xl mx-auto h-[90%]">
+  <main class="max-w-7xl pb-20">
     <router-view v-slot="{ Component }">
       <Transition
         name="fade-tab"
@@ -44,8 +44,6 @@ watch(
         />
       </Transition>
     </router-view>
-
-    <footer class="h-20"></footer>
   </main>
 
   <MovieModal
