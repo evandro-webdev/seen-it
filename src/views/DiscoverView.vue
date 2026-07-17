@@ -54,7 +54,7 @@ function clearSearch() {
 
 <template>
   <div>
-    <div class="py-2 px-4 lg:py-14 space-y-3">
+    <div class="py-2 lg:py-14 space-y-3">
       <SearchBar
         v-model="searchQuery"
         current-tab="discover"
@@ -74,7 +74,7 @@ function clearSearch() {
       </div>
     </div>
 
-    <div class="h-[100%] pt-2 px-4 flex flex-col">
+    <div class="h-[100%] pt-2 flex flex-col">
       <div
         v-if="!discoverMoviesStore.isSearching || !searchQuery"
         class="space-y-6"

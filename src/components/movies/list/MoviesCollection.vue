@@ -46,10 +46,10 @@ function clearSearch() {
 </script>
 
 <template>
-  <div class="relative h-[80vh] flex flex-col">
+  <div class="relative w-full">
     <div
       v-if="authStore.loading"
-      class="absolute inset-0 flex items-center justify-center bg-transparent"
+      class="min-h-[calc(100dvh-150px)] w-full flex flex-col items-center justify-center"
     >
       <div
         class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0088FF]"
@@ -58,13 +58,13 @@ function clearSearch() {
 
     <div
       v-else-if="!authStore.isAuthenticated"
-      class="absolute inset-0 flex items-center justify-center p-4 z-10"
+      class="min-h-[calc(100dvh-150px)] w-full flex flex-col items-center justify-center"
     >
       <AuthForm />
     </div>
 
     <template v-else>
-      <div class="py-2 px-4 lg:py-14 mb-2 space-y-3">
+      <div class="py-2 lg:py-14 mb-2 space-y-3">
         <SearchBar v-model="searchQuery" />
 
         <div
@@ -83,7 +83,7 @@ function clearSearch() {
         </div>
       </div>
 
-      <div class="h-[100%] py-2 px-4 flex flex-col flex-1">
+      <div class="h-[100%] py-2 flex flex-col flex-1">
         <section
           v-if="filteredMovies.length > 0"
           class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"

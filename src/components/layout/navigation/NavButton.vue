@@ -24,15 +24,26 @@ defineProps({
   >
     <a
       @click="navigate"
-      class="py-[10px] px-[5px] flex flex-1 justify-center items-center gap-2 transition-colors duration-300 cursor-pointer"
-      :class="isActive ? 'text-[#0088FF]' : 'text-gray-400'"
+      class="flex flex-col items-center justify-center flex-1 h-full py-2 transition-all duration-200 cursor-pointer select-none gap-1"
+      :class="[
+        isActive
+          ? 'text-[#0088FF] dark:text-[#0088FF]'
+          : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300',
+      ]"
     >
+      <!-- Ícone (muda o preenchimento ou peso visual indiretamente pela cor) -->
       <component
         :is="icon"
-        class="w-4 h-4"
+        class="w-5 h-5 transition-transform duration-200"
       />
 
-      <span class="text-sm font-medium text-nowrap">{{ label }}</span>
+      <!-- Texto (sempre visível, mudando apenas o peso e a cor) -->
+      <span
+        class="text-[10px] tracking-wide transition-colors duration-200"
+        :class="isActive ? 'font-semibold' : 'font-medium'"
+      >
+        {{ label }}
+      </span>
     </a>
   </RouterLink>
 </template>

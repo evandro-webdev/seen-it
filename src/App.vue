@@ -32,7 +32,7 @@ watch(
 <template>
   <Header />
 
-  <main class="max-w-7xl pb-20">
+  <main class="w-full max-w-7xl mx-auto flex-1 pb-20 px-4">
     <router-view v-slot="{ Component }">
       <Transition
         name="fade-tab"
