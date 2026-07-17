@@ -16,6 +16,7 @@ const searchQuery = defineModel();
       type="search"
       v-model="searchQuery"
       enterkeyhint="search"
+      @keyup.enter="$event.target.blur()"
       class="w-full p-4 pl-11 rounded-2xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
       placeholder="Que filme você está procurando?"
     />
