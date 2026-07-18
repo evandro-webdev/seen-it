@@ -162,7 +162,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     const url = "https://onesignal.com/api/v1/notifications";
 
     const payload = {
-      app_id: "bf4a1dca-0b4f-40dd-bca0-9ce3edc05537",
+      app_id: import.meta.env.VITE_ONESIGNAL_API_KEY,
       include_aliases: {
         external_id: targetUserIds,
       },
@@ -183,7 +183,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
         headers: {
           "Content-Type": "application/json",
           Authorization:
-            "Basic os_v2_app_x5fb3sqlj5an3pfattr63qcvg5wsi32p4qnu4nuno3klsc5edhbroq3ird2wqjgom22tplw2vrzjqjq6aymsc4tcxwpnd647hctohnq",
+            import.meta.env.VITE_ONESIGNAL_REST_API_KEY,
         },
         body: JSON.stringify(payload),
       });
