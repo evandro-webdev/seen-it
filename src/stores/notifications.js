@@ -67,7 +67,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
       if (newGroup?.id) {
         listenToNotifications();
       } else {
-        // Se o grupo ativo ficou nulo (ex: logout ou saiu do grupo), desliga tudo
         stopListening();
       }
     },
@@ -108,6 +107,11 @@ export const useNotificationsStore = defineStore("notifications", () => {
     });
 
     await Promise.all(promises);
+
+    const title = "Filme salvo! 📌";
+    const body = `${authStore.user.displayName} adicionou "${movieTitle}" aos salvos!`;
+
+    await sendPushNotification(membersToNotificate, title, body);
   }
 
   async function dispatchWatchedMovieNotification(movie) {
@@ -135,6 +139,11 @@ export const useNotificationsStore = defineStore("notifications", () => {
     });
 
     await Promise.all(promises);
+
+    const title = "Filme avaliado! 📌";
+    const body = `${authStore.user.displayName} avaliou "${movie.title}". Confira!`;
+
+    await sendPushNotification(membersToNotificate, title, body);
   }
 
   async function markAsRead(notificationId) {
@@ -144,6 +153,43 @@ export const useNotificationsStore = defineStore("notifications", () => {
       });
     } catch (error) {
       console.error("Erro ao marcar como lida: ", error);
+    }
+  }
+
+  async function sendPushNotification(targetUserIds, title, body) {
+    if (!targetUserIds || targetUserIds.length === 0) return;
+
+    const url = "https://onesignal.com/api/v1/notifications";
+
+    const payload = {
+      app_id: "bf4a1dca-0b4f-40dd-bca0-9ce3edc05537",
+      include_aliases: {
+        external_id: targetUserIds,
+      },
+      target_channel: "push",
+      contents: {
+        en: body,
+        pt: body,
+      },
+      headings: {
+        en: title,
+        pt: title,
+      },
+    };
+
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Basic os_v2_app_x5fb3sqlj5an3pfattr63qcvg5wsi32p4qnu4nuno3klsc5edhbroq3ird2wqjgom22tplw2vrzjqjq6aymsc4tcxwpnd647hctohnq",
+        },
+        body: JSON.stringify(payload),
+      });
+      console.log("Push OneSignal enviado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao enviar push via OneSignal:", error);
     }
   }
 

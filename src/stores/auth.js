@@ -53,6 +53,29 @@ export const useAuthStore = defineStore("auth", () => {
     await signInWithEmailAndPassword(auth, email, password);
   }
 
+  async function setupNotifications() {
+    if (!user.value?.uid) return;
+
+    try {
+      window.OneSignal = window.OneSignal || [];
+
+      window.OneSignal.push(async function () {
+        await window.OneSignal.init({
+          appId: "bf4a1dca-0b4f-40dd-bca0-9ce3edc05537",
+          allowLocalhostAsSecureOrigin: true,
+        });
+
+        await window.OneSignal.login(user.value.uid);
+
+        await window.OneSignal.Notifications.requestPermission();
+
+        console.log("OneSignal inicializado com sucesso via Janela!");
+      });
+    } catch (error) {
+      console.error("Erro ao inicializar OneSignal:", error);
+    }
+  }
+
   async function logout() {
     const notificationsStore = useNotificationsStore();
     const groupsStore = useGroupsStore();
@@ -71,5 +94,6 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     register,
     logout,
+    setupNotifications,
   };
 });
