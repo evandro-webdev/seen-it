@@ -183,7 +183,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
         headers: {
           "Content-Type": "application/json",
           Authorization:
-            import.meta.env.VITE_ONESIGNAL_REST_API_KEY,
+            `Basic ${import.meta.env.VITE_ONESIGNAL_REST_API_KEY}`
         },
         body: JSON.stringify(payload),
       });
