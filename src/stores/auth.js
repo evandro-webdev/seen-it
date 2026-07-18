@@ -57,18 +57,16 @@ export const useAuthStore = defineStore("auth", () => {
     if (!user.value?.uid) return;
 
     try {
-      window.OneSignal = window.OneSignal || [];
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
 
-      window.OneSignal.push(async function () {
-        await window.OneSignal.init({
+      window.OneSignalDeferred.push(async function (OneSignal) {
+        await OneSignal.init({
           appId: import.meta.env.VITE_ONESIGNAL_API_KEY,
           allowLocalhostAsSecureOrigin: true,
         });
 
-        await window.OneSignal.login(user.value.uid);
-
-        await window.OneSignal.Notifications.requestPermission();
-
+        await OneSignal.login(user.value.uid);
+        await OneSignal.Notifications.requestPermission();
         console.log("OneSignal inicializado com sucesso via Janela!");
       });
     } catch (error) {
