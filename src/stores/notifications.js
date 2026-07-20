@@ -173,9 +173,8 @@ export const useNotificationsStore = defineStore("notifications", () => {
       headings: {
         pt: title,
       },
-      android_group: `movie_saved_${Date.now()}`,
-      web_push_topic: `movie_saved_${Date.now()}`,
-      android_group_message: { pt: "$[notif_count] novos filmes adicionados!" },
+      collapse_id: `movie_${Date.now()}_${Math.random()}`,
+      android_group: `movie_group_${Date.now()}`,
     };
 
     try {
