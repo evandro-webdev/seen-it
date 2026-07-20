@@ -11,6 +11,10 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      strategies: "generateSW",
+      workbox: {
+        importScripts: ["/OneSignalSDKWorker.js"],
+      },
       manifest: {
         name: "Seen It",
         short_name: "Seen It",
