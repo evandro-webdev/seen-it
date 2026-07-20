@@ -168,13 +168,14 @@ export const useNotificationsStore = defineStore("notifications", () => {
       },
       target_channel: "push",
       contents: {
-        en: body,
         pt: body,
       },
       headings: {
-        en: title,
         pt: title,
       },
+      android_group: `movie_saved_${Date.now()}`,
+      web_push_topic: `movie_saved_${Date.now()}`,
+      android_group_message: { pt: "$[notif_count] novos filmes adicionados!" },
     };
 
     try {
@@ -182,8 +183,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            `Basic ${import.meta.env.VITE_ONESIGNAL_REST_API_KEY}`
+          Authorization: `Basic ${import.meta.env.VITE_ONESIGNAL_REST_API_KEY}`,
         },
         body: JSON.stringify(payload),
       });
