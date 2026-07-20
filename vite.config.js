@@ -13,7 +13,8 @@ export default defineConfig({
     VitePWA({
       strategies: "generateSW",
       workbox: {
-        importScripts: ["/OneSignalSDKWorker.js"],
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api/, /OneSignalSDKWorker/],
       },
       manifest: {
         name: "Seen It",
