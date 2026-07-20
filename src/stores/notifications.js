@@ -111,7 +111,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     const title = "Filme salvo! 📌";
     const body = `${authStore.user.displayName} adicionou "${movieTitle}" aos salvos!`;
 
-    await sendPushNotification(membersToNotificate, title, body);
+    await sendPushNotification(membersToNotificate, title, body, 'movie_saved');
   }
 
   async function dispatchWatchedMovieNotification(movie) {
@@ -143,7 +143,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     const title = "Filme avaliado! 📌";
     const body = `${authStore.user.displayName} avaliou "${movie.title}". Confira!`;
 
-    await sendPushNotification(membersToNotificate, title, body);
+    await sendPushNotification(membersToNotificate, title, body, 'movie_rated');
   }
 
   async function markAsRead(notificationId) {
@@ -156,7 +156,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     }
   }
 
-  async function sendPushNotification(targetUserIds, title, body) {
+  async function sendPushNotification(targetUserIds, title, body, type) {
     if (!targetUserIds || targetUserIds.length === 0) return;
 
     const url = "https://onesignal.com/api/v1/notifications";
@@ -175,8 +175,8 @@ export const useNotificationsStore = defineStore("notifications", () => {
         en: title,
         pt: title,
       },
-      android_group: `movie_saved_${Date.now()}`,
-      web_push_topic: `movie_saved_${Date.now()}`,
+      android_group: `${type}_${Date.now()}`,
+      web_push_topic: `${type}_${Date.now()}`,
       android_group_message: { pt: "$[notif_count] novos filmes adicionados!" },
     };
 
