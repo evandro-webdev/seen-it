@@ -63,6 +63,8 @@ export const useAuthStore = defineStore("auth", () => {
         await OneSignal.init({
           appId: import.meta.env.VITE_ONESIGNAL_API_KEY,
           allowLocalhostAsSecureOrigin: true,
+          serviceWorkerParam: { scope: "/" },
+          serviceWorkerPath: "OneSignalSDKWorker.js",
         });
 
         await OneSignal.login(user.value.uid);
