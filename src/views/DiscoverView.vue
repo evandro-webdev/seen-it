@@ -6,6 +6,7 @@ import { Flame, Award, Clapperboard, SearchX } from "@lucide/vue";
 import SearchBar from "@/components/layout/SearchBar.vue";
 import MovieCardDetailed from "@/components/movies/cards/MovieCardDetailed.vue";
 import MoviesList from "@/components/movies/list/MoviesList.vue";
+import MoviesHeroCarousel from "@/components/movies/list/MoviesHeroCarousel.vue";
 
 defineEmits(["open-movie-modal"]);
 
@@ -77,8 +78,14 @@ function clearSearch() {
     <div class="h-[100%] pt-2 flex flex-col">
       <div
         v-if="!discoverMoviesStore.isSearching || !searchQuery"
-        class="space-y-6"
+        class="space-y-8"
       >
+        <MoviesHeroCarousel
+          :movies="discoverMoviesStore.heroMovies"
+          @open-movie-modal="$emit('open-movie-modal', $event)"
+          :loading="discoverMoviesStore.isLoading"
+        />
+
         <MoviesList
           :icon="Flame"
           title="Mais vistos do momento"

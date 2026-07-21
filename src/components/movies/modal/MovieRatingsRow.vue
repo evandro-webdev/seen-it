@@ -9,7 +9,12 @@ defineProps({
     required: true,
   },
   members: {
-    type: Object,
+    type: [Object, null],
+    required: true,
+    default: null,
+  },
+  isAlreadyWatched: {
+    type: Boolean,
     required: true,
   },
   modelValue: {
@@ -23,9 +28,11 @@ const emit = defineEmits(["update:modelValue"]);
 
 <template>
   <div
-    class="p-2 mt-4 rounded-xl border border-gray-200 dark:border-[#2c3042] flex items-center gap-x-3 overflow-x-auto"
+    class="mt-4 flex items-center gap-x-3 overflow-x-auto"
+    :class="{'p-2 rounded-xl border border-gray-200 dark:border-[#2c3042]' : isAlreadyWatched }"
   >
     <template
+      v-if="isAlreadyWatched"
       v-for="(member, uid) in members"
       :key="uid"
     >
@@ -40,6 +47,7 @@ const emit = defineEmits(["update:modelValue"]);
     </template>
 
     <div
+      v-if="isAlreadyWatched"
       class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
     >
       <div class="p-2 rounded-full border border-[#356dd5]">

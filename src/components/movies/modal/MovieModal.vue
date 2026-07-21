@@ -62,82 +62,84 @@ const selectedReviewer = ref(null);
       class="fixed inset-0 z-50 bg-white dark:bg-[#0F111D] overflow-y-auto"
     >
       <MovieHeader
-        :poster-path="props.movie.poster_path"
-        :title="props.movie.title"
+        :poster-path="movie.poster_path"
+        :title="movie.title"
         @close="$emit('close')"
       />
 
-      <div class="pt-2 pb-4 px-4">
+      <div class="p-4 space-y-6">
         <div>
-          <h2 class="text-3xl font-semibold text-slate-800 dark:text-white">
-            {{ props.movie.title }}
-          </h2>
-          <p
-            v-if="!showRateForm"
-            class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200"
-          >
-            {{ props.movie.tagline }}
-          </p>
-        </div>
-
-        <Transition
-          name="fade"
-          mode="out-in"
-        >
-          <div v-if="!showRateForm">
-            <MovieMetadata :movie="props.movie" />
-
-            <MovieRatingsRow
-              v-if="isAlreadyWatched && props.movie.reviews"
-              :movie="props.movie"
-              :members="groupStore.activeGroupMembers"
-              v-model="selectedReviewer"
-            />
-
-            <MovieCommentBox
-              v-if="
-                selectedReviewer &&
-                props.movie.reviews[selectedReviewer]?.comment
-              "
-              :reviewer-name="props.movie.reviews[selectedReviewer].name"
-              :comment="props.movie.reviews[selectedReviewer].comment"
-            />
+          <div>
+            <h2 class="text-3xl font-semibold text-slate-800 dark:text-white">
+              {{ movie.title }}
+            </h2>
+            <p
+              v-if="!showRateForm"
+              class="text-[14px] font-light text-[#8C8C8C] dark:text-gray-200"
+            >
+              {{ movie.tagline }}
+            </p>
           </div>
 
-          <MovieRateForm
-            v-else
-            :movie="props.movie"
-            @close="showRateForm = false"
-          />
-        </Transition>
-      </div>
+          <Transition
+            name="fade"
+            mode="out-in"
+          >
+            <div v-if="!showRateForm">
+              <MovieMetadata :movie="movie" />
 
-      <div
-        v-if="!showRateForm"
-        class="px-4 pb-6 mt-6"
-      >
-        <div
-          v-if="isAlreadyWatched"
-          class="flex items-center gap-4"
-        >
-          <RemoveRatedMovieButton
-            @click="watchedMoviesStore.deleteWatchedMovie(props.movie.id)"
-          />
-          <EditRatedMovieButton />
+              <MovieRatingsRow
+                :movie="movie"
+                :members="
+                  isAlreadyWatched ? groupStore.activeGroupMembers : null
+                "
+                :is-already-watched="isAlreadyWatched"
+                v-model="selectedReviewer"
+              />
+
+              <MovieCommentBox
+                v-if="
+                  selectedReviewer && movie.reviews[selectedReviewer]?.comment
+                "
+                :reviewer-name="movie.reviews[selectedReviewer].name"
+                :comment="movie.reviews[selectedReviewer].comment"
+              />
+            </div>
+
+            <MovieRateForm
+              v-else
+              :movie="movie"
+              @close="showRateForm = false"
+            />
+          </Transition>
         </div>
 
         <div
-          v-else
-          class="flex items-center gap-4"
+          v-if="!showRateForm"
         >
-          <SaveButton
-            :is-already-saved="isAlreadySaved"
-            :movie="props.movie"
-          />
-          <RateMovieButton
-            :movie="props.movie"
-            @click="showRateForm = true"
-          />
+          <div
+            v-if="isAlreadyWatched"
+            class="flex items-center gap-4"
+          >
+            <RemoveRatedMovieButton
+              @click="watchedMoviesStore.deleteWatchedMovie(movie.id)"
+            />
+            <EditRatedMovieButton />
+          </div>
+
+          <div
+            v-else
+            class="flex items-center gap-4"
+          >
+            <SaveButton
+              :is-already-saved="isAlreadySaved"
+              :movie="movie"
+            />
+            <RateMovieButton
+              :movie="movie"
+              @click="showRateForm = true"
+            />
+          </div>
         </div>
       </div>
     </div>

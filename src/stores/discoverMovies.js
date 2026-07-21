@@ -6,9 +6,11 @@ import {
   getPopularMovies,
   getTopRatedMovies,
   getUpcomingMovies,
+  getTrendingMovies,
 } from "@/services/tmdb.js";
 
 export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
+  const heroMovies = ref([]);
   const popularMovies = ref([]);
   const topRatedMovies = ref([]);
   const upcomingMovies = ref([]);
@@ -29,12 +31,14 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     try {
       isLoading.value = true;
 
-      const [popular, topRated, upcoming] = await Promise.all([
+      const [trending, popular, topRated, upcoming] = await Promise.all([
+        getTrendingMovies(),
         getPopularMovies(),
         getTopRatedMovies(),
         getUpcomingMovies(),
       ]);
 
+      heroMovies.value = trending.results.slice(0, 5);
       popularMovies.value = popular.results;
       topRatedMovies.value = topRated.results;
       upcomingMovies.value = upcoming.results;
@@ -105,6 +109,7 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
 
   return {
     searchResults,
+    heroMovies,
     popularMovies,
     topRatedMovies,
     upcomingMovies,
