@@ -7,6 +7,8 @@ import {
   getTopRatedMovies,
   getUpcomingMovies,
   getTrendingMovies,
+  getGenres,
+  getMoviesByGenre,
 } from "@/services/tmdb.js";
 
 export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
@@ -14,6 +16,11 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   const popularMovies = ref([]);
   const topRatedMovies = ref([]);
   const upcomingMovies = ref([]);
+
+  const genres = ref([]);
+  const selectedGenreId = ref(null);
+  const genreMovies = ref([]);
+  const isLoadingGenreMovies = ref(false);
 
   const searchResults = ref([]);
   const isSearching = ref(false);
@@ -31,17 +38,20 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     try {
       isLoading.value = true;
 
-      const [trending, popular, topRated, upcoming] = await Promise.all([
+      const [trending, popular, topRated, upcoming, genreData] = await Promise.all([
         getTrendingMovies(),
         getPopularMovies(),
         getTopRatedMovies(),
         getUpcomingMovies(),
+        getGenres(),
       ]);
 
       heroMovies.value = trending.results.slice(0, 5);
       popularMovies.value = popular.results;
       topRatedMovies.value = topRated.results;
       upcomingMovies.value = upcoming.results;
+
+      genres.value = genreData.genres || [];
     } catch (error) {
       console.log(error);
     } finally {
@@ -102,6 +112,26 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     }
   }
 
+  async function selectGenre(genreId) {
+    if (selectedGenreId.value === genreId) {
+      selectedGenreId.value = null;
+      genreMovies.value = [];
+      return;
+    }
+
+    selectedGenreId.value = genreId;
+    isLoadingGenreMovies.value = true;
+
+    try {
+      const data = await getMoviesByGenre(genreId);
+      genreMovies.value = data.results;
+    } catch (error) {
+      console.error("Erro ao buscar filmes por gênero:", error);
+    } finally {
+      isLoadingGenreMovies.value = false;
+    }
+  }
+
   function clearSearch() {
     isSearching.value = false;
     searchResults.value = [];
@@ -122,5 +152,10 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     totalPages,
     isLoadingMore,
     loadMoreMovies,
+    genres,
+    selectedGenreId,
+    genreMovies,
+    isLoadingGenreMovies,
+    selectGenre,
   };
 });

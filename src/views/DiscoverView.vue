@@ -7,6 +7,10 @@ import SearchBar from "@/components/layout/SearchBar.vue";
 import MovieCardDetailed from "@/components/movies/cards/MovieCardDetailed.vue";
 import MoviesList from "@/components/movies/list/MoviesList.vue";
 import MoviesHeroCarousel from "@/components/movies/list/MoviesHeroCarousel.vue";
+import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
+import MovieSearchEmpty from "@/components/movies/ui/messages/MovieSearchEmpty.vue";
+import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
+import MovieCard from "@/components/movies/cards/MovieCard.vue";
 
 defineEmits(["open-movie-modal"]);
 
@@ -73,11 +77,73 @@ function clearSearch() {
           {{ discoverMoviesStore.searchResults.length }} filmes encontrados
         </span>
       </div>
+
+      <MovieGenrePill
+        v-if="
+          !discoverMoviesStore.isSearching && !discoverMoviesStore.isLoading
+        "
+        :genres="discoverMoviesStore.genres"
+        :selected-genre-id="discoverMoviesStore.selectedGenreId"
+        @select-genre="discoverMoviesStore.selectGenre"
+      />
     </div>
 
     <div class="h-[100%] pt-2 flex flex-col">
       <div
-        v-if="!discoverMoviesStore.isSearching || !searchQuery"
+        v-if="discoverMoviesStore.isSearching"
+        class="space-y-4"
+      >
+        <LoadingSpinner v-if="discoverMoviesStore.isLoading" full-screen/>
+
+        <template v-else>
+          <MovieSearchEmpty
+            v-if="discoverMoviesStore.searchResults.length === 0"
+            :search-query="searchQuery"
+            @clear="clearSearch"
+          />
+
+          <MovieCardDetailed
+            v-else
+            v-for="movie in discoverMoviesStore.searchResults"
+            :key="movie.id"
+            :movie="movie"
+            @click="$emit('open-movie-modal', movie.id)"
+          />
+
+          <LoadingSpinner v-if="discoverMoviesStore.isLoadingMore" size="sm"/>
+        </template>
+      </div>
+
+      <div
+        v-else-if="discoverMoviesStore.selectedGenreId"
+        class="pt-2 space-y-4"
+      >
+        <h2 class="font-bold text-[#10355E] dark:text-[#B0D5FE] text-base">
+          Filmes de
+          {{
+            discoverMoviesStore.genres.find(
+              (g) => g.id === discoverMoviesStore.selectedGenreId,
+            )?.name
+          }}
+        </h2>
+
+        <LoadingSpinner v-if="discoverMoviesStore.isLoadingGenreMovies" full-screen/>
+
+        <div
+          v-else
+          class="grid grid-cols-3 sm:grid-cols-4 gap-2"
+        >
+          <MovieCard
+            v-for="movie in discoverMoviesStore.genreMovies"
+            :key="movie.id"
+            :movie="movie"
+            @click="$emit('open-movie-modal', movie.id)"
+          />
+        </div>
+      </div>
+
+      <div
+        v-else
         class="space-y-8"
       >
         <MoviesHeroCarousel
@@ -93,6 +159,7 @@ function clearSearch() {
           @open-movie-modal="$emit('open-movie-modal', $event)"
           :loading="discoverMoviesStore.isLoading"
         />
+
         <MoviesList
           :icon="Award"
           title="Melhores avaliados"
@@ -100,6 +167,7 @@ function clearSearch() {
           @open-movie-modal="$emit('open-movie-modal', $event)"
           :loading="discoverMoviesStore.isLoading"
         />
+
         <MoviesList
           :icon="Clapperboard"
           title="Mais esperados"
@@ -107,72 +175,6 @@ function clearSearch() {
           @open-movie-modal="$emit('open-movie-modal', $event)"
           :loading="discoverMoviesStore.isLoading"
         />
-      </div>
-
-      <div
-        v-if="discoverMoviesStore.isSearching"
-        class="space-y-4"
-      >
-        <div
-          v-if="discoverMoviesStore.isLoading"
-          class="absolute inset-0 flex items-center justify-center bg-transparent"
-        >
-          <div
-            class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0088FF]"
-          ></div>
-        </div>
-
-        <template v-else>
-          <div
-            v-if="discoverMoviesStore.searchResults.length === 0"
-            class="flex-1 flex flex-col items-center justify-center text-center px-6 py-12 animate-fade-in"
-          >
-            <div class="space-y-4 max-w-xs">
-              <div
-                class="mx-auto w-16 h-16 rounded-2xl bg-gray-50 dark:bg-[#161f30] flex items-center justify-center border border-gray-100 dark:border-[#242C3C] shadow-xs"
-              >
-                <SearchX class="w-8 h-8 text-gray-400 dark:text-[#52627a]" />
-              </div>
-              <div class="space-y-1">
-                <h3 class="text-md font-semibold text-gray-800 dark:text-white">
-                  Nenhum resultado encontrado
-                </h3>
-                <p
-                  class="text-xs/5 [text-wrap:balance] text-gray-400 dark:text-[#8892b0]"
-                >
-                  Não encontramos nada para "<span
-                    class="font-medium text-gray-600 dark:text-gray-300"
-                    >{{ searchQuery }}</span
-                  >". Verifique a grafia ou tente outro título.
-                </p>
-              </div>
-              <button
-                @click="clearSearch"
-                type="button"
-                class="inline-flex items-center text-xs font-semibold text-[#0088FF] hover:underline"
-              >
-                Limpar pesquisa
-              </button>
-            </div>
-          </div>
-
-          <MovieCardDetailed
-            v-else
-            v-for="movie in discoverMoviesStore.searchResults"
-            :key="movie.id"
-            :movie="movie"
-            @click="$emit('open-movie-modal', movie.id)"
-          />
-
-          <div
-            v-if="discoverMoviesStore.isLoadingMore"
-            class="py-4 flex justify-center items-center"
-          >
-            <div
-              class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0088FF]"
-            ></div>
-          </div>
-        </template>
       </div>
     </div>
   </div>

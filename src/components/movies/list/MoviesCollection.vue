@@ -45,7 +45,7 @@ function clearSearch() {
 
 <template>
   <div class="relative w-full">
-    <LoadingSpinner v-if="authStore.loading" />
+    <LoadingSpinner v-if="authStore.loading" full-screen/>
 
     <AuthForm v-else-if="!authStore.isAuthenticated" />
 

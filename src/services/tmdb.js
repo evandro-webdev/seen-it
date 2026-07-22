@@ -33,31 +33,48 @@ export async function getMovieWithCredits(movieId) {
 }
 
 export async function getPopularMovies() {
+  const allowedLanguages = "en|pt|fr|ko|ja";
+
   const res = await fetch(
-    `${BASE_URL}/movie/popular?include_adult=false&language=pt-BR&page=1`,
+    `${BASE_URL}/discover/movie?include_adult=false&language=pt-BR&page=1` +
+      `&with_original_language=${allowedLanguages}` +
+      `&vote_count.gte=50` +
+      `&sort_by=popularity.desc`,
     options,
   );
-  const data = await res.json();
-  return {
-    ...data,
-    results: data.results.filter((movie) => movie.vote_count > 100),
-  };
+
+  return await res.json();
 }
 
 export async function getTopRatedMovies() {
+  const allowedLanguages = "en|pt|fr|ko|ja";
+
   const res = await fetch(
-    `${BASE_URL}/movie/top_rated?include_adult=false&language=pt-BR&page=1`,
+    `${BASE_URL}/discover/movie?include_adult=false&language=pt-BR&page=1` +
+      `&vote_count.gte=300` +
+      `&with_original_language=${allowedLanguages}` +
+      `&sort_by=vote_average.desc`,
     options,
   );
-  return res.json();
+
+  return await res.json();
 }
 
 export async function getUpcomingMovies() {
+  const today = new Date().toISOString().split("T")[0];
+
+  const allowedLanguages = "en|pt|fr|ko|ja";
+
   const res = await fetch(
-    `${BASE_URL}/movie/upcoming?include_adult=false&region=BR&language=pt-BR&page=1`,
+    `${BASE_URL}/discover/movie?include_adult=false&region=BR&language=pt-BR&page=1` +
+      `&primary_release_date.gte=${today}` +
+      `&with_original_language=${allowedLanguages}` +
+      `&popularity.gte=5` +
+      `&sort_by=popularity.desc`,
     options,
   );
-  return res.json();
+
+  return await res.json();
 }
 
 export async function getTrendingMovies() {
@@ -65,5 +82,28 @@ export async function getTrendingMovies() {
     `${BASE_URL}/trending/movie/day?language=pt-BR`,
     options,
   );
+  return await response.json();
+}
+
+export async function getGenres() {
+  const response = await fetch(
+    `${BASE_URL}/genre/movie/list?language=pt-BR`,
+    options,
+  );
+  return await response.json();
+}
+
+export async function getMoviesByGenre(genreId, page = 1) {
+  const allowedLanguages = "en|pt|fr|ko|ja";
+
+  const response = await fetch(
+    `${BASE_URL}/discover/movie?language=pt-BR&page=${page}` +
+      `&with_genres=${genreId}` +
+      `&with_original_language=${allowedLanguages}` +
+      `&vote_count.gte=20` +
+      `&sort_by=popularity.desc`,
+    options,
+  );
+
   return await response.json();
 }

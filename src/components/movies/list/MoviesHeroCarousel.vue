@@ -81,7 +81,7 @@ onUnmounted(() => {
 
   <div
     v-else-if="movies.length > 0"
-    class="relative w-full h-[320px] rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-[#242C3C] touch-pan-y"
+    class="relative w-full h-[320px] rounded-2xl overflow-hidden shadow-xl touch-pan-y"
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
   >
@@ -93,7 +93,7 @@ onUnmounted(() => {
         :key="movie.id"
         class="absolute inset-0 p-5 pb-9 rounded-2xl bg-cover bg-center flex items-end"
         :style="{
-          backgroundImage: `linear-gradient(to top, rgba(15, 23, 42, 0.95) 12%, rgba(15, 23, 42, 0.35) 60%, transparent 100%), url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
+          backgroundImage: `linear-gradient(to top, rgba(15, 23, 42, 0.95) 20%, rgba(15, 23, 42, 0.35) 60%, transparent 100%), url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
         }"
       >
         <div class="space-y-2 text-white max-w-full z-10">
@@ -101,7 +101,7 @@ onUnmounted(() => {
             {{ movie.title }}
           </h1>
 
-          <p class="text-xs text-gray-300 line-clamp-2 leading-relaxed">
+          <p class="text-xs text-gray-300 line-clamp-3 leading-relaxed">
             {{ movie.overview || "Sem sinopse disponível." }}
           </p>
         </div>
@@ -109,7 +109,7 @@ onUnmounted(() => {
     </transition-group>
 
     <div
-      class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-50"
+      class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20"
     >
       <button
         v-for="(_, idx) in movies"
