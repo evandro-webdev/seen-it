@@ -5,6 +5,7 @@ import { ref } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import GroupCreateForm from "./GroupCreateForm.vue";
 import { onClickOutside } from "@vueuse/core";
+import BaseButton from "../ui/BaseButton.vue";
 
 defineProps({
   groups: {
@@ -108,14 +109,15 @@ function unlockScroll() {
           @close-form="showCreateGroupForm = false"
         />
 
-        <button
+        <BaseButton
           v-if="!showCreateGroupForm"
           @click="showCreateGroupForm = true"
-          class="w-full py-3 px-3 rounded-xl text-white bg-[#0088FF] hover:bg-blue-600 active:scale-99 transition-all flex justify-center items-center gap-2 shadow-lg shadow-blue-500/10"
-        >
-          <UsersRound class="w-5 h-5" />
-          <span class="font-medium text-nowrap">Novo Grupo</span>
-        </button>
+          label="Novo Grupo"
+          :icon="UsersRound"
+          variant="primary"
+          size="lg"
+          block
+        />
       </div>
     </div>
   </Transition>

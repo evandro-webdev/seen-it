@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { Check, User, UserRoundCheck, X } from "@lucide/vue";
+import BaseButton from "../ui/BaseButton.vue";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -161,14 +162,13 @@ function unlockScroll() {
             </p>
           </div>
 
-          <button
-            @click="handleUpdate"
-            type="button"
-            class="w-full py-3 px-3 rounded-xl text-white bg-[#0088FF] hover:bg-blue-600 active:scale-99 transition-all flex justify-center items-center gap-2 shadow-lg shadow-blue-500/10"
-          >
-            <UserRoundCheck class="w-4 h-4" />
-            <span class="font-medium text-nowrap">Salvar alterações</span>
-          </button>
+          <BaseButton
+            label="Salvar alterações"
+            :icon="UserRoundCheck"
+            variant="primary"
+            size="lg"
+            block
+          />
         </form>
       </div>
     </div>

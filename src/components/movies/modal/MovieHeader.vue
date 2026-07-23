@@ -16,7 +16,7 @@ defineEmits(["close"]);
 </script>
 
 <template>
-  <div class="relative w-full h-[500px] overflow-hidden bg-[#161f30]">
+  <div class="relative w-full h-[540px] overflow-hidden bg-[#161f30]">
     <template v-if="posterPath">
       <div
         class="skeleton absolute inset-0 bg-gray-300 dark:bg-[#1f293d] animate-pulse"

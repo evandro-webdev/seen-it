@@ -51,25 +51,25 @@ const emit = defineEmits(["update:modelValue"]);
 
     <div
       v-if="isAlreadyWatched"
-      class="px-3 py-1 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
+      class="px-3 py-1.5 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
     >
-      <div class="p-2 rounded-full border border-[#356dd5]">
+      <div class="p-1.5 rounded-full border border-[#356dd5]">
         <UsersRound class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]" />
       </div>
       <div>
         <div class="flex items-center gap-1">
           <Star
-            class="w-4 h-4 text-[#356dd5] dark:text-[#4787ff]"
+            class="w-3.5 h-3.5 text-[#356dd5] dark:text-[#4787ff]"
             fill="currentColor"
           />
           <span
-            class="block text-md font-medium text-[#356dd5] dark:text-[#4787ff]"
+            class="block text-sm font-bold text-[#356dd5] dark:text-[#4787ff]"
           >
             {{ formatRating(movie.average_rating) }}
           </span>
         </div>
         <span
-          class="text-xs capitalize text-[#356dd5] dark:text-[#4787ff] block"
+          class="text-[10px] uppercase tracking-wider font-semibold text-[#356dd5] dark:text-[#4787ff] block"
           >Média</span
         >
       </div>

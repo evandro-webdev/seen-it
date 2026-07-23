@@ -10,6 +10,7 @@ import {
   X,
 } from "@lucide/vue";
 import { ref } from "vue";
+import BaseButton from "../ui/BaseButton.vue";
 
 const groupsStore = useGroupsStore();
 
@@ -76,7 +77,7 @@ async function handleCreateGroup() {
       />
     </div>
 
-    <div class="space-y-2.5">
+    <div>
       <div class="relative">
         <Users
           stroke-width="1"
@@ -97,7 +98,10 @@ async function handleCreateGroup() {
         </button>
       </div>
 
-      <div class="flex flex-wrap gap-2.5">
+      <div
+        v-if="members.length"
+        class="mt-2.5 flex flex-wrap gap-2.5"
+      >
         <span
           v-for="member in members"
           :key="member"
@@ -139,21 +143,21 @@ async function handleCreateGroup() {
     </div>
 
     <div class="flex gap-2 pt-2">
-      <button
+      <BaseButton
+        label="Voltar"
+        :icon="ArrowLeft"
+        variant="ghost"
+        size="md"
         @click="$emit('closeForm')"
-        type="button"
-        class="py-2 px-4 rounded-lg text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-[#314066] flex justify-center items-center gap-2 transition-colors"
-      >
-        <ArrowLeft class="w-4 h-4" />
-        <span class="font-medium text-nowrap">Voltar</span>
-      </button>
+      />
 
-      <button
-        class="w-full py-3 px-3 rounded-xl text-white bg-[#0088FF] hover:bg-blue-600 active:scale-99 transition-all flex justify-center items-center gap-2 shadow-lg shadow-blue-500/10"
-      >
-        <UsersRound class="w-4 h-4" />
-        <span class="font-medium text-nowrap">Criar Grupo</span>
-      </button>
+      <BaseButton
+        label="Criar Grupo"
+        :icon="UsersRound"
+        variant="primary"
+        size="lg"
+        block
+      />
     </div>
   </form>
 </template>

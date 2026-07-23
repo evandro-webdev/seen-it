@@ -34,14 +34,15 @@ const defaultAvatar = computed(() => {
 </script>
 
 <template>
-  <div class="text-white flex flex-shrink-0 items-center gap-2">
+  <div class="text-white flex flex-shrink-0 items-center gap-2.5">
     <div class="relative">
       <img
         :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${uid}.jpg`"
         @error="$event.target.src = defaultAvatar"
-        class="w-9 h-9 rounded-full border object-cover"
+        class="w-8 h-8 rounded-full border object-cover"
         :style="{ borderColor: color }"
       />
+      
       <div
         v-if="hasComment"
         class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
@@ -56,17 +57,17 @@ const defaultAvatar = computed(() => {
     <div>
       <div class="flex items-center gap-1">
         <Star
-          class="w-4 h-4"
+          class="w-3.5 h-3.5"
           :style="{
             color: color,
             fill: color,
           }"
         />
-        <span class="block text-md font-medium text-gray-800 dark:text-white">{{
+        <span class="block text-sm font-bold text-gray-800 dark:text-white">{{
           formatRating(review.rating)
         }}</span>
       </div>
-      <span class="text-xs capitalize text-gray-500 dark:text-gray-200 block">{{
+      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-200 block">{{
         review.name.toLowerCase()
       }}</span>
     </div>
