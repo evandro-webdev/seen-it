@@ -29,7 +29,10 @@ const emit = defineEmits(["update:modelValue"]);
 <template>
   <div
     class="mt-4 flex items-center gap-x-3 overflow-x-auto"
-    :class="{'p-2 rounded-xl border border-gray-200 dark:border-[#2c3042]' : isAlreadyWatched }"
+    :class="{
+      'p-2 rounded-xl border border-gray-200 dark:border-[#2c3042]':
+        isAlreadyWatched,
+    }"
   >
     <template
       v-if="isAlreadyWatched"
@@ -73,25 +76,32 @@ const emit = defineEmits(["update:modelValue"]);
     </div>
 
     <div
-      class="px-3 py-1 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
+      class="px-3 py-1.5 rounded-xl bg-[#e9f5f2] dark:bg-[#399c8d1e] flex flex-shrink-0 items-center gap-2"
     >
-      <div class="p-2 rounded-full border border-[#399c8d] bg-[#0d2b42]">
+      <div class="p-1.5 rounded-full border border-[#399c8d] bg-[#0d2b42]">
         <img
           src="/img/tmdb.svg"
           class="w-4 h-4"
+          alt="TMDB Logo"
         />
       </div>
       <div>
         <div class="flex items-center gap-1">
           <Star
-            class="w-4 h-4 text-[#399c8d]"
+            class="w-3.5 h-3.5 text-[#399c8d]"
             fill="currentColor"
           />
-          <span class="block text-md font-medium text-[#399c8d]">
-            {{ formatRating(movie.vote_average) }}
+          <span class="block text-sm font-bold text-[#399c8d]">
+            {{
+              movie.vote_average > 0 ? formatRating(movie.vote_average) : "N/A"
+            }}
           </span>
         </div>
-        <span class="text-xs capitalize text-[#399c8d] block">TMDB</span>
+        <span
+          class="text-[10px] uppercase tracking-wider font-semibold text-[#399c8d] block"
+        >
+          {{ movie.vote_average > 0 ? "TMDB" : "Sem avaliações" }}
+        </span>
       </div>
     </div>
   </div>
