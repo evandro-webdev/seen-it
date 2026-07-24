@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onUnmounted } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
 
-import { Sparkles, ArrowLeft, Check } from "@lucide/vue";
+import { Sparkles, ArrowLeft, Check, X, SquarePen } from "@lucide/vue";
 
 import MovieHeader from "./MovieHeader.vue";
 import MovieMetadata from "./MovieMetadata.vue";
@@ -15,8 +15,6 @@ import MovieCommentBox from "./MovieCommentBox.vue";
 import MovieRateForm from "../rating/MovieRateForm.vue";
 
 import SaveButton from "../ui/buttons/SaveButton.vue";
-import EditRatedMovieButton from "../ui/buttons/EditRatedMovieButton.vue";
-import RemoveRatedMovieButton from "../ui/buttons/RemoveRatedMovieButton.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
@@ -32,15 +30,7 @@ const props = defineProps({
   },
 });
 
-defineEmits(["close"]);
-
-function lockScroll() {
-  document.body.style.overflow = "hidden";
-}
-
-function unlockScroll() {
-  document.body.style.overflow = "";
-}
+const emit = defineEmits(["close"]);
 
 const isAlreadyWatched = computed(() =>
   props.movie ? watchedMoviesStore.isAlreadyWatched(props.movie.id) : false,
@@ -86,6 +76,44 @@ async function handleSaveRating(ratingData) {
     console.error("Erro ao salvar avaliação:", error);
   }
 }
+
+function handleAndroidBack() {
+  if (props.movie) {
+    emit("close");
+  }
+}
+
+watch(
+  () => props.movie,
+  (newMovie, oldMovie) => {
+    if (newMovie && !oldMovie) {
+      history.pushState({ modalOpen: true }, "");
+      window.addEventListener("popstate", handleAndroidBack);
+    } else if (!newMovie && oldMovie) {
+      window.removeEventListener("popstate", handleAndroidBack);
+    }
+  },
+);
+
+function handleCloseClick() {
+  if (history.state?.modalOpen) {
+    history.back();
+  } else {
+    emit("close");
+  }
+}
+
+onUnmounted(() => {
+  window.removeEventListener("popstate", handleAndroidBack);
+});
+
+function lockScroll() {
+  document.body.style.overflow = "hidden";
+}
+
+function unlockScroll() {
+  document.body.style.overflow = "";
+}
 </script>
 
 <template>
@@ -107,7 +135,7 @@ async function handleSaveRating(ratingData) {
           v-if="!showRateForm"
           :poster-path="movie.poster_path"
           :title="movie.title"
-          @close="$emit('close')"
+          @close="handleCloseClick"
         />
 
         <div
@@ -198,10 +226,19 @@ async function handleSaveRating(ratingData) {
             v-if="isAlreadyWatched"
             class="flex items-center gap-3 w-full"
           >
-            <RemoveRatedMovieButton
+            <BaseButton
               @click="watchedMoviesStore.deleteWatchedMovie(movie.id)"
+              label="Remover"
+              :icon="X"
+              size="md"
+              variant="ghost"
             />
-            <EditRatedMovieButton class="flex-1" />
+            <BaseButton
+              label="Editar avaliação"
+              :icon="SquarePen"
+              size="md"
+              block
+            />
           </div>
 
           <div
