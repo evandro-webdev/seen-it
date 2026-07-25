@@ -93,7 +93,10 @@ function clearSearch() {
         v-if="discoverMoviesStore.isSearching"
         class="space-y-4"
       >
-        <LoadingSpinner v-if="discoverMoviesStore.isLoading" full-screen/>
+        <LoadingSpinner
+          v-if="discoverMoviesStore.isLoading"
+          full-screen
+        />
 
         <template v-else>
           <MovieSearchEmpty
@@ -110,7 +113,10 @@ function clearSearch() {
             @click="$emit('open-movie-modal', movie.id)"
           />
 
-          <LoadingSpinner v-if="discoverMoviesStore.isLoadingMore" size="sm"/>
+          <LoadingSpinner
+            v-if="discoverMoviesStore.isLoadingMore"
+            size="sm"
+          />
         </template>
       </div>
 
@@ -127,7 +133,10 @@ function clearSearch() {
           }}
         </h2>
 
-        <LoadingSpinner v-if="discoverMoviesStore.isLoadingGenreMovies" full-screen/>
+        <LoadingSpinner
+          v-if="discoverMoviesStore.isLoadingGenreMovies"
+          full-screen
+        />
 
         <div
           v-else
@@ -161,17 +170,17 @@ function clearSearch() {
         />
 
         <MoviesList
-          :icon="Award"
-          title="Melhores avaliados"
-          :movies="discoverMoviesStore.topRatedMovies"
-          @open-movie-modal="$emit('open-movie-modal', $event)"
-          :loading="discoverMoviesStore.isLoading"
-        />
-
-        <MoviesList
           :icon="Clapperboard"
           title="Mais esperados"
           :movies="discoverMoviesStore.upcomingMovies"
+          @open-movie-modal="$emit('open-movie-modal', $event)"
+          :loading="discoverMoviesStore.isLoading"
+        />
+        
+        <MoviesList
+          :icon="Award"
+          title="Melhores avaliados"
+          :movies="discoverMoviesStore.topRatedMovies"
           @open-movie-modal="$emit('open-movie-modal', $event)"
           :loading="discoverMoviesStore.isLoading"
         />

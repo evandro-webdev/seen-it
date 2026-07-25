@@ -10,7 +10,7 @@ const options = {
 
 export async function searchMovies(query, page = 1) {
   const res = await fetch(
-    `${BASE_URL}/search/movie?language=pt-BR&query=${encodeURIComponent(query)}&page=${page}`,
+    `${BASE_URL}/search/movie?include_adult=false&language=pt-BR&query=${encodeURIComponent(query)}&page=${page}`,
     options,
   );
   return res.json();

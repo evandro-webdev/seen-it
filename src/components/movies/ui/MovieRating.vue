@@ -12,6 +12,10 @@ defineProps({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
   review: {
     type: Object,
     required: true,
@@ -42,7 +46,7 @@ const defaultAvatar = computed(() => {
         class="w-8 h-8 rounded-full border object-cover"
         :style="{ borderColor: color }"
       />
-      
+
       <div
         v-if="hasComment"
         class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
@@ -67,9 +71,10 @@ const defaultAvatar = computed(() => {
           formatRating(review.rating)
         }}</span>
       </div>
-      <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-200 block">{{
-        review.name.toLowerCase()
-      }}</span>
+      <span
+        class="text-[10px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-200 block"
+        >{{ name.split(' ')[0] }}</span
+      >
     </div>
 
     <div class="w-px h-8 bg-gray-200 dark:bg-gray-600"></div>

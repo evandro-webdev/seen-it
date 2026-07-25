@@ -2,20 +2,16 @@
 import { UsersRound, Star } from "@lucide/vue";
 import MovieRating from "../ui/MovieRating.vue";
 import { formatRating } from "@/utils/formatters.js";
+import { useAuthStore } from "@/stores/auth.js";
 
-defineProps({
+const props = defineProps({
   movie: {
     type: Object,
     required: true,
   },
   members: {
-    type: [Object, null],
-    required: true,
+    type: [Object, Array, null],
     default: null,
-  },
-  isAlreadyWatched: {
-    type: Boolean,
-    required: true,
   },
   modelValue: {
     type: [String, null],
@@ -24,6 +20,28 @@ defineProps({
 });
 
 const emit = defineEmits(["update:modelValue"]);
+const authStore = useAuthStore();
+
+function getReviewerData(uid) {
+  if (props.members && props.members[uid]) {
+    return {
+      name: props.members[uid].name,
+      color: props.members[uid].color || "#338CD5",
+    };
+  }
+
+  if (uid === authStore.user?.uid) {
+    return {
+      name: authStore.user?.displayName || "Você",
+      color: "#338CD5",
+    };
+  }
+
+  return {
+    name: "Membro",
+    color: "#338CD5",
+  };
+}
 </script>
 
 <template>
@@ -31,26 +49,32 @@ const emit = defineEmits(["update:modelValue"]);
     class="mt-4 flex items-center gap-x-3 overflow-x-auto"
     :class="{
       'p-2 rounded-xl border border-gray-200 dark:border-[#2c3042]':
-        isAlreadyWatched,
+        movie?.reviews,
     }"
   >
-    <template
-      v-if="isAlreadyWatched"
-      v-for="(member, uid) in members"
-      :key="uid"
-    >
-      <MovieRating
-        v-if="movie.reviews && movie.reviews[uid]"
-        :uid="uid"
-        :review="movie.reviews[uid]"
-        :color="member.color || '#338CD5'"
-        :has-comment="!!movie.reviews[uid].comment"
-        @click="emit('update:modelValue', modelValue === uid ? null : uid)"
-      />
+    <template v-if="movie?.reviews">
+      <template
+        v-for="(review, uid) in movie.reviews"
+        :key="uid"
+      >
+        <MovieRating
+          :uid="String(uid)"
+          :review="review"
+          :name="getReviewerData(uid).name"
+          :color="getReviewerData(uid).color"
+          :has-comment="!!review.comment"
+          @click="
+            emit(
+              'update:modelValue',
+              modelValue === String(uid) ? null : String(uid),
+            )
+          "
+        />
+      </template>
     </template>
 
     <div
-      v-if="isAlreadyWatched"
+      v-if="movie?.reviews && members"
       class="px-3 py-1.5 rounded-xl bg-[#edf3fc] dark:bg-[#356dd51e] flex flex-shrink-0 items-center gap-2"
     >
       <div class="p-1.5 rounded-full border border-[#356dd5]">
@@ -70,8 +94,9 @@ const emit = defineEmits(["update:modelValue"]);
         </div>
         <span
           class="text-[10px] uppercase tracking-wider font-semibold text-[#356dd5] dark:text-[#4787ff] block"
-          >Média</span
         >
+          {{ members ? "Média" : "Sua Nota" }}
+        </span>
       </div>
     </div>
 

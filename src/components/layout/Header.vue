@@ -53,9 +53,11 @@ function openProfileModal() {
 
         <div
           v-if="groupsStore.activeGroup"
-          class="py-1.5 px-3 rounded-full text-xs font-semibold text-white shadow-sm transition-all flex items-center gap-1.5"
+          class="py-1 px-3 rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 border"
           :style="{
-            backgroundImage: `linear-gradient(135deg, ${groupsStore.activeGroup.color.primary}, ${groupsStore.activeGroup.color.secondary})`,
+            backgroundColor: `${groupsStore.activeGroup.color.primary}1e`,
+            borderColor: `${groupsStore.activeGroup.color.primary}50`,
+            color: groupsStore.activeGroup.color.primary,
           }"
         >
           <FolderHeart class="w-3.5 h-3.5" />
@@ -63,7 +65,7 @@ function openProfileModal() {
 
           <button
             @click.stop="groupsStore.clearActiveGroup"
-            class="ml-1 p-0.5 rounded-full hover:bg-white/20 transition-colors"
+            class="ml-1 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
           >
             <X class="w-3 h-3" />
           </button>

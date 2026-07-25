@@ -68,57 +68,56 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     const notificationsStore = useNotificationsStore();
     const savedMoviesStore = useSavedMoviesStore();
 
-    const activeGroup = groupStore.activeGroup;
-    let targetCollectionPath = "";
+    const currentUserId = authStore.user?.uid;
+    if (!currentUserId) return;
 
-    if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      targetCollectionPath = `users/${authStore.user.uid}/watchedMovies`;
-    } else {
-      targetCollectionPath = `groups/${activeGroup.id}/watchedMovies`;
-    }
+    const activeGroup = groupStore.activeGroup;
+
+    const targetCollectionPath = activeGroup
+      ? `groups/${activeGroup.id}/watchedMovies`
+      : `users/${currentUserId}/watchedMovies`;
 
     const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
-
     const docSnap = await getDoc(movieDocRef);
     const isAlreadyWatched = docSnap.exists();
 
+    const newUserReview = {
+      rating: review.rating,
+      comment: review.comment || "",
+      updatedAt: new Date(),
+    };
+
     let updatedReviews = {};
-    let average_rating = "0.0";
 
     if (isAlreadyWatched) {
       const existingData = docSnap.data();
-      updatedReviews = { ...existingData.reviews, ...review };
+      updatedReviews = {
+        ...existingData.reviews,
+        [currentUserId]: newUserReview,
+      };
+    } else {
+      updatedReviews = {
+        [currentUserId]: newUserReview,
+      };
+    }
 
-      const ratings = Object.values(updatedReviews).map((r) =>
-        Number(r.rating),
-      );
+    const ratings = Object.values(updatedReviews).map((r) => Number(r.rating));
+    const average_rating = (
+      ratings.reduce((a, b) => a + b, 0) / ratings.length
+    ).toFixed(1);
 
-      average_rating = Number(
-        ratings.reduce((a, b) => a + b, 0) / ratings.length,
-      ).toFixed(1);
-
+    if (isAlreadyWatched) {
       await updateDoc(movieDocRef, {
         reviews: updatedReviews,
         average_rating,
         updated_at: new Date(),
       });
     } else {
-      updatedReviews = { ...review };
-
-      const ratings = Object.values(updatedReviews).map((r) =>
-        Number(r.rating),
-      );
-
-      average_rating = Number(
-        ratings.reduce((a, b) => a + b, 0) / ratings.length,
-      ).toFixed(1);
-
       await setDoc(movieDocRef, {
         id: movie.id,
         title: movie.title,
-        original_title: movie.original_title,
-        poster_path: movie.poster_path,
+        original_title: movie.original_title || "",
+        poster_path: movie.poster_path || "",
         reviews: updatedReviews,
         average_rating,
         created_at: new Date(),
@@ -171,8 +170,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     watchedMovies.value = watchedMovies.value.filter(
       (movie) => String(movie.id) !== String(id),
     );
+
     watchedMoviesIds.value = watchedMoviesIds.value.filter(
-      (id) => String(id) !== String(id),
+      (movieId) => String(movieId) !== String(id),
     );
   }
 

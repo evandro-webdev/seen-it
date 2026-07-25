@@ -9,7 +9,7 @@ export const useMovieDetailsStore = defineStore("movieDetails", () => {
   const selectedMovie = ref(null);
   const isLoading = ref(false);
 
-  async function openMovie(id, currentRoute) {
+  async function openMovie(id) {
     isLoading.value = true;
 
     try {
@@ -26,15 +26,23 @@ export const useMovieDetailsStore = defineStore("movieDetails", () => {
         (m) => String(m.id) === String(id),
       );
 
-      if (currentRoute === "watched" && localWatched) {
-        selectedMovie.value = { ...localWatched, ...tmdbData };
-      } else if (currentRoute === "saved" && localSaved) {
-        selectedMovie.value = { ...localSaved, ...tmdbData };
-      } else if (watchedStore.isAlreadyWatched(id) && localWatched) {
-        selectedMovie.value = { ...localWatched, ...tmdbData };
-      } else {
-        selectedMovie.value = tmdbData;
+      let mergedMovie = { ...tmdbData };
+
+      if (localSaved) {
+        mergedMovie = {
+          ...mergedMovie,
+          ...localSaved,
+        };
       }
+
+      if (localWatched) {
+        mergedMovie = {
+          ...mergedMovie,
+          ...localWatched,
+        };
+      }
+
+      selectedMovie.value = mergedMovie;
     } catch (error) {
       console.error("Erro ao carregar detalhes do filme:", error);
     } finally {

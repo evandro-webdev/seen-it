@@ -124,6 +124,7 @@ function unlockScroll() {
     @after-leave="
       unlockScroll();
       showRateForm = false;
+      selectedReviewer = null
     "
   >
     <div
@@ -173,8 +174,9 @@ function unlockScroll() {
 
             <MovieRatingsRow
               :movie="movie"
-              :members="isAlreadyWatched ? groupStore.activeGroupMembers : null"
-              :is-already-watched="isAlreadyWatched"
+              :members="
+                groupStore.activeGroup ? groupStore.activeGroupMembers : null
+              "
               v-model="selectedReviewer"
             />
 
@@ -182,7 +184,7 @@ function unlockScroll() {
               v-if="
                 selectedReviewer && movie.reviews[selectedReviewer]?.comment
               "
-              :reviewer-name="movie.reviews[selectedReviewer].name"
+              :reviewer-name="groupStore.activeGroupMembers[selectedReviewer].name"
               :comment="movie.reviews[selectedReviewer].comment"
             />
           </div>
