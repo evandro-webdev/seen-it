@@ -13,6 +13,7 @@ import {
   deleteDoc,
   updateDoc,
   setDoc,
+  runTransaction,
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";
 
@@ -78,8 +79,6 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       : `users/${currentUserId}/watchedMovies`;
 
     const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
-    const docSnap = await getDoc(movieDocRef);
-    const isAlreadyWatched = docSnap.exists();
 
     const newUserReview = {
       rating: review.rating,
@@ -87,42 +86,49 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       updatedAt: new Date(),
     };
 
-    let updatedReviews = {};
+    let finalReviews = {};
+    let average_rating = "0";
 
-    if (isAlreadyWatched) {
-      const existingData = docSnap.data();
-      updatedReviews = {
-        ...existingData.reviews,
-        [currentUserId]: newUserReview,
-      };
-    } else {
-      updatedReviews = {
-        [currentUserId]: newUserReview,
-      };
-    }
+    await runTransaction(db, async (transaction) => {
+      const docSnap = await transaction.get(movieDocRef);
 
-    const ratings = Object.values(updatedReviews).map((r) => Number(r.rating));
-    const average_rating = (
-      ratings.reduce((a, b) => a + b, 0) / ratings.length
-    ).toFixed(1);
+      if (docSnap.exists()) {
+        const existingData = docSnap.data();
 
-    if (isAlreadyWatched) {
-      await updateDoc(movieDocRef, {
-        reviews: updatedReviews,
-        average_rating,
-        updated_at: new Date(),
-      });
-    } else {
-      await setDoc(movieDocRef, {
-        id: movie.id,
-        title: movie.title,
-        original_title: movie.original_title || "",
-        poster_path: movie.poster_path || "",
-        reviews: updatedReviews,
-        average_rating,
-        created_at: new Date(),
-      });
-    }
+        finalReviews = {
+          ...existingData.reviews,
+          [currentUserId]: newUserReview,
+        };
+
+        const ratings = Object.values(finalReviews).map((r) =>
+          Number(r.rating),
+        );
+        average_rating = (
+          ratings.reduce((a, b) => a + b, 0) / ratings.length
+        ).toFixed(1);
+
+        transaction.update(movieDocRef, {
+          [`reviews.${currentUserId}`]: newUserReview,
+          average_rating,
+          updated_at: new Date(),
+        });
+      } else {
+        finalReviews = {
+          [currentUserId]: newUserReview,
+        };
+        average_rating = Number(review.rating).toFixed(1);
+
+        transaction.set(movieDocRef, {
+          id: movie.id,
+          title: movie.title,
+          original_title: movie.original_title || "",
+          poster_path: movie.poster_path || "",
+          reviews: finalReviews,
+          average_rating,
+          created_at: new Date(),
+        });
+      }
+    });
 
     const existingLocalIndex = watchedMovies.value.findIndex(
       (m) => String(m.id) === String(movie.id),
@@ -131,7 +137,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     const localMovieData = {
       ...movie,
       docId: String(movie.id),
-      reviews: updatedReviews,
+      reviews: finalReviews,
       average_rating,
     };
 

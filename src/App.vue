@@ -11,6 +11,7 @@ import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";
 import { useNotificationsStore } from "./stores/notifications.js";
 import NotificationsModal from "./components/notifications/NotificationsModal.vue";
+import ToastContainer from "./components/ui/ToastContainer.vue";
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
@@ -56,6 +57,7 @@ watch(
   <GroupListModal :groups="groupsStore.groups" />
   <ProfileModal />
   <NotificationsModal />
+  <ToastContainer/>
 
   <NavigationBar />
 </template>

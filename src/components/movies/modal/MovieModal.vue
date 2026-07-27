@@ -5,7 +5,7 @@ import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
 
-import { Sparkles, ArrowLeft, Check, X, SquarePen } from "@lucide/vue";
+import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
 import MovieHeader from "./MovieHeader.vue";
 import MovieMetadata from "./MovieMetadata.vue";
@@ -16,11 +16,13 @@ import MovieRateForm from "../rating/MovieRateForm.vue";
 
 import SaveButton from "../ui/buttons/SaveButton.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
+import { useToastStore } from "@/stores/toast.js";
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
 const groupStore = useGroupsStore();
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 
 const props = defineProps({
   movie: {
@@ -72,6 +74,8 @@ async function handleSaveRating(ratingData) {
     });
 
     showRateForm.value = false;
+
+    toastStore.success("Avaliação salva com sucesso!")
   } catch (error) {
     console.error("Erro ao salvar avaliação:", error);
   }
@@ -124,7 +128,7 @@ function unlockScroll() {
     @after-leave="
       unlockScroll();
       showRateForm = false;
-      selectedReviewer = null
+      selectedReviewer = null;
     "
   >
     <div
@@ -184,7 +188,9 @@ function unlockScroll() {
               v-if="
                 selectedReviewer && movie.reviews[selectedReviewer]?.comment
               "
-              :reviewer-name="groupStore.activeGroupMembers[selectedReviewer].name"
+              :reviewer-name="
+                groupStore.activeGroupMembers[selectedReviewer].name
+              "
               :comment="movie.reviews[selectedReviewer].comment"
             />
           </div>
@@ -219,8 +225,20 @@ function unlockScroll() {
             :icon="Check"
             variant="primary"
             block
+            :disabled="isSubmitting"
             @click="submitRating"
-          />
+          >
+            <template #icon>
+              <Loader2
+                v-if="isSubmitting"
+                class="w-4 h-4 animate-spin"
+              />
+              <Check
+                v-else
+                class="w-4 h-4 transition-all"
+              />
+            </template>
+          </BaseButton>
         </div>
 
         <template v-else>
