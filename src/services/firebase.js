@@ -15,7 +15,8 @@ import {
   arrayUnion,
   onSnapshot,
   orderBy,
-  runTransaction
+  runTransaction,
+  writeBatch
 } from "firebase/firestore";
 
 import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
@@ -52,5 +53,6 @@ export {
   auth,
   onSnapshot,
   orderBy,
-  runTransaction
+  runTransaction,
+  writeBatch
 };

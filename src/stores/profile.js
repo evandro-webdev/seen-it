@@ -18,7 +18,6 @@ const supabase = createClient(
 
 export const useProfileStore = defineStore("profile", () => {
   const isProfileModalOpen = ref(false);
-  const isUpdating = ref(false);
 
   async function updateProfile({ name, color, imageFile }) {
     const authStore = useAuthStore();
@@ -26,63 +25,54 @@ export const useProfileStore = defineStore("profile", () => {
 
     if (!uid) return;
 
-    isUpdating.value = true;
+    const updates = {};
 
-    try {
-      const updates = {};
+    updates.name = name;
+    updates.color = color;
 
-      updates.name = name;
-      updates.color = color;
-
-      if (imageFile) {
-        const compressedFile = await new Promise((resolve, reject) => {
-          new Compressor(imageFile, {
-            quality: 0.6,
-            maxWidth: 400,
-            maxHeight: 400,
-            success(result) {
-              resolve(result);
-            },
-            error(err) {
-              reject(err);
-            },
-          });
+    if (imageFile) {
+      const compressedFile = await new Promise((resolve, reject) => {
+        new Compressor(imageFile, {
+          quality: 0.6,
+          maxWidth: 400,
+          maxHeight: 400,
+          success(result) {
+            resolve(result);
+          },
+          error(err) {
+            reject(err);
+          },
         });
+      });
 
-        const fileName = `${uid}.jpg`;
+      const fileName = `${uid}.jpg`;
 
-        const { data, error } = await supabase.storage
-          .from("avatars")
-          .upload(fileName, compressedFile, { upsert: true });
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, compressedFile, { upsert: true });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
-        updates.avatar_url = publicUrl;
+      updates.avatar_url = publicUrl;
+    }
+
+    await updateDoc(doc(db, "users", uid), updates);
+
+    const auth = getAuth();
+    if (auth.currentUser) {
+      await updateFirebaseProfile(auth.currentUser, {
+        displayName: name,
+      });
+
+      authStore.user.displayName = name;
+
+      if (updates.avatar_url) {
+        authStore.user.avatar_url = updates.avatar_url;
       }
-
-      await updateDoc(doc(db, "users", uid), updates);
-
-      const auth = getAuth();
-      if (auth.currentUser) {
-        await updateFirebaseProfile(auth.currentUser, {
-          displayName: name,
-        });
-
-        authStore.user.displayName = name;
-
-        if (updates.avatar_url) {
-          authStore.user.avatar_url = updates.avatar_url;
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
-    } finally {
-      isUpdating.value = false;
-      closeProfileModal();
     }
   }
 

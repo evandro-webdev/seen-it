@@ -5,7 +5,7 @@ import MovieModal from "./components/movies/modal/MovieModal.vue";
 import GroupListModal from "./components/groups/GroupListModal.vue";
 import ProfileModal from "./components/profile/ProfileModal.vue";
 
-import { watch, onMounted } from "vue";
+import { watch } from "vue";
 import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";

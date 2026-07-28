@@ -2,11 +2,14 @@
 import { ref, watch } from "vue";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
-import { Check, User, UserRoundCheck, X } from "@lucide/vue";
+import { Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
 import BaseButton from "../ui/BaseButton.vue";
+import { useToastStore } from "@/stores/toast.js";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
+const toastStore = useToastStore();
+const isSubmitting = ref(false);
 
 const name = ref("");
 const selectedColor = ref("");
@@ -38,11 +41,25 @@ function handleFileChange(event) {
 }
 
 async function handleUpdate() {
-  await profileStore.updateProfile({
-    name: name.value,
-    color: selectedColor.value,
-    imageFile: selectedFile.value,
-  });
+  if (isSubmitting.value) return;
+
+  try {
+    isSubmitting.value = true;
+
+    await profileStore.updateProfile({
+      name: name.value,
+      color: selectedColor.value,
+      imageFile: selectedFile.value,
+    });
+
+    toastStore.success("Perfil atualizado!");
+    profileStore.closeProfileModal();
+  } catch (error) {
+    console.error("Erro ao atualizar perfil:", error);
+    toastStore.error("Falha ao atualizar o perfil.");
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 function lockScroll() {
@@ -163,12 +180,25 @@ function unlockScroll() {
           </div>
 
           <BaseButton
+            @click="handleUpdate"
             label="Salvar alterações"
             :icon="UserRoundCheck"
             variant="primary"
             size="lg"
+            :disabled="isSubmitting"
             block
-          />
+          >
+            <template #icon>
+              <Loader2
+                v-if="isSubmitting"
+                class="w-4 h-4 animate-spin"
+              />
+              <UserRoundCheck
+                v-else
+                class="w-4 h-4 transition-all"
+              />
+            </template>
+          </BaseButton>
         </form>
       </div>
     </div>

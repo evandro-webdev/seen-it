@@ -11,6 +11,7 @@ import {
   orderBy,
   updateDoc,
   doc,
+  writeBatch,
 } from "@/services/firebase";
 import { useAuthStore } from "./auth";
 
@@ -82,38 +83,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
     loading.value = false;
   }
 
-  async function dispatchSavedMovieNotification(movieId, movieTitle) {
-    const authStore = useAuthStore();
-    const groupStore = useGroupsStore();
-
-    const membersIds = Object.keys(groupStore.activeGroupMembers);
-
-    const membersToNotificate = membersIds.filter(
-      (memberId) => authStore.user.uid !== memberId,
-    );
-
-    const promises = membersToNotificate.map((uid) => {
-      return addDoc(collection(db, "notifications"), {
-        userId: uid,
-        sender_id: authStore.user.uid,
-        sender_name: authStore.user.displayName,
-        group_id: groupStore.activeGroup.id,
-        movie_id: movieId,
-        movie_title: movieTitle,
-        type: "movie_saved",
-        isRead: false,
-        created_at: new Date(),
-      });
-    });
-
-    await Promise.all(promises);
-
-    const title = "Filme salvo! 📌";
-    const body = `${authStore.user.displayName} adicionou "${movieTitle}" aos salvos!`;
-
-    await sendPushNotification(membersToNotificate, title, body, 'movie_saved');
-  }
-
   async function dispatchWatchedMovieNotification(movie) {
     const authStore = useAuthStore();
     const groupStore = useGroupsStore();
@@ -140,10 +109,42 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     await Promise.all(promises);
 
-    const title = "Filme avaliado! 📌";
-    const body = `${authStore.user.displayName} avaliou "${movie.title}". Confira!`;
+    const title = "Confira minha nota!";
+    const body = `${authStore.user.displayName} avaliou "${movie.title}".`;
 
-    await sendPushNotification(membersToNotificate, title, body, 'movie_rated');
+    await sendPushNotification(membersToNotificate, title, body, "movie_rated");
+  }
+
+  async function dispatchSavedMovieNotification(movieId, movieTitle) {
+    const authStore = useAuthStore();
+    const groupStore = useGroupsStore();
+
+    const membersIds = Object.keys(groupStore.activeGroupMembers);
+
+    const membersToNotificate = membersIds.filter(
+      (memberId) => authStore.user.uid !== memberId,
+    );
+
+    const promises = membersToNotificate.map((uid) => {
+      return addDoc(collection(db, "notifications"), {
+        userId: uid,
+        sender_id: authStore.user.uid,
+        sender_name: authStore.user.displayName,
+        group_id: groupStore.activeGroup.id,
+        movie_id: movieId,
+        movie_title: movieTitle,
+        type: "movie_saved",
+        isRead: false,
+        created_at: new Date(),
+      });
+    });
+
+    await Promise.all(promises);
+
+    const title = "Vamos assistir?";
+    const body = `${authStore.user.displayName} salvou o filme "${movieTitle}"`;
+
+    await sendPushNotification(membersToNotificate, title, body, "movie_saved");
   }
 
   async function markAsRead(notificationId) {
@@ -153,6 +154,32 @@ export const useNotificationsStore = defineStore("notifications", () => {
       });
     } catch (error) {
       console.error("Erro ao marcar como lida: ", error);
+    }
+  }
+
+  async function markAllAsRead() {
+    const groupsStore = useGroupsStore();
+    const activeGroupId = groupsStore.activeGroup?.id;
+
+    if (!activeGroupId) return;
+
+    const unreadNotifications = notifications.value.filter(
+      (n) => !n.isRead && n.group_id === activeGroupId,
+    );
+
+    if (unreadNotifications.length === 0) return;
+
+    try {
+      const batch = writeBatch(db);
+
+      unreadNotifications.forEach((notification) => {
+        const notiRef = doc(db, "notifications", notification.id);
+        batch.update(notiRef, { isRead: true });
+      });
+
+      await batch.commit();
+    } catch (error) {
+      console.error("Erro ao marcar todas como lidas: ", error);
     }
   }
 
@@ -205,6 +232,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     dispatchWatchedMovieNotification,
     unreadCount,
     markAsRead,
+    markAllAsRead,
     stopListening,
     loading,
   };

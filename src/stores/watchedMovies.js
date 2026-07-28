@@ -9,10 +9,7 @@ import {
   doc,
   getDocs,
   collection,
-  getDoc,
   deleteDoc,
-  updateDoc,
-  setDoc,
   runTransaction,
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";

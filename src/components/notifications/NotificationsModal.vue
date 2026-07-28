@@ -1,6 +1,6 @@
 <script setup>
 import { useNotificationsStore } from "@/stores/notifications";
-import { Bell, X } from "@lucide/vue";
+import { Bell, CheckCheck, X } from "@lucide/vue";
 import NotificationItem from "./NotificationItem.vue";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 
@@ -51,18 +51,29 @@ async function handleNotificationClick(notification) {
             </h2>
           </div>
 
-          <button
-            @click="notificationsStore.closeNotificationsModal"
-            type="button"
-            class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
-          >
-            <X class="text-gray-600 dark:text-[#A7B0C9]" />
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="notificationsStore.unreadCount > 0"
+              @click="notificationsStore.markAllAsRead"
+              type="button"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-[#0088FF] transition-colors"
+              title="Marcar todas como lidas"
+            >
+              <CheckCheck class="w-4 h-4" />
+              <span class="hidden sm:inline">Marcar lidas</span>
+            </button>
+
+            <button
+              @click="notificationsStore.closeNotificationsModal"
+              type="button"
+              class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
+            >
+              <X class="text-gray-600 dark:text-[#A7B0C9]" />
+            </button>
+          </div>
         </div>
 
-        <div
-          class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 standard-scrollbar"
-        >
+        <div class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 standard-scrollbar">
           <div
             v-if="notificationsStore.notifications.length === 0"
             class="px-2.5 py-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]"
