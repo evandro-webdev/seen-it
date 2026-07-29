@@ -1,10 +1,11 @@
 <script setup>
 import { Frown, UsersRound, X } from "@lucide/vue";
-import GroupListItem from "./GroupListItem.vue";
 import { ref } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
-import GroupCreateForm from "./GroupCreateForm.vue";
 import { onClickOutside } from "@vueuse/core";
+
+import GroupListItem from "./GroupListItem.vue";
+import GroupCreateForm from "./GroupCreateForm.vue";
 import BaseButton from "../ui/BaseButton.vue";
 
 defineProps({
@@ -14,8 +15,8 @@ defineProps({
   },
 });
 
-const groupModalRef = ref(null);
 const groupsStore = useGroupsStore();
+const groupModalRef = ref(null);
 const showCreateGroupForm = ref(false);
 
 onClickOutside(groupModalRef, () => {

@@ -11,11 +11,15 @@ defineProps({
 
 const groupsStore = useGroupsStore();
 
+function handleSelectGroup(group) {
+  groupsStore.setActiveGroup(group);
+  groupsStore.closeGroupsModal();
+}
 </script>
 
 <template>
   <div
-    @click="groupsStore.setActiveGroup(group)"
+    @click="handleSelectGroup(group)"
     class="px-2.5 py-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F] flex justify-between items-center transition-colors"
   >
     <div class="flex items-center gap-2.5">

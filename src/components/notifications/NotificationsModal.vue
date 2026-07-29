@@ -1,19 +1,17 @@
 <script setup>
+import { ref } from "vue";
 import { useNotificationsStore } from "@/stores/notifications";
-import { Bell, CheckCheck, X } from "@lucide/vue";
-import NotificationItem from "./NotificationItem.vue";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { onClickOutside } from "@vueuse/core";
+
+import { Bell, CheckCheck, X } from "@lucide/vue";
+
+import NotificationItem from "./NotificationItem.vue";
 
 const movieDetailStore = useMovieDetailsStore();
 const notificationsStore = useNotificationsStore();
 
-function lockScroll() {
-  document.body.style.overflow = "hidden";
-}
-
-function unlockScroll() {
-  document.body.style.overflow = "";
-}
+const notificationsModalRef = ref(null);
 
 async function handleNotificationClick(notification) {
   if (!notification.isRead) {
@@ -21,6 +19,18 @@ async function handleNotificationClick(notification) {
   }
 
   await movieDetailStore.openMovie(notification.movie_id);
+}
+
+onClickOutside(notificationsModalRef, () => {
+  notificationsStore.closeNotificationsModal();
+});
+
+function lockScroll() {
+  document.body.style.overflow = "hidden";
+}
+
+function unlockScroll() {
+  document.body.style.overflow = "";
 }
 </script>
 

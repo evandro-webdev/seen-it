@@ -4,7 +4,6 @@ import {
   db,
   getDocs,
   collection,
-  addDoc,
   deleteDoc,
   doc,
   setDoc,
@@ -33,27 +32,26 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       targetCollectionPath = `groups/${activeGroup.id}/savedMovies`;
     }
 
-    const snapshot = await getDocs(collection(db, targetCollectionPath));
+    try {
+      const snapshot = await getDocs(collection(db, targetCollectionPath));
 
-    savedMovies.value = snapshot.docs.map((doc) => ({
-      docId: doc.id,
-      ...doc.data(),
-    }));
+      savedMovies.value = snapshot.docs.map((doc) => ({
+        docId: doc.id,
+        ...doc.data(),
+      }));
 
-    savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
+      savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
+    } catch (error) {
+      console.error("Erro ao carregar filmes salvos:", error);
+    }
   }
 
   const groupStore = useGroupsStore();
   watch(
     () => groupStore.activeGroup,
-    async (newGroup) => {
+    async () => {
       savedMovies.value = [];
       savedMoviesIds.value = [];
-
-      if (newGroup) {
-        await groupStore.loadActiveGroupMembers();
-      }
-
       await loadSavedMovies();
     },
     { immediate: true },

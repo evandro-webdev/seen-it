@@ -15,12 +15,22 @@ import { ref } from "vue";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
-  const activeGroup = ref(
-    JSON.parse(localStorage.getItem("activeGroup")) || null,
-  );
+
+  const activeGroup = ref(getInitialActiveGroup());
   const activeGroupMembers = ref({});
+
   const isGroupsModalOpen = ref(false);
   const isLoading = ref(false);
+
+  function getInitialActiveGroup() {
+    try {
+      const item = localStorage.getItem("activeGroup");
+      return item ? JSON.parse(item) : null;
+    } catch (e) {
+      localStorage.removeItem("activeGroup");
+      return null;
+    }
+  }
 
   function openGroupsModal() {
     isGroupsModalOpen.value = true;
@@ -32,12 +42,17 @@ export const useGroupsStore = defineStore("groups", () => {
 
   function setActiveGroup(group) {
     activeGroup.value = group;
-    localStorage.setItem("activeGroup", JSON.stringify(group));
-    closeGroupsModal();
+    if (group) {
+      localStorage.setItem("activeGroup", JSON.stringify(group));
+      loadActiveGroupMembers();
+    } else {
+      clearActiveGroup();
+    }
   }
 
   function clearActiveGroup() {
     activeGroup.value = null;
+    activeGroupMembers.value = {};
     localStorage.removeItem("activeGroup");
   }
 
@@ -130,7 +145,7 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function loadActiveGroupMembers() {
-    if (!activeGroup.value || !activeGroup.value.membersIds) return;
+    if (!activeGroup.value?.membersIds?.length) return;
 
     try {
       const q = query(

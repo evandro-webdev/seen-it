@@ -16,21 +16,36 @@ export const useAuthStore = defineStore("auth", () => {
   const loading = ref(true);
 
   onAuthStateChanged(auth, async (firebaseUser) => {
-    if (firebaseUser) {
-      const docSnap = await getDoc(doc(db, "users", firebaseUser.uid));
-      const userData = docSnap.exists() ? docSnap.data() : {};
+    try {
+      if (firebaseUser) {
+        const docSnap = await getDoc(doc(db, "users", firebaseUser.uid));
+        const userData = docSnap.exists() ? docSnap.data() : {};
 
-      user.value = {
-        uid: firebaseUser.uid,
-        displayName: firebaseUser.displayName,
-        email: firebaseUser.email,
-        color: userData.color,
-        avatar_url: userData.avatar_url || null,
-      };
-    } else {
-      user.value = null;
+        user.value = {
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          color: userData.color || "#1D4776",
+          avatar_url: userData.avatar_url || null,
+        };
+      } else {
+        user.value = null;
+      }
+    } catch (error) {
+      console.error("Erro ao sincronizar sessão do usuário:", error);
+
+      if (firebaseUser) {
+        user.value = {
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+        };
+      } else {
+        user.value = null;
+      }
+    } finally {
+      loading.value = false;
     }
-    loading.value = false;
   });
 
   async function register(email, password, name) {
@@ -81,6 +96,14 @@ export const useAuthStore = defineStore("auth", () => {
     const groupsStore = useGroupsStore();
     notificationsStore.stopListening();
     groupsStore.activeGroup = null;
+
+    if (window.OneSignal) {
+      try {
+        await window.OneSignal.logout();
+      } catch (e) {
+        console.warn("Erro ao deslogar do OneSignal:", e);
+      }
+    }
 
     await signOut(auth);
   }

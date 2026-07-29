@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from "vue";
-import { Star } from "@lucide/vue"; // ou de onde importar o ícone Star
+import { computed, ref } from "vue";
+import { Star } from "@lucide/vue";
 import { formatRating } from "@/utils/formatters";
 
 const props = defineProps({
@@ -14,6 +14,8 @@ const props = defineProps({
   },
 });
 
+const imageError = ref(false);
+
 const posterUrl = computed(() => {
   if (props.movie?.poster_path) {
     return `https://image.tmdb.org/t/p/w500${props.movie.poster_path}`;
@@ -25,21 +27,26 @@ const rating = computed(() => {
   const val = props.movie?.average_rating ?? props.movie?.vote_average;
   return val ? formatRating(val) : null;
 });
+
+function handleImageError() {
+  imageError.value = true;
+}
 </script>
 
 <template>
   <div
-    class="group space-y-1.5 overflow-hidden cursor-pointer flex flex-col transition-transform duration-200 active:scale-95 select-none"
+    class="group space-y-1.5 overflow-hidden cursor-pointer flex flex-col transition-transform duration-200 active:scale-95 select-none snap-start"
     :class="fixedWidth ? 'w-[125px] sm:w-[140px] shrink-0' : 'w-full'"
   >
     <div
       class="relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-gray-200 dark:bg-[#161f30]"
     >
       <img
-        v-if="posterUrl"
+        v-if="posterUrl && !imageError"
         :src="posterUrl"
         :alt="movie.title"
         loading="lazy"
+        @error="handleImageError"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
 
@@ -56,7 +63,7 @@ const rating = computed(() => {
 
       <div
         v-if="rating"
-        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md  flex items-center gap-1 backdrop-blur-xs"
+        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md flex items-center gap-1 backdrop-blur-xs"
       >
         <Star class="w-2.5 h-2.5 fill-white text-white" />
         <span>{{ rating }}</span>

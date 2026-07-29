@@ -2,14 +2,19 @@
 import { ref, watch } from "vue";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
-import { Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
-import BaseButton from "../ui/BaseButton.vue";
 import { useToastStore } from "@/stores/toast.js";
+import { onClickOutside } from "@vueuse/core";
+
+import { Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
+
+import BaseButton from "../ui/BaseButton.vue";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const toastStore = useToastStore();
+
 const isSubmitting = ref(false);
+const profileModalRef = ref(false);
 
 const name = ref("");
 const selectedColor = ref("");
@@ -61,6 +66,10 @@ async function handleUpdate() {
     isSubmitting.value = false;
   }
 }
+
+onClickOutside(profileModalRef, () => {
+  profileStore.closeProfileModal();
+});
 
 function lockScroll() {
   document.body.style.overflow = "hidden";

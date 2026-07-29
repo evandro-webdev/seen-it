@@ -7,6 +7,11 @@ import "./style.css";
 
 const app = createApp(App);
 
+app.config.errorHandler = (err, instance, info) => {
+  console.error("Exceção não tratada capturada pelo Vue:", err);
+  console.error("Info:", info);
+};
+
 app.use(createPinia());
 app.use(router);
 

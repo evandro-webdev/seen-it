@@ -4,6 +4,8 @@ import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
+import { useToastStore } from "@/stores/toast.js";
+import { useModalHistory } from "@/composables/useModalHistory.js";
 
 import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
@@ -11,18 +13,10 @@ import MovieHeader from "./MovieHeader.vue";
 import MovieMetadata from "./MovieMetadata.vue";
 import MovieRatingsRow from "./MovieRatingsRow.vue";
 import MovieCommentBox from "./MovieCommentBox.vue";
-
 import MovieRateForm from "../rating/MovieRateForm.vue";
 
 import SaveButton from "../ui/buttons/SaveButton.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
-import { useToastStore } from "@/stores/toast.js";
-
-const watchedMoviesStore = useWatchedMoviesStore();
-const savedMoviesStore = useSavedMoviesStore();
-const groupStore = useGroupsStore();
-const authStore = useAuthStore();
-const toastStore = useToastStore();
 
 const props = defineProps({
   movie: {
@@ -33,6 +27,15 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close"]);
+
+const watchedMoviesStore = useWatchedMoviesStore();
+const savedMoviesStore = useSavedMoviesStore();
+const groupStore = useGroupsStore();
+const authStore = useAuthStore();
+const toastStore = useToastStore();
+
+const isModalOpen = computed(() => !!props.movie);
+const { handleCloseClick } = useModalHistory(isModalOpen, () => emit("close"));
 
 const isAlreadyWatched = computed(() =>
   props.movie ? watchedMoviesStore.isAlreadyWatched(props.movie.id) : false,
@@ -49,7 +52,6 @@ const avatarUrl = computed(() => authStore.user?.avatar_url || "");
 
 const showRateForm = ref(false);
 const selectedReviewer = ref(null);
-
 const rateFormRef = ref(null);
 const isSubmitting = ref(false);
 
@@ -60,56 +62,21 @@ async function submitRating() {
 
   try {
     isSubmitting.value = true;
-    await handleSaveRating(formData);
+
+    await watchedMoviesStore.saveWatchedMovie(props.movie, {
+      rating: formData.rating,
+      comment: formData.comment,
+    });
+
+    showRateForm.value = false;
+    toastStore.success("Avaliação salva com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar avaliação:", error);
+    toastStore.error("Ocorreu um erro ao salvar sua avaliação.");
   } finally {
     isSubmitting.value = false;
   }
 }
-
-async function handleSaveRating(ratingData) {
-  try {
-    await watchedMoviesStore.saveWatchedMovie(props.movie, {
-      rating: ratingData.rating,
-      comment: ratingData.comment,
-    });
-
-    showRateForm.value = false;
-
-    toastStore.success("Avaliação salva com sucesso!")
-  } catch (error) {
-    console.error("Erro ao salvar avaliação:", error);
-  }
-}
-
-function handleAndroidBack() {
-  if (props.movie) {
-    emit("close");
-  }
-}
-
-watch(
-  () => props.movie,
-  (newMovie, oldMovie) => {
-    if (newMovie && !oldMovie) {
-      history.pushState({ modalOpen: true }, "");
-      window.addEventListener("popstate", handleAndroidBack);
-    } else if (!newMovie && oldMovie) {
-      window.removeEventListener("popstate", handleAndroidBack);
-    }
-  },
-);
-
-function handleCloseClick() {
-  if (history.state?.modalOpen) {
-    history.back();
-  } else {
-    emit("close");
-  }
-}
-
-onUnmounted(() => {
-  window.removeEventListener("popstate", handleAndroidBack);
-});
 
 function lockScroll() {
   document.body.style.overflow = "hidden";
@@ -189,7 +156,7 @@ function unlockScroll() {
                 selectedReviewer && movie.reviews[selectedReviewer]?.comment
               "
               :reviewer-name="
-                groupStore.activeGroupMembers[selectedReviewer].name
+                groupStore.activeGroupMembers[selectedReviewer]?.name
               "
               :comment="movie.reviews[selectedReviewer].comment"
             />
@@ -201,7 +168,6 @@ function unlockScroll() {
             :movie="movie"
             :current-user="currentUser"
             :avatar-url="avatarUrl"
-            @save="handleSaveRating"
             @cancel="showRateForm = false"
           />
         </div>

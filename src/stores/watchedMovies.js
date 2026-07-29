@@ -34,27 +34,24 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       targetCollectionPath = `groups/${activeGroup.id}/watchedMovies`;
     }
 
-    const snapshot = await getDocs(collection(db, targetCollectionPath));
-
-    watchedMovies.value = snapshot.docs.map((doc) => ({
-      docId: doc.id,
-      ...doc.data(),
-    }));
-
-    watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
+    try {
+      const snapshot = await getDocs(collection(db, targetCollectionPath));
+      watchedMovies.value = snapshot.docs.map((doc) => ({
+        docId: doc.id,
+        ...doc.data(),
+      }));
+      watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
+    } catch (error) {
+      console.error("Erro ao carregar filmes assistidos:", error);
+    }
   }
 
   const groupStore = useGroupsStore();
   watch(
     () => groupStore.activeGroup,
-    async (newGroup) => {
+    async () => {
       watchedMovies.value = [];
       watchedMoviesIds.value = [];
-
-      if (newGroup) {
-        await groupStore.loadActiveGroupMembers();
-      }
-
       await loadWatchedMovies();
     },
     { immediate: true },

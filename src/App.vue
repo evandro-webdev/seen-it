@@ -1,15 +1,15 @@
 <script setup>
-import Header from "./components/layout/Header.vue";
-import NavigationBar from "./components/layout/NavigationBar.vue";
-import MovieModal from "./components/movies/modal/MovieModal.vue";
-import GroupListModal from "./components/groups/GroupListModal.vue";
-import ProfileModal from "./components/profile/ProfileModal.vue";
-
 import { watch } from "vue";
 import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";
 import { useNotificationsStore } from "./stores/notifications.js";
+
+import Header from "./components/layout/Header.vue";
+import NavigationBar from "./components/layout/NavigationBar.vue";
+import MovieModal from "./components/movies/modal/MovieModal.vue";
+import GroupListModal from "./components/groups/GroupListModal.vue";
+import ProfileModal from "./components/profile/ProfileModal.vue";
 import NotificationsModal from "./components/notifications/NotificationsModal.vue";
 import ToastContainer from "./components/ui/ToastContainer.vue";
 
@@ -20,12 +20,14 @@ const notificationsStore = useNotificationsStore();
 
 watch(
   () => authStore.user?.uid,
-  (newUid) => {
+  (newUid, oldUid) => {
     if (newUid) {
       groupsStore.getGroups();
       notificationsStore.listenToNotifications();
-
       authStore.setupNotifications();
+    } else if (oldUid && !newUid) {
+      groupsStore.groups = [];
+      notificationsStore.stopListening();
     }
   },
   { immediate: true },
@@ -57,7 +59,7 @@ watch(
   <GroupListModal :groups="groupsStore.groups" />
   <ProfileModal />
   <NotificationsModal />
-  <ToastContainer/>
+  <ToastContainer />
 
   <NavigationBar />
 </template>

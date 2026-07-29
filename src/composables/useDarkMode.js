@@ -1,8 +1,18 @@
 import { ref } from 'vue'
 
-const isDarkMode = ref(localStorage.getItem('theme') === 'dark')
+function getInitialTheme() {
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    return savedTheme === 'dark'
+  }
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+}
 
-if (isDarkMode.value) document.documentElement.classList.add('dark')
+const isDarkMode = ref(getInitialTheme())
+
+if (typeof window !== 'undefined') {
+  document.documentElement.classList.toggle('dark', isDarkMode.value)
+}
 
 export function useDarkMode() {
   function toggleDarkMode() {

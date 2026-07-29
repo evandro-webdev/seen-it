@@ -24,7 +24,7 @@ const emit = defineEmits(["open-movie-modal"]);
 </script>
 
 <template>
-  <div>
+  <div v-if="loading || movies.length > 0">
     <div class="flex justify-between items-center mb-4">
       <div class="flex gap-1 items-center">
         <component
@@ -39,7 +39,7 @@ const emit = defineEmits(["open-movie-modal"]);
       <button class="text-xs font-semibold text-[#0088FF]">Ver todos</button>
     </div>
 
-    <div class="-mr-4 pr-4 flex gap-x-2 overflow-x-auto">
+    <div class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory">
       <template v-if="loading">
         <MovieCardSkeleton
           v-for="n in 4"
