@@ -4,6 +4,7 @@ import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast.js";
 import { onClickOutside } from "@vueuse/core";
+import { useModalHistory } from "@/composables/useModalHistory.js";
 
 import { Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
 

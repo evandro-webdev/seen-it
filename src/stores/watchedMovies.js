@@ -17,25 +17,32 @@ import { useNotificationsStore } from "./notifications.js";
 export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMovies = ref([]);
   const watchedMoviesIds = ref([]);
+  const isLoading = ref(false);
+
+  const groupStore = useGroupsStore();
+  const authStore = useAuthStore();
+  const notificationsStore = useNotificationsStore();
+  const savedMoviesStore = useSavedMoviesStore();
+
+  function getTargetCollectionPath() {
+    const activeGroup = groupStore.activeGroup;
+    if (!activeGroup) {
+      if (!authStore.user?.uid) return null;
+      return `users/${authStore.user.uid}/watchedMovies`;
+    }
+    return `groups/${activeGroup.id}/watchedMovies`;
+  }
 
   async function loadWatchedMovies() {
     if (watchedMovies.value.length > 0) return;
 
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
-    const activeGroup = groupStore.activeGroup;
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return;
 
-    let targetCollectionPath = "";
-
-    if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      targetCollectionPath = `users/${authStore.user.uid}/watchedMovies`;
-    } else {
-      targetCollectionPath = `groups/${activeGroup.id}/watchedMovies`;
-    }
+    isLoading.value = true;
 
     try {
-      const snapshot = await getDocs(collection(db, targetCollectionPath));
+      const snapshot = await getDocs(collection(db, collectionPath));
       watchedMovies.value = snapshot.docs.map((doc) => ({
         docId: doc.id,
         ...doc.data(),
@@ -43,36 +50,32 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
     } catch (error) {
       console.error("Erro ao carregar filmes assistidos:", error);
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  const groupStore = useGroupsStore();
   watch(
-    () => groupStore.activeGroup,
-    async () => {
+    [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
+    async ([groupId, userId]) => {
       watchedMovies.value = [];
       watchedMoviesIds.value = [];
-      await loadWatchedMovies();
+
+      if (groupId || userId) {
+        await loadWatchedMovies();
+      }
     },
     { immediate: true },
   );
 
   async function saveWatchedMovie(movie, review) {
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
-    const notificationsStore = useNotificationsStore();
-    const savedMoviesStore = useSavedMoviesStore();
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return null;
 
     const currentUserId = authStore.user?.uid;
     if (!currentUserId) return;
 
-    const activeGroup = groupStore.activeGroup;
-
-    const targetCollectionPath = activeGroup
-      ? `groups/${activeGroup.id}/watchedMovies`
-      : `users/${currentUserId}/watchedMovies`;
-
-    const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
+    const movieDocRef = doc(db, collectionPath, String(movie.id));
 
     const newUserReview = {
       rating: review.rating,
@@ -142,7 +145,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watchedMoviesIds.value.push(movie.id);
     }
 
-    if (activeGroup) {
+    if (groupStore.activeGroup) {
       await notificationsStore.dispatchWatchedMovieNotification(movie);
     }
 
@@ -152,20 +155,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   }
 
   async function deleteWatchedMovie(id) {
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
-    const activeGroup = groupStore.activeGroup;
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return;
 
-    if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      await deleteDoc(
-        doc(db, "users", authStore.user.uid, "watchedMovies", String(id)),
-      );
-    } else {
-      await deleteDoc(
-        doc(db, "groups", activeGroup.id, "watchedMovies", String(id)),
-      );
-    }
+    await deleteDoc(doc(db, collectionPath, String(id)));
 
     watchedMovies.value = watchedMovies.value.filter(
       (movie) => String(movie.id) !== String(id),
@@ -177,15 +170,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   }
 
   function isAlreadyWatched(movieId) {
-    const authStore = useAuthStore();
-    const groupStore = useGroupsStore();
-
-    const activeGroup = groupStore.activeGroup;
     const currentUserId = authStore.user?.uid;
-
     if (!currentUserId) return false;
 
-    if (!activeGroup) {
+    if (!groupStore.activeGroup) {
       return watchedMoviesIds.value.includes(movieId);
     }
 

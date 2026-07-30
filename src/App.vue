@@ -4,6 +4,8 @@ import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
 import { useMovieDetailsStore } from "./stores/movieDetails.js";
 import { useNotificationsStore } from "./stores/notifications.js";
+import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
+import { useSavedMoviesStore } from "./stores/savedMovies.js";
 
 import Header from "./components/layout/Header.vue";
 import NavigationBar from "./components/layout/NavigationBar.vue";
@@ -17,12 +19,21 @@ const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
 const movieDetailsStore = useMovieDetailsStore();
 const notificationsStore = useNotificationsStore();
+const watchedMoviesStore = useWatchedMoviesStore();
+const savedMoviesStore = useSavedMoviesStore();
 
 watch(
   () => authStore.user?.uid,
   (newUid, oldUid) => {
     if (newUid) {
       groupsStore.getGroups();
+      if (groupsStore.activeGroup) {
+        groupsStore.loadActiveGroupMembers();
+      }
+
+      savedMoviesStore.loadSavedMovies(true);
+      watchedMoviesStore.loadWatchedMovies(true);
+
       notificationsStore.listenToNotifications();
       authStore.setupNotifications();
     } else if (oldUid && !newUid) {

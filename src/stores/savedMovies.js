@@ -15,62 +15,61 @@ import { useAuthStore } from "./auth";
 export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const savedMovies = ref([]);
   const savedMoviesIds = ref([]);
+  const isLoading = ref(false);
 
-  async function loadSavedMovies() {
-    if (savedMovies.value.length > 0) return;
+  const groupStore = useGroupsStore();
+  const authStore = useAuthStore();
+  const notificationsStore = useNotificationsStore();
 
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
+  function getTargetCollectionPath() {
     const activeGroup = groupStore.activeGroup;
-
-    let targetCollectionPath = "";
-
     if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      targetCollectionPath = `users/${authStore.user.uid}/savedMovies`;
-    } else {
-      targetCollectionPath = `groups/${activeGroup.id}/savedMovies`;
+      if (!authStore.user?.uid) return null;
+      return `users/${authStore.user.uid}/savedMovies`;
     }
+    return `groups/${activeGroup.id}/savedMovies`;
+  }
+
+  async function loadSavedMovies(forceReload = true) {
+    if (!forceReload && savedMovies.value.length > 0) return;
+
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return;
+
+    isLoading.value = true;
 
     try {
-      const snapshot = await getDocs(collection(db, targetCollectionPath));
+      const snapshot = await getDocs(collection(db, collectionPath));
 
       savedMovies.value = snapshot.docs.map((doc) => ({
         docId: doc.id,
         ...doc.data(),
       }));
 
-      savedMoviesIds.value = savedMovies.value.map((movie) => movie.id);
+      savedMoviesIds.value = savedMovies.value.map((movie) => String(movie.id));
     } catch (error) {
       console.error("Erro ao carregar filmes salvos:", error);
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  const groupStore = useGroupsStore();
   watch(
-    () => groupStore.activeGroup,
-    async () => {
+    [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
+    async ([groupId, userId]) => {
       savedMovies.value = [];
       savedMoviesIds.value = [];
-      await loadSavedMovies();
+
+      if (groupId || userId) {
+        await loadSavedMovies(true);
+      }
     },
     { immediate: true },
   );
 
   async function saveMovie(movie) {
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
-    const notificationsStore = useNotificationsStore();
-
-    const activeGroup = groupStore.activeGroup;
-    let targetCollectionPath = "";
-
-    if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      targetCollectionPath = `users/${authStore.user.uid}/savedMovies`;
-    } else {
-      targetCollectionPath = `groups/${activeGroup.id}/savedMovies`;
-    }
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return null;
 
     const movieData = {
       id: movie.id,
@@ -79,14 +78,14 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       vote_average: movie.vote_average,
     };
 
-    if (activeGroup) {
+    if (groupStore.activeGroup) {
       movieData.saved_by = authStore.user.uid;
     }
 
-    const movieDocRef = doc(db, targetCollectionPath, String(movie.id));
+    const movieDocRef = doc(db, collectionPath, String(movie.id));
     await setDoc(movieDocRef, movieData);
 
-    if (activeGroup) {
+    if (groupStore.activeGroup) {
       await notificationsStore.dispatchSavedMovieNotification(
         movie.id,
         movie.title,
@@ -96,34 +95,24 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     return movieDocRef;
   }
 
-  async function unsaveMovie(docId) {
-    const groupStore = useGroupsStore();
-    const authStore = useAuthStore();
-    const activeGroup = groupStore.activeGroup;
+  async function unsaveMovie(movieId) {
+    const collectionPath = getTargetCollectionPath();
+    if (!collectionPath) return;
 
-    if (!activeGroup) {
-      if (!authStore.user?.uid) return;
-      await deleteDoc(
-        doc(db, "users", authStore.user.uid, "savedMovies", String(docId)),
-      );
-    } else {
-      await deleteDoc(
-        doc(db, "groups", activeGroup.id, "savedMovies", String(docId)),
-      );
-    }
+    await deleteDoc(doc(db, collectionPath, String(movieId)));
   }
 
   async function toggleSaved(movie) {
-    if (isAlreadySaved(movie.id)) {
-      const savedEntry = savedMovies.value.find(
-        (m) => String(m.id) === String(movie.id),
+    const strMovieId = String(movie.id);
+
+    if (isAlreadySaved(strMovieId)) {
+      await unsaveMovie(strMovieId);
+
+      savedMovies.value = savedMovies.value.filter(
+        (m) => String(m.id) !== strMovieId,
       );
-
-      await unsaveMovie(savedEntry.docId);
-
-      savedMovies.value = savedMovies.value.filter((m) => m.id !== movie.id);
       savedMoviesIds.value = savedMoviesIds.value.filter(
-        (id) => id !== movie.id,
+        (id) => String(id) !== strMovieId,
       );
     } else {
       const docRef = await saveMovie(movie);
@@ -136,17 +125,13 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
           poster_path: movie.poster_path,
           vote_average: movie.vote_average,
         });
-        savedMoviesIds.value.push(movie.id);
+        savedMoviesIds.value.push(strMovieId);
       }
     }
   }
 
   function isAlreadySaved(movieId) {
-    const movie = savedMovies.value.find(
-      (movie) => String(movie.id) === String(movieId),
-    );
-
-    return !!movie;
+    return savedMoviesIds.value.includes(String(movieId));
   }
 
   return {

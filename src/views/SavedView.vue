@@ -1,23 +1,11 @@
 <script setup>
-import { watch, computed } from "vue";
+import { computed } from "vue";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
-import { useAuthStore } from "@/stores/auth.js";
 import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
-const authStore = useAuthStore();
 const savedMoviesStore = useSavedMoviesStore();
 
 defineEmits(["open-movie-modal"]);
-
-watch(
-  () => authStore.isAuthenticated,
-  (isAuthenticated) => {
-    if (isAuthenticated) {
-      savedMoviesStore.loadSavedMovies();
-    }
-  },
-  { immediate: true },
-);
 
 const sortedMovies = computed(() => {
   return [...savedMoviesStore.savedMovies].sort(

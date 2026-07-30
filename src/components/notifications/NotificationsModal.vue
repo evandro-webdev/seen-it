@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useNotificationsStore } from "@/stores/notifications";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 import { onClickOutside } from "@vueuse/core";
+import { useModalHistory } from "@/composables/useModalHistory.js";
 
 import { Bell, CheckCheck, X } from "@lucide/vue";
 

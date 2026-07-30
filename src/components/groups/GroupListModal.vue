@@ -3,6 +3,7 @@ import { Frown, UsersRound, X } from "@lucide/vue";
 import { ref } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import { onClickOutside } from "@vueuse/core";
+import { useModalHistory } from "@/composables/useModalHistory.js";
 
 import GroupListItem from "./GroupListItem.vue";
 import GroupCreateForm from "./GroupCreateForm.vue";
