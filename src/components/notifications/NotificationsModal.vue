@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useNotificationsStore } from "@/stores/notifications";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 import { onClickOutside } from "@vueuse/core";
@@ -13,6 +13,10 @@ const movieDetailStore = useMovieDetailsStore();
 const notificationsStore = useNotificationsStore();
 
 const notificationsModalRef = ref(null);
+const isModalOpen = computed(() => notificationsStore.isNotificationsModalOpen);
+const { handleCloseClick } = useModalHistory(isModalOpen, () =>
+  notificationsStore.closeNotificationsModal(),
+);
 
 async function handleNotificationClick(notification) {
   if (!notification.isRead) {
@@ -75,7 +79,7 @@ function unlockScroll() {
             </button>
 
             <button
-              @click="notificationsStore.closeNotificationsModal"
+              @click="handleCloseClick"
               type="button"
               class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
             >
