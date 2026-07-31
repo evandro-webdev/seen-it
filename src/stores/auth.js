@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from "firebase/auth";
-import { useNotificationsStore } from "./notifications";
+
 import { useGroupsStore } from "./groups";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -84,7 +84,6 @@ export const useAuthStore = defineStore("auth", () => {
 
         await OneSignal.login(user.value.uid);
         await OneSignal.Notifications.requestPermission();
-        console.log("OneSignal inicializado com sucesso via Janela!");
       });
     } catch (error) {
       console.error("Erro ao inicializar OneSignal:", error);
@@ -92,10 +91,8 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function logout() {
-    const notificationsStore = useNotificationsStore();
-    const groupsStore = useGroupsStore();
-    notificationsStore.stopListening();
-    groupsStore.activeGroup = null;
+    const groupsStore = useGroupsStore()
+    groupsStore.clearActiveGroup();
 
     if (window.OneSignal) {
       try {
@@ -106,6 +103,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     await signOut(auth);
+    user.value = null;
   }
 
   const isAuthenticated = computed(() => !!user.value);

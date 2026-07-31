@@ -5,14 +5,17 @@ import { Menu, Bell, X, FolderHeart } from "@lucide/vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import { useProfileStore } from "@/stores/profile.js";
 import { useAuthStore } from "@/stores/auth.js";
+import { useNotificationsStore } from "@/stores/notifications.js";
+import { useToastStore } from "@/stores/toast.js";
+
 import MenuDropdown from "./Menu.vue";
 import ToggleThemeButton from "@/components/ui/ToggleThemeButton.vue";
-import { useNotificationsStore } from "@/stores/notifications.js";
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
 const profileStore = useProfileStore();
 const notificationsStore = useNotificationsStore();
+const toastStore = useToastStore();
 
 const isMenuOpen = ref(false);
 const menuButtonRef = ref(null);
@@ -22,6 +25,7 @@ async function handleLogout() {
 
   try {
     await authStore.logout();
+    toastStore.success("Você saiu da sua conta.");
   } catch (error) {
     console.error("Erro ao fazer logout:", error);
   }

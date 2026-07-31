@@ -2,8 +2,10 @@
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth.js";
 import { Loader2 } from "@lucide/vue";
+import { useToastStore } from "@/stores/toast";
 
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 
 const name = ref("");
 const email = ref("");
@@ -37,11 +39,25 @@ async function handleAuthentication() {
   try {
     if (currentForm.value === "register") {
       await authStore.register(email.value, password.value, name.value);
+      toastStore.success(`Conta criada com sucesso! Bem-vindo, ${name.value.split("")[0]}!`);
     } else {
       await authStore.login(email.value, password.value);
+      toastStore.success("Login realizado com sucesso!");
     }
   } catch (error) {
     console.error("Erro na autenticação: ", error);
+
+    let message = "Erro ao autenticar. Tente novamente.";
+    if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found") {
+      message = "E-mail ou senha incorretos.";
+    } else if (error.code === "auth/email-already-in-use") {
+      message = "Este e-mail já está em uso.";
+    } else if (error.code === "auth/weak-password") {
+      message = "A senha deve ter pelo menos 6 caracteres.";
+    }
+
+    toastStore.error(message);
+  } finally {
     isSubmiting.value = false;
   }
 }

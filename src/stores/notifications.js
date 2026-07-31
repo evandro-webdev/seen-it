@@ -19,6 +19,10 @@ export const useNotificationsStore = defineStore("notifications", () => {
   const isNotificationsModalOpen = ref(false);
   const notifications = ref([]);
   const loading = ref(false);
+
+  const groupsStore = useGroupsStore();
+  const authStore = useAuthStore();
+
   let unsubscribe = null;
 
   const unreadCount = computed(() => {
@@ -36,10 +40,8 @@ export const useNotificationsStore = defineStore("notifications", () => {
   function listenToNotifications() {
     stopListening();
 
-    const authStore = useAuthStore();
-    const groupStore = useGroupsStore();
     const uid = authStore.user?.uid;
-    const activeGroup = groupStore.activeGroup;
+    const activeGroup = groupsStore.activeGroup;
 
     if (!uid || !activeGroup?.id) return;
 
@@ -61,11 +63,10 @@ export const useNotificationsStore = defineStore("notifications", () => {
     });
   }
 
-  const groupStore = useGroupsStore();
   watch(
-    () => groupStore.activeGroup,
-    (newGroup) => {
-      if (newGroup?.id) {
+    () => groupsStore.activeGroup?.id,
+    (newGroupId) => {
+      if (newGroupId) {
         listenToNotifications();
       } else {
         stopListening();
@@ -84,10 +85,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function dispatchWatchedMovieNotification(movie) {
-    const authStore = useAuthStore();
-    const groupStore = useGroupsStore();
-
-    const membersIds = Object.keys(groupStore.activeGroupMembers);
+    const membersIds = Object.keys(groupsStore.activeGroupMembers);
 
     const membersToNotificate = membersIds.filter(
       (memberId) => memberId !== authStore.user.uid,
@@ -98,7 +96,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
         userId: uid,
         sender_id: authStore.user.uid,
         sender_name: authStore.user.displayName,
-        group_id: groupStore.activeGroup.id,
+        group_id: groupsStore.activeGroup.id,
         movie_id: movie.id,
         movie_title: movie.title,
         type: "movie_rated",
@@ -116,10 +114,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function dispatchSavedMovieNotification(movieId, movieTitle) {
-    const authStore = useAuthStore();
-    const groupStore = useGroupsStore();
-
-    const membersIds = Object.keys(groupStore.activeGroupMembers);
+    const membersIds = Object.keys(groupsStore.activeGroupMembers);
 
     const membersToNotificate = membersIds.filter(
       (memberId) => authStore.user.uid !== memberId,
@@ -130,7 +125,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
         userId: uid,
         sender_id: authStore.user.uid,
         sender_name: authStore.user.displayName,
-        group_id: groupStore.activeGroup.id,
+        group_id: groupsStore.activeGroup.id,
         movie_id: movieId,
         movie_title: movieTitle,
         type: "movie_saved",
@@ -158,7 +153,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function markAllAsRead() {
-    const groupsStore = useGroupsStore();
     const activeGroupId = groupsStore.activeGroup?.id;
 
     if (!activeGroupId) return;

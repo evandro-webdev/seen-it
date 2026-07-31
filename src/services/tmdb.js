@@ -29,7 +29,20 @@ export async function searchMovies(query, page = 1) {
 }
 
 export async function getMovie(movieId) {
-  return fetchTMDB(`/movie/${movieId}?language=pt-BR`);
+  const data = await fetchTMDB(`/movie/${movieId}?language=pt-BR&append_to_response=videos,credits`);
+
+  const trailer =
+    data.videos?.results?.find(
+      (v) => v.type === "Trailer" && v.site === "YouTube" && v.iso_639_1 === "pt"
+    ) ||
+    data.videos?.results?.find(
+      (v) => v.type === "Trailer" && v.site === "YouTube"
+    );
+
+  return {
+    ...data,
+    trailerKey: trailer ? trailer.key : null,
+  };
 }
 
 export async function getMovieWithCredits(movieId) {
