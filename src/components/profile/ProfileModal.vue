@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast.js";
@@ -23,6 +23,11 @@ const avatarPreview = ref(null);
 const selectedFile = ref(null);
 
 const colorOptions = ["#338CD5", "#9367EB", "#D75870", "#55C06E", "#F69F40"];
+
+const isModalOpen = computed(() => profileStore.isProfileModalOpen);
+const { handleCloseClick } = useModalHistory(isModalOpen, () =>
+  profileStore.closeProfileModal(),
+);
 
 watch(
   () => authStore.user,
@@ -138,7 +143,7 @@ function unlockScroll() {
           </div>
 
           <button
-            @click="profileStore.closeProfileModal"
+            @click="handleCloseClick"
             type="button"
             class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
           >

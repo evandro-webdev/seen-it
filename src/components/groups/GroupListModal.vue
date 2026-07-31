@@ -1,6 +1,6 @@
 <script setup>
 import { Frown, UsersRound, X } from "@lucide/vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import { onClickOutside } from "@vueuse/core";
 import { useModalHistory } from "@/composables/useModalHistory.js";
@@ -19,6 +19,11 @@ defineProps({
 const groupsStore = useGroupsStore();
 const groupModalRef = ref(null);
 const showCreateGroupForm = ref(false);
+
+const isModalOpen = computed(() => groupsStore.isGroupsModalOpen);
+const { handleCloseClick } = useModalHistory(isModalOpen, () =>
+  groupsStore.closeGroupsModal(),
+);
 
 onClickOutside(groupModalRef, () => {
   groupsStore.closeGroupsModal();
@@ -70,7 +75,7 @@ function unlockScroll() {
           </div>
 
           <button
-            @click="groupsStore.closeGroupsModal"
+            @click="handleCloseClick"
             type="button"
             class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
           >
