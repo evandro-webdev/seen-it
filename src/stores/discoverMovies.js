@@ -38,13 +38,14 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     try {
       isLoading.value = true;
 
-      const [trending, popular, topRated, upcoming, genreData] = await Promise.all([
-        getTrendingMovies(),
-        getPopularMovies(),
-        getTopRatedMovies(),
-        getUpcomingMovies(),
-        getGenres(),
-      ]);
+      const [trending, popular, topRated, upcoming, genreData] =
+        await Promise.all([
+          getTrendingMovies(),
+          getPopularMovies(),
+          getTopRatedMovies(),
+          getUpcomingMovies(),
+          getGenres(),
+        ]);
 
       heroMovies.value = trending.results.slice(0, 5);
       popularMovies.value = popular.results;
@@ -74,9 +75,13 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
       const data = await searchMovies(query, 1);
       totalPages.value = data.total_pages;
 
-      searchResults.value = await Promise.all(
-        data.results.map((movie) => getMovieWithCredits(movie.id)),
+      const moviesWithCredits = await Promise.all(
+        data.results.map((movie) =>
+          getMovieWithCredits(movie.id).catch(() => null),
+        ),
       );
+
+      searchResults.value = moviesWithCredits.filter(Boolean);
     } catch (error) {
       console.error("Erro ao buscar filmes:", error);
     } finally {
@@ -100,10 +105,13 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
       const data = await searchMovies(lastQuery.value, nextPage);
 
       const newMovies = await Promise.all(
-        data.results.map((movie) => getMovieWithCredits(movie.id)),
+        data.results.map((movie) =>
+          getMovieWithCredits(movie.id).catch(() => null),
+        ),
       );
 
-      searchResults.value = [...searchResults.value, ...newMovies];
+      const validNewMovies = newMovies.filter(Boolean);
+      searchResults.value = [...searchResults.value, ...validNewMovies];
       currentPage.value = nextPage;
     } catch (error) {
       console.error("Erro ao carregar mais filmes:", error);
