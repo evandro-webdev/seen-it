@@ -18,6 +18,7 @@ const sortedMovies = computed(() => {
 <template>
   <MoviesCollection
     :movies="sortedMovies"
+    :is-loading="savedMoviesStore.isLoading"
     :group-by-member="true"
     @open-movie-modal="$emit('open-movie-modal', $event)"
     type="saved"

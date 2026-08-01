@@ -18,6 +18,7 @@ const sortedMovies = computed(() => {
 <template>
   <MoviesCollection
     :movies="sortedMovies"
+    :is-loading="watchedMoviesStore.isLoading"
     @open-movie-modal="$emit('open-movie-modal', $event)"
     type="watched"
   />

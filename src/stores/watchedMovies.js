@@ -194,5 +194,6 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     saveWatchedMovie,
     deleteWatchedMovie,
     isAlreadyWatched,
+    isLoading,
   };
 });

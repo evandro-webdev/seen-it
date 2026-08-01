@@ -140,5 +140,6 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     loadSavedMovies,
     isAlreadySaved,
     toggleSaved,
+    isLoading,
   };
 });

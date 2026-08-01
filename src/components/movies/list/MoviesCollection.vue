@@ -26,6 +26,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 defineEmits(["open-movie-modal"]);
@@ -90,28 +94,35 @@ function clearSearch() {
     <AuthForm v-else-if="!authStore.isAuthenticated" />
 
     <template v-else>
-      <div class="py-2 lg:py-14 mb-2 space-y-3">
+      <div class="py-2 lg:py-14 space-y-3">
         <SearchBar v-model="searchQuery" />
 
         <div
-          v-if="filteredMovies.length > 0 && type === 'watched'"
-          class="flex justify-between items-center"
+          v-if="!isLoading && filteredMovies.length > 0 && type === 'watched'"
+          class="mt-2 flex justify-between items-center"
         >
           <div class="flex items-center gap-1">
             <SlidersHorizontal class="w-4 h-4 text-[#0088FF]" />
-            <span class="block text-xs text-gray-700 dark:text-gray-300"
-              >Ordenar por: Nota</span
-            >
+            <span class="block text-xs text-gray-700 dark:text-gray-300">
+              Ordenar por: Nota
+            </span>
           </div>
-          <span class="block text-xs text-gray-600 dark:text-gray-300"
-            >{{ filteredMovies.length }} filmes</span
-          >
+          <span class="block text-xs text-gray-600 dark:text-gray-300">
+            {{ filteredMovies.length }} filmes
+          </span>
         </div>
       </div>
 
       <div class="h-[100%] py-2 flex flex-col flex-1">
+        <div 
+          v-if="isLoading" 
+          class="flex flex-1 justify-center items-center py-12"
+        >
+          <LoadingSpinner />
+        </div>
+
         <div
-          v-if="
+          v-else-if="
             filteredMovies.length > 0 &&
             groupByMember &&
             groupsStore.activeGroup
@@ -131,16 +142,12 @@ function clearSearch() {
               <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
                 Salvos por {{ section.userName }}
               </h2>
-              <span
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
-              >
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                 ({{ section.movies.length }})
               </span>
             </div>
 
-            <div
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
-            >
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4">
               <MovieCard
                 v-for="movie in section.movies"
                 :key="movie.id"
@@ -170,7 +177,7 @@ function clearSearch() {
         />
 
         <MoviesTrackedEmpty
-          v-else
+          v-else-if="!isLoading"
           :type="type"
         />
       </div>
