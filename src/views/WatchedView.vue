@@ -1,17 +1,43 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 
 import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
-const watchedMoviesStore = useWatchedMoviesStore();
-
 defineEmits(["open-movie-modal"]);
 
+const watchedMoviesStore = useWatchedMoviesStore();
+
+const currentSort = ref("rating_desc");
+
+function getMovieTimestamp(movie) {
+  const rawDate = movie.created_at || movie.watched_at || movie.added_at;
+
+  if (!rawDate) return 0;
+  if (typeof rawDate.toDate === "function") return rawDate.toDate().getTime();
+  if (rawDate.seconds) return rawDate.seconds * 1000;
+
+  return new Date(rawDate).getTime() || 0;
+}
+
 const sortedMovies = computed(() => {
-  return [...watchedMoviesStore.watchedMovies].sort(
-    (a, b) => b.average_rating - a.average_rating,
-  );
+  const list = [...watchedMoviesStore.watchedMovies];
+
+  return list.sort((a, b) => {
+    if (currentSort.value === "rating_desc") {
+      return b.average_rating - a.average_rating;
+    }
+
+    if (currentSort.value === "rating_asc") {
+      return a.average_rating - b.average_rating;
+    }
+
+    if (currentSort.value === "date_desc") {
+      return getMovieTimestamp(b) - getMovieTimestamp(a);
+    }
+
+    return 0;
+  });
 });
 </script>
 
@@ -19,7 +45,8 @@ const sortedMovies = computed(() => {
   <MoviesCollection
     :movies="sortedMovies"
     :is-loading="watchedMoviesStore.isLoading"
-    @open-movie-modal="$emit('open-movie-modal', $event)"
     type="watched"
+    v-model:sort-by="currentSort"
+    @open-movie-modal="$emit('open-movie-modal', $event)"
   />
 </template>

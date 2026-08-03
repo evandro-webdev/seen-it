@@ -23,11 +23,18 @@ async function handleNotificationClick(notification) {
     await notificationsStore.markAsRead(notification.id);
   }
 
+  notificationsStore.closeNotificationsModal();
+
   await movieDetailStore.openMovie(notification.movie_id);
 }
 
 onClickOutside(notificationsModalRef, () => {
-  notificationsStore.closeNotificationsModal();
+  if (
+    notificationsStore.isNotificationsModalOpen &&
+    !movieDetailStore.selectedMovie
+  ) {
+    notificationsStore.closeNotificationsModal();
+  }
 });
 
 function lockScroll() {

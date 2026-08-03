@@ -9,8 +9,8 @@ import MoviesList from "@/components/movies/list/MoviesList.vue";
 import MoviesHeroCarousel from "@/components/movies/list/MoviesHeroCarousel.vue";
 import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
 import MovieSearchEmpty from "@/components/movies/ui/messages/MovieSearchEmpty.vue";
-import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 import MovieCard from "@/components/movies/cards/MovieCard.vue";
+import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 
 defineEmits(["open-movie-modal"]);
 
