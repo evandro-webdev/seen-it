@@ -18,6 +18,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /OneSignalSDKWorker/],
+        navigateFallbackAllowlist: [/^(?!\/__)/],
+
+        clientsClaim: true,
+        skipWaiting: true
       },
       manifest: {
         name: "Seen It",
@@ -31,25 +35,25 @@ export default defineConfig({
         start_url: "/",
         icons: [
           {
-            src: "/img/icons/icon-192.png",
+            src: "img/icons/icon-192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/img/icons/icon-512.png",
+            src: "img/icons/icon-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/img/icons/maskable-192.png",
+            src: "img/icons/maskable-192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "maskable",
           },
           {
-            src: "/img/icons/maskable-512.png",
+            src: "img/icons/maskable-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
