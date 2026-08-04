@@ -1,5 +1,5 @@
 <script setup>
-import { SlidersHorizontal, Dices, ArrowUpDown } from "@lucide/vue";
+import { SlidersHorizontal, Dices, Grid2x2, Grid3x3 } from "@lucide/vue";
 import SearchBar from "@/components/layout/SearchBar.vue";
 
 const props = defineProps({
@@ -23,9 +23,18 @@ const props = defineProps({
     type: String,
     default: "rating_desc",
   },
+  cols: {
+    type: Number,
+    default: 2,
+  },
 });
 
-const emit = defineEmits(["update:modelValue", "pick-random", "update:sortBy"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "pick-random",
+  "update:sortBy",
+  "update:cols",
+]);
 </script>
 
 <template>
@@ -83,9 +92,42 @@ const emit = defineEmits(["update:modelValue", "pick-random", "update:sortBy"]);
         </button>
       </div>
 
-      <span class="text-gray-500 dark:text-gray-400 font-medium">
-        {{ totalCount }} {{ totalCount === 1 ? "filme" : "filmes" }}
-      </span>
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center bg-gray-100 dark:bg-[#161f30] p-0.5 rounded-lg sm:hidden"
+        >
+          <button
+            @click="emit('update:cols', 2)"
+            type="button"
+            :class="[
+              'p-1 rounded-md transition-all cursor-pointer',
+              cols === 2
+                ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+            ]"
+            title="2 Colunas"
+          >
+            <Grid2x2 class="w-3.5 h-3.5" />
+          </button>
+          <button
+            @click="emit('update:cols', 3)"
+            type="button"
+            :class="[
+              'p-1 rounded-md transition-all cursor-pointer',
+              cols === 3
+                ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+            ]"
+            title="3 Colunas"
+          >
+            <Grid3x3 class="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <span class="text-gray-500 dark:text-gray-400 font-medium">
+          {{ totalCount }} {{ totalCount === 1 ? "filme" : "filmes" }}
+        </span>
+      </div>
     </div>
   </div>
 </template>

@@ -18,6 +18,10 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  upcoming: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["open-movie-modal"]);
@@ -56,6 +60,7 @@ const emit = defineEmits(["open-movie-modal"]);
           class="flex-shrink-0"
           @click="emit('open-movie-modal', movie.id)"
           fixed-width
+          :releaseDate="upcoming ? movie.release_date : null"
         />
       </template>
     </div>

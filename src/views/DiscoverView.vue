@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
-import { Flame, Award, Clapperboard, SearchX } from "@lucide/vue";
+import { Flame, Award, Clapperboard } from "@lucide/vue";
 
 import SearchBar from "@/components/layout/SearchBar.vue";
 import MovieCardDetailed from "@/components/movies/cards/MovieCardDetailed.vue";
@@ -11,11 +11,18 @@ import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
 import MovieSearchEmpty from "@/components/movies/ui/messages/MovieSearchEmpty.vue";
 import MovieCard from "@/components/movies/cards/MovieCard.vue";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
+import NotInternetConnection from "@/components/movies/ui/messages/NotInternetConnection.vue";
 
 defineEmits(["open-movie-modal"]);
 
 const discoverMoviesStore = useDiscoverMoviesStore();
 const searchQuery = ref("");
+
+const isOnline = ref(navigator.onLine);
+
+function updateOnlineStatus() {
+  isOnline.value = navigator.onLine;
+}
 
 function handleScroll() {
   if (
@@ -38,12 +45,18 @@ function handleScroll() {
 onMounted(() => {
   discoverMoviesStore.loadDiscover();
   window.addEventListener("scroll", handleScroll);
+
+  window.addEventListener("online", updateOnlineStatus);
+  window.addEventListener("offline", updateOnlineStatus);
 });
 
 onUnmounted(() => {
   searchQuery.value = "";
   discoverMoviesStore.clearSearch();
   window.removeEventListener("scroll", handleScroll);
+
+  window.removeEventListener("online", updateOnlineStatus);
+  window.removeEventListener("offline", updateOnlineStatus);
 });
 
 watch(searchQuery, (newQuery) => {
@@ -72,7 +85,7 @@ function clearSearch() {
       >
         <span
           v-if="discoverMoviesStore.searchResults.length !== 0"
-          class="block text-xs text-gray-600 dark:text-gray-300"
+          class="text-xs font-medium text-gray-500 dark:text-gray-400"
         >
           {{ discoverMoviesStore.searchResults.length }} filmes encontrados
         </span>
@@ -88,7 +101,12 @@ function clearSearch() {
       />
     </div>
 
-    <div class="h-[100%] pt-2 flex flex-col">
+    <NotInternetConnection v-if="!isOnline" />
+
+    <div
+      v-else
+      class="h-[100%] pt-2 flex flex-col"
+    >
       <div
         v-if="discoverMoviesStore.isSearching"
         class="space-y-4"
@@ -175,8 +193,9 @@ function clearSearch() {
           :movies="discoverMoviesStore.upcomingMovies"
           @open-movie-modal="$emit('open-movie-modal', $event)"
           :loading="discoverMoviesStore.isLoading"
+          upcoming
         />
-        
+
         <MoviesList
           :icon="Award"
           title="Melhores avaliados"

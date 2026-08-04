@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
-import { Star } from "@lucide/vue";
+import { Calendar, Star } from "@lucide/vue";
 import { formatRating } from "@/utils/formatters";
 
 const props = defineProps({
@@ -11,6 +11,10 @@ const props = defineProps({
   fixedWidth: {
     type: Boolean,
     default: false,
+  },
+  releaseDate: {
+    type: String,
+    default: null,
   },
 });
 
@@ -30,6 +34,12 @@ const rating = computed(() => {
 
 function handleImageError() {
   imageError.value = true;
+}
+
+function formatDate(dateString) {
+  if (!dateString) return "Em breve";
+  const [year, month, day] = dateString.split("-");
+  return `${day}/${month}`;
 }
 </script>
 
@@ -62,7 +72,15 @@ function handleImageError() {
       </div>
 
       <div
-        v-if="rating"
+        v-if="releaseDate"
+        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md flex items-center gap-1 backdrop-blur-xs"
+      >
+        <Calendar class="w-2.5 h-2.5 text-white" />
+        <span>{{ formatDate(releaseDate) }}</span>
+      </div>
+
+      <div
+        v-else-if="rating"
         class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md flex items-center gap-1 backdrop-blur-xs"
       >
         <Star class="w-2.5 h-2.5 fill-white text-white" />

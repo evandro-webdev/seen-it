@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { removeAccents } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useGroupsStore } from "@/stores/groups.js";
@@ -42,6 +42,19 @@ const groupsStore = useGroupsStore();
 
 const searchQuery = ref("");
 
+const savedCols = localStorage.getItem("app_grid_cols");
+const gridCols = ref(savedCols ? Number(savedCols) : 2);
+
+watch(gridCols, (newVal) => {
+  localStorage.setItem("app_grid_cols", newVal.toString());
+});
+
+const gridClass = computed(() => {
+  return gridCols.value === 3
+    ? "grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
+    : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4";
+});
+
 const filteredMovies = computed(() => {
   if (!searchQuery.value.trim()) return props.movies;
 
@@ -59,7 +72,7 @@ const groupedSections = computed(() => {
   const groups = {};
 
   filteredMovies.value.forEach((movie) => {
-    const uid = movie.saved_by || "Não identificado";
+    const uid = movie.saved_by || null;
     if (!groups[uid]) groups[uid] = [];
     groups[uid].push(movie);
   });
@@ -104,6 +117,7 @@ function clearSearch() {
         :total-count="filteredMovies.length"
         :is-loading="isLoading"
         :sort-by="sortBy"
+        v-model:cols="gridCols"
         @update:sort-by="emit('update:sortBy', $event)"
         @pick-random="$emit('pick-random')"
       />
@@ -144,9 +158,7 @@ function clearSearch() {
               </span>
             </div>
 
-            <div
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
-            >
+            <div :class="gridClass">
               <MovieCard
                 v-for="movie in section.movies"
                 :key="movie.id"
@@ -159,7 +171,7 @@ function clearSearch() {
 
         <section
           v-else-if="filteredMovies.length > 0"
-          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
+          :class="gridClass"
         >
           <MovieCard
             v-for="movie in filteredMovies"
