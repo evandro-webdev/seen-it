@@ -11,8 +11,11 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       strategies: "generateSW",
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /OneSignalSDKWorker/],
       },
