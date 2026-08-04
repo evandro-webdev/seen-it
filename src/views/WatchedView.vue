@@ -9,6 +9,7 @@ defineEmits(["open-movie-modal"]);
 const watchedMoviesStore = useWatchedMoviesStore();
 
 const currentSort = ref("rating_desc");
+const currentGroupBy = ref("none");
 
 function getMovieTimestamp(movie) {
   const rawDate = movie.created_at || movie.watched_at || movie.added_at;
@@ -39,14 +40,49 @@ const sortedMovies = computed(() => {
     return 0;
   });
 });
+
+function get5YearRange(year) {
+  if (!year) return "Ano desconhecido";
+  const startYear = Math.floor(year / 5) * 5;
+  const endYear = startYear + 4;
+  return `${startYear} - ${endYear}`;
+}
+
+const activeSections = computed(() => {
+  if (currentGroupBy.value === "none") return [];
+
+  if (currentGroupBy.value === "5years") {
+    const groups = {};
+
+    sortedMovies.value.forEach((movie) => {
+      const releaseYear = parseInt(movie.release_date?.slice(0, 4));
+      const rangeLabel = get5YearRange(releaseYear);
+
+      if (!groups[rangeLabel]) {
+        groups[rangeLabel] = {
+          title: rangeLabel,
+          sortKey: releaseYear ? Math.floor(releaseYear / 5) * 5 : 0,
+          movies: [],
+        };
+      }
+      groups[rangeLabel].movies.push(movie);
+    });
+
+    return Object.values(groups).sort((a, b) => b.sortKey - a.sortKey);
+  }
+
+  return [];
+});
 </script>
 
 <template>
   <MoviesCollection
     :movies="sortedMovies"
+    :custom-sections="activeSections"
     :is-loading="watchedMoviesStore.isLoading"
     type="watched"
     v-model:sort-by="currentSort"
+    v-model:group-by="currentGroupBy"
     @open-movie-modal="$emit('open-movie-modal', $event)"
   />
 </template>

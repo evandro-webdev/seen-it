@@ -16,6 +16,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  customSections: {
+    type: Array,
+    default: () => [],
+  },
   type: {
     type: String,
     required: true,
@@ -33,9 +37,18 @@ const props = defineProps({
     type: String,
     default: "rating_desc",
   },
+  groupBy: {
+    type: String,
+    default: "none",
+  },
 });
 
-const emit = defineEmits(["open-movie-modal", "pick-random", "update:sortBy"]);
+const emit = defineEmits([
+  "open-movie-modal",
+  "pick-random",
+  "update:sortBy",
+  "update:groupBy",
+]);
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
@@ -63,6 +76,27 @@ const filteredMovies = computed(() => {
   return props.movies.filter((movie) =>
     removeAccents(movie.title.toLowerCase()).includes(query),
   );
+});
+
+const processedCustomSections = computed(() => {
+  if (!props.customSections || props.customSections.length === 0) return [];
+
+  const query = removeAccents(searchQuery.value.trim().toLowerCase());
+
+  return props.customSections
+    .map((section) => {
+      const filtered = query
+        ? section.movies.filter((movie) =>
+            removeAccents(movie.title.toLowerCase()).includes(query),
+          )
+        : section.movies;
+
+      return {
+        ...section,
+        movies: filtered,
+      };
+    })
+    .filter((section) => section.movies.length > 0);
 });
 
 const groupedSections = computed(() => {
@@ -117,8 +151,10 @@ function clearSearch() {
         :total-count="filteredMovies.length"
         :is-loading="isLoading"
         :sort-by="sortBy"
+        :group-by="groupBy"
         v-model:cols="gridCols"
         @update:sort-by="emit('update:sortBy', $event)"
+        @update:group-by="emit('update:groupBy', $event)"
         @pick-random="$emit('pick-random')"
       />
 
@@ -150,6 +186,39 @@ function clearSearch() {
               ></span>
               <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
                 Salvos por {{ section.userName }}
+              </h2>
+              <span
+                class="text-xs font-medium text-gray-500 dark:text-gray-400"
+              >
+                ({{ section.movies.length }})
+              </span>
+            </div>
+
+            <div :class="gridClass">
+              <MovieCard
+                v-for="movie in section.movies"
+                :key="movie.id"
+                :movie="movie"
+                @click="$emit('open-movie-modal', movie.id)"
+              />
+            </div>
+          </section>
+        </div>
+
+        <div
+          v-else-if="processedCustomSections.length > 0"
+          class="space-y-6"
+        >
+          <section
+            v-for="section in processedCustomSections"
+            :key="section.title"
+            class="space-y-3"
+          >
+            <div
+              class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800/60 pb-2"
+            >
+              <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
+                {{ section.title }}
               </h2>
               <span
                 class="text-xs font-medium text-gray-500 dark:text-gray-400"
