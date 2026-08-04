@@ -93,7 +93,9 @@ function clearSearch() {
 
       <MovieGenrePill
         v-if="
-          !discoverMoviesStore.isSearching && !discoverMoviesStore.isLoading
+          !discoverMoviesStore.isSearching &&
+          !discoverMoviesStore.isLoading &&
+          isOnline
         "
         :genres="discoverMoviesStore.genres"
         :selected-genre-id="discoverMoviesStore.selectedGenreId"
