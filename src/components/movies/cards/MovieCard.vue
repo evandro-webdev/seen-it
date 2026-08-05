@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { Calendar, Star } from "@lucide/vue";
 import { formatRating } from "@/utils/formatters";
+import { useGroupsStore } from "@/stores/groups";
 
 const props = defineProps({
   movie: {
@@ -16,8 +17,13 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  showUserColor: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+const groupsStore = useGroupsStore();
 const imageError = ref(false);
 
 const posterUrl = computed(() => {
@@ -30,6 +36,27 @@ const posterUrl = computed(() => {
 const rating = computed(() => {
   const val = props.movie?.average_rating ?? props.movie?.vote_average;
   return val ? formatRating(val) : null;
+});
+
+const badgeColorMap = {
+  "#338CD5": "#2168A4",
+  "#9367EB": "#6E32CF",
+  "#D75870": "#A92B45",
+  "#55C06E": "#2A7C3F",
+  "#F69F40": "#B25900",
+};
+
+const badgeBackgroundColor = computed(() => {
+  if (!props.showUserColor) return null;
+
+  const uid = props.movie?.saved_by;
+  const originalColor = groupsStore.activeGroupMembers?.[uid]?.color;
+
+  if (originalColor) {
+    return badgeColorMap[originalColor] || originalColor;
+  }
+
+  return null;
 });
 
 function handleImageError() {
@@ -73,7 +100,7 @@ function formatDate(dateString) {
 
       <div
         v-if="releaseDate"
-        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md flex items-center gap-1 backdrop-blur-xs"
+        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white shadow-md flex items-center gap-1 backdrop-blur-md bg-black/60 border border-white/10"
       >
         <Calendar class="w-2.5 h-2.5 text-white" />
         <span>{{ formatDate(releaseDate) }}</span>
@@ -81,7 +108,15 @@ function formatDate(dateString) {
 
       <div
         v-else-if="rating"
-        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white bg-gradient-to-r from-[#194476] to-[#215DA2] shadow-md flex items-center gap-1 backdrop-blur-xs"
+        class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white shadow-md flex items-center gap-1 backdrop-blur-sm transition-colors duration-200"
+        :class="{
+          'bg-black/65 border border-white/10': !badgeBackgroundColor,
+        }"
+        :style="
+          badgeBackgroundColor
+            ? { backgroundColor: badgeBackgroundColor }
+            : {}
+        "
       >
         <Star class="w-2.5 h-2.5 fill-white text-white" />
         <span>{{ rating }}</span>

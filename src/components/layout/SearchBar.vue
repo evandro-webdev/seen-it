@@ -7,7 +7,7 @@ const searchQuery = defineModel();
 <template>
   <form
     @submit.prevent
-    class="relative"
+    class="relative w-full"
   >
     <Search
       class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"

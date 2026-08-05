@@ -1,4 +1,6 @@
 <script setup>
+import { ref } from "vue";
+import { useGroupsStore } from "@/stores/groups";
 import {
   SlidersHorizontal,
   Dices,
@@ -6,6 +8,7 @@ import {
   Grid3x3,
   Layers,
 } from "@lucide/vue";
+
 import SearchBar from "@/components/layout/SearchBar.vue";
 
 const props = defineProps({
@@ -46,14 +49,46 @@ const emit = defineEmits([
   "update:groupBy",
   "update:cols",
 ]);
+
+const groupsStore = useGroupsStore();
+
+const isRolling = ref(false);
+
+function handlePickRandom() {
+  if (isRolling.value) return;
+
+  isRolling.value = true;
+  emit("pick-random");
+
+  setTimeout(() => {
+    isRolling.value = false;
+  }, 800);
+}
 </script>
 
 <template>
   <div class="py-2 lg:py-6 space-y-3">
-    <SearchBar
-      :model-value="modelValue"
-      @update:model-value="emit('update:modelValue', $event)"
-    />
+    <div class="flex items-center gap-2">
+      <SearchBar
+        :model-value="modelValue"
+        @update:model-value="emit('update:modelValue', $event)"
+      />
+
+      <button
+        v-if="type === 'saved' && totalCount > 0"
+        @click="handlePickRandom"
+        type="button"
+        title="Escolher filme aleatório"
+        aria-label="Escolher filme aleatório"
+        :disabled="isRolling"
+        class="h-[54px] w-[54px] rounded-2xl bg-[#0062b8] text-white flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-80"
+      >
+        <Dices
+          class="w-6 h-6 transition-transform duration-500"
+          :class="{ 'animate-spin': isRolling }"
+        />
+      </button>
+    </div>
 
     <div
       v-if="!isLoading && (totalCount > 0 || modelValue)"
@@ -95,7 +130,7 @@ const emit = defineEmits([
         </div>
 
         <div
-          v-if="type === 'watched'"
+          v-if="groupsStore.activeGroup || type === 'watched'"
           class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] px-2 py-1 rounded-lg shrink-0"
         >
           <Layers class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
@@ -112,6 +147,14 @@ const emit = defineEmits([
               Sem grupo
             </option>
             <option
+              v-if="groupsStore.activeGroup"
+              value="members"
+              class="dark:bg-[#121825]"
+            >
+              Por membro
+            </option>
+            <option
+              v-if="type === 'watched'"
               value="5years"
               class="dark:bg-[#121825]"
             >
@@ -126,16 +169,6 @@ const emit = defineEmits([
             </option>
           </select>
         </div>
-
-        <button
-          v-else-if="type === 'saved' && totalCount > 0"
-          @click="emit('pick-random')"
-          type="button"
-          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0062b8] text-white text-xs font-semibold shadow-xs active:scale-95 hover:bg-[#00529b] transition-all cursor-pointer shrink-0"
-        >
-          <Dices class="w-3.5 h-3.5 shrink-0" />
-          <span class="whitespace-nowrap">Aleatório</span>
-        </button>
       </div>
 
       <div class="flex items-center gap-2 shrink-0">

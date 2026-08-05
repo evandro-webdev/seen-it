@@ -40,6 +40,11 @@ function openProfileModal() {
   isMenuOpen.value = false;
   profileStore.openProfileModal();
 }
+
+async function openNotificationsModal() {
+  notificationsStore.openNotificationsModal();
+  await notificationsStore.cleanOldNotifications();
+}
 </script>
 
 <template>
@@ -80,7 +85,7 @@ function openProfileModal() {
         <ToggleThemeButton />
         <button
           v-if="authStore.isAuthenticated"
-          @click="notificationsStore.openNotificationsModal"
+          @click="openNotificationsModal"
           class="relative text-[#0088FF]"
         >
           <Bell class="w-6 h-6" />

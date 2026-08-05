@@ -7,7 +7,16 @@ import { useAuthStore } from "@/stores/auth.js";
 import { useToastStore } from "@/stores/toast.js";
 import { useModalHistory } from "@/composables/useModalHistory.js";
 
-import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2, Play, ChevronDown } from "@lucide/vue";
+import {
+  Sparkles,
+  ArrowLeft,
+  Check,
+  X,
+  SquarePen,
+  Loader2,
+  Play,
+  ChevronDown,
+} from "@lucide/vue";
 
 import MovieHeader from "./MovieHeader.vue";
 import MovieMetadata from "./MovieMetadata.vue";
@@ -64,10 +73,13 @@ async function submitRating() {
   try {
     isSubmitting.value = true;
 
-    await watchedMoviesStore.saveWatchedMovie(props.movie, {
-      rating: formData.rating,
-      comment: formData.comment,
-    });
+    await watchedMoviesStore.saveWatchedMovie(
+      props.movie,
+      {
+        rating: formData.rating,
+        comment: formData.comment,
+      }
+    );
 
     showRateForm.value = false;
     toastStore.success("Avaliação salva com sucesso!");
@@ -210,6 +222,9 @@ function unlockScroll() {
                 groupStore.activeGroupMembers[selectedReviewer]?.name
               "
               :comment="movie.reviews[selectedReviewer].comment"
+              :user-color="
+                groupStore.activeGroupMembers[selectedReviewer]?.color
+              "
             />
           </div>
 

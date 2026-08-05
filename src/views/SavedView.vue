@@ -1,11 +1,13 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
 const savedMoviesStore = useSavedMoviesStore();
 
 const emit = defineEmits(["open-movie-modal"]);
+
+const currentGroupBy = ref("none");
 
 const sortedMovies = computed(() => {
   return [...savedMoviesStore.savedMovies].sort(
@@ -29,7 +31,7 @@ function pickRandomMovie() {
   <MoviesCollection
     :movies="sortedMovies"
     :is-loading="savedMoviesStore.isLoading"
-    :group-by-member="true"
+    v-model:group-by="currentGroupBy"
     @open-movie-modal="$emit('open-movie-modal', $event)"
     @pick-random="pickRandomMovie"
     type="saved"

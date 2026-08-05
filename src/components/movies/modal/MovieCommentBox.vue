@@ -1,22 +1,54 @@
 <script setup>
-import { Quote } from "@lucide/vue";
+import { computed } from "vue";
 
-defineProps({
-  reviewerName: String,
-  comment: String,
+const props = defineProps({
+  comment: {
+    type: String,
+    required: true,
+  },
+  reviewerName: {
+    type: String,
+    required: true,
+  },
+  userColor: {
+    type: String,
+    default: null,
+  },
+});
+
+const userColorStyle = computed(() => {
+  if (!props.userColor) return {};
+  return {
+    borderLeftColor: props.userColor,
+    borderLeftWidth: "3px",
+  };
 });
 </script>
 
 <template>
   <div
-    class="mt-3 p-3 bg-[#1e3653] rounded-lg rounded-tl-none relative overflow-hidden"
+    v-if="comment"
+    class="mt-3 p-3 rounded-xl border transition-all duration-200 overflow-hidden bg-gray-50/80 dark:bg-slate-800/40 border-gray-200/80 dark:border-gray-700/60"
+    :style="userColorStyle"
   >
-    <Quote class="absolute -top-1 -right-1 w-10 h-10 text-white/10" />
 
-    <span class="text-xs text-gray-400 capitalize block mb-1">
-      {{ reviewerName }}
-    </span>
-    <p class="text-sm text-white pl-2">
+    <div class="flex items-center gap-1.5 mb-1.5">
+      <span
+        class="w-1.5 h-1.5 rounded-full"
+        :style="{ backgroundColor: userColor || 'currentColor' }"
+      />
+
+      <span
+        class="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-400"
+      >
+        {{ reviewerName }}
+      </span>
+    </div>
+
+    <p
+      class="text-sm text-gray-700 dark:text-gray-200 leading-relaxed pl-3 "
+      :style="{ borderColor: userColor ? `${userColor}40` : 'currentColor' }"
+    >
       {{ comment }}
     </p>
   </div>

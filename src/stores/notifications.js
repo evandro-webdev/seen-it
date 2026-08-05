@@ -12,6 +12,8 @@ import {
   updateDoc,
   doc,
   writeBatch,
+  limit,
+  getDocs,
 } from "@/services/firebase";
 import { useAuthStore } from "./auth";
 
@@ -52,15 +54,23 @@ export const useNotificationsStore = defineStore("notifications", () => {
       where("userId", "==", uid),
       where("group_id", "==", activeGroup.id),
       orderBy("created_at", "desc"),
+      limit(25),
     );
 
-    unsubscribe = onSnapshot(q, (snapshot) => {
-      notifications.value = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      loading.value = false;
-    });
+    unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        notifications.value = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        loading.value = false;
+      },
+      (error) => {
+        console.error("Erro no listener de notificações:", error);
+        loading.value = false;
+      },
+    );
   }
 
   watch(
@@ -85,11 +95,13 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function dispatchWatchedMovieNotification(movie) {
-    const membersIds = Object.keys(groupsStore.activeGroupMembers);
+    const membersIds = Object.keys(groupsStore.activeGroupMembers || {});
 
     const membersToNotificate = membersIds.filter(
       (memberId) => memberId !== authStore.user.uid,
     );
+
+    if (membersToNotificate.length === 0) return;
 
     const promises = membersToNotificate.map((uid) => {
       return addDoc(collection(db, "notifications"), {
@@ -114,11 +126,13 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function dispatchSavedMovieNotification(movieId, movieTitle) {
-    const membersIds = Object.keys(groupsStore.activeGroupMembers);
+    const membersIds = Object.keys(groupsStore.activeGroupMembers || {});
 
     const membersToNotificate = membersIds.filter(
       (memberId) => authStore.user.uid !== memberId,
     );
+
+    if (membersToNotificate.length === 0) return;
 
     const promises = membersToNotificate.map((uid) => {
       return addDoc(collection(db, "notifications"), {
@@ -177,6 +191,39 @@ export const useNotificationsStore = defineStore("notifications", () => {
     }
   }
 
+  async function cleanOldNotifications() {
+    const activeGroupId = groupsStore.activeGroup?.id;
+
+    if (!activeGroupId) return;
+
+    const TWO_WEEKS_MS = 10 * 24 * 60 * 60 * 1000;
+    const fourteenDaysAgo = new Date(Date.now() - TWO_WEEKS_MS);
+
+    try {
+      const q = query(
+        collection(db, "notifications"),
+        where("group_id", "==", activeGroupId),
+        where("created_at", "<=", fourteenDaysAgo),
+      );
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) return;
+
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((docSnap) => {
+        batch.delete(docSnap.ref);
+      });
+
+      await batch.commit();
+      console.log(
+        `[CleanUp] ${snapshot.size} notificações antigas removidas com sucesso.`,
+      );
+    } catch (error) {
+      console.error("Erro ao limpar notificações antigas:", error);
+    }
+  }
+
   async function sendPushNotification(targetUserIds, title, body, type) {
     if (!targetUserIds || targetUserIds.length === 0) return;
 
@@ -227,6 +274,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     unreadCount,
     markAsRead,
     markAllAsRead,
+    cleanOldNotifications,
     stopListening,
     loading,
   };

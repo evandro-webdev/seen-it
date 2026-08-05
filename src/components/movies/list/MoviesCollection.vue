@@ -25,10 +25,6 @@ const props = defineProps({
     required: true,
     validator: (value) => ["saved", "watched"].includes(value),
   },
-  groupByMember: {
-    type: Boolean,
-    default: false,
-  },
   isLoading: {
     type: Boolean,
     default: false,
@@ -70,12 +66,50 @@ const gridClass = computed(() => {
 
 const filteredMovies = computed(() => {
   if (!searchQuery.value.trim()) return props.movies;
-
   const query = removeAccents(searchQuery.value.trim().toLowerCase());
-
   return props.movies.filter((movie) =>
     removeAccents(movie.title.toLowerCase()).includes(query),
   );
+});
+
+const memberSections = computed(() => {
+  if (props.groupBy !== "members") return [];
+
+  const members = groupsStore.activeGroupMembers || {};
+  const currentUid = authStore.user?.uid;
+  const groups = {};
+
+  filteredMovies.value.forEach((movie) => {
+    const uid = movie.saved_by || null;
+    if (!groups[uid]) groups[uid] = [];
+    groups[uid].push(movie);
+  });
+
+  return Object.entries(groups)
+    .map(([uid, userMovies]) => {
+      let memberData = members[uid];
+
+      if (!memberData && uid === currentUid) {
+        memberData = {
+          name: authStore.user?.displayName || "Você",
+          color: "#338CD5",
+        };
+      }
+
+      return {
+        uid,
+        title: memberData?.name
+          ? `Salvos por ${memberData.name}`
+          : "Membro do Grupo",
+        userColor: memberData?.color || "#338CD5",
+        movies: userMovies,
+      };
+    })
+    .sort((a, b) => {
+      if (a.uid === currentUid) return -1;
+      if (b.uid === currentUid) return 1;
+      return 0;
+    });
 });
 
 const processedCustomSections = computed(() => {
@@ -97,37 +131,6 @@ const processedCustomSections = computed(() => {
       };
     })
     .filter((section) => section.movies.length > 0);
-});
-
-const groupedSections = computed(() => {
-  if (!props.groupByMember) return [];
-
-  const members = groupsStore.activeGroupMembers || {};
-  const groups = {};
-
-  filteredMovies.value.forEach((movie) => {
-    const uid = movie.saved_by || null;
-    if (!groups[uid]) groups[uid] = [];
-    groups[uid].push(movie);
-  });
-
-  return Object.entries(groups).map(([uid, userMovies]) => {
-    let memberData = members[uid];
-
-    if (!memberData && uid === authStore.user?.uid) {
-      memberData = {
-        name: authStore.user?.displayName || "Você",
-        color: "#338CD5",
-      };
-    }
-
-    return {
-      uid,
-      userName: memberData?.name || "Membro",
-      userColor: memberData?.color || "#338CD5",
-      movies: userMovies,
-    };
-  });
 });
 
 function clearSearch() {
@@ -169,13 +172,13 @@ function clearSearch() {
         <div
           v-else-if="
             filteredMovies.length > 0 &&
-            groupByMember &&
-            groupsStore.activeGroup
+            groupBy === 'members' &&
+            memberSections.length > 0
           "
           class="space-y-6"
         >
           <section
-            v-for="section in groupedSections"
+            v-for="section in memberSections"
             :key="section.uid"
             class="space-y-3"
           >
@@ -185,7 +188,7 @@ function clearSearch() {
                 :style="{ backgroundColor: section.userColor }"
               ></span>
               <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
-                Salvos por {{ section.userName }}
+                {{ section.title }}
               </h2>
               <span
                 class="text-xs font-medium text-gray-500 dark:text-gray-400"
@@ -200,13 +203,14 @@ function clearSearch() {
                 :key="movie.id"
                 :movie="movie"
                 @click="$emit('open-movie-modal', movie.id)"
+                show-user-color
               />
             </div>
           </section>
         </div>
 
         <div
-          v-else-if="processedCustomSections.length > 0"
+          v-else-if="processedCustomSections.length > 0 && groupBy === '5years'"
           class="space-y-6"
         >
           <section
@@ -247,6 +251,7 @@ function clearSearch() {
             :key="movie.id"
             :movie="movie"
             @click="$emit('open-movie-modal', movie.id)"
+            show-user-color
           />
         </section>
 

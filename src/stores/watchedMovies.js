@@ -122,6 +122,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           poster_path: movie.poster_path || "",
           reviews: finalReviews,
           average_rating,
+          release_date: movie.release_date,
+          saved_by: movie.saved_by || currentUserId,
           created_at: new Date(),
         });
       }
