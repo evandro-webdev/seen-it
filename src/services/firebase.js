@@ -17,7 +17,7 @@ import {
   orderBy,
   runTransaction,
   writeBatch,
-  limit
+  limit,
 } from "firebase/firestore";
 
 import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
@@ -56,5 +56,5 @@ export {
   orderBy,
   runTransaction,
   writeBatch,
-  limit
+  limit,
 };

@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { removeAccents } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useGroupsStore } from "@/stores/groups.js";
+import { useMovieGrouping } from "@/composables/useMovieGrouping.js";
 
 import MovieCard from "../cards/MovieCard.vue";
 import AuthForm from "@/components/auth/AuthForm.vue";
@@ -72,66 +73,15 @@ const filteredMovies = computed(() => {
   );
 });
 
-const memberSections = computed(() => {
-  if (props.groupBy !== "members") return [];
-
-  const members = groupsStore.activeGroupMembers || {};
-  const currentUid = authStore.user?.uid;
-  const groups = {};
-
-  filteredMovies.value.forEach((movie) => {
-    const uid = movie.saved_by || null;
-    if (!groups[uid]) groups[uid] = [];
-    groups[uid].push(movie);
-  });
-
-  return Object.entries(groups)
-    .map(([uid, userMovies]) => {
-      let memberData = members[uid];
-
-      if (!memberData && uid === currentUid) {
-        memberData = {
-          name: authStore.user?.displayName || "Você",
-          color: "#338CD5",
-        };
-      }
-
-      return {
-        uid,
-        title: memberData?.name
-          ? `Salvos por ${memberData.name}`
-          : "Membro do Grupo",
-        userColor: memberData?.color || "#338CD5",
-        movies: userMovies,
-      };
-    })
-    .sort((a, b) => {
-      if (a.uid === currentUid) return -1;
-      if (b.uid === currentUid) return 1;
-      return 0;
-    });
-});
-
-const processedCustomSections = computed(() => {
-  if (!props.customSections || props.customSections.length === 0) return [];
-
-  const query = removeAccents(searchQuery.value.trim().toLowerCase());
-
-  return props.customSections
-    .map((section) => {
-      const filtered = query
-        ? section.movies.filter((movie) =>
-            removeAccents(movie.title.toLowerCase()).includes(query),
-          )
-        : section.movies;
-
-      return {
-        ...section,
-        movies: filtered,
-      };
-    })
-    .filter((section) => section.movies.length > 0);
-});
+const { activeGroupSections } = useMovieGrouping(
+  filteredMovies,
+  computed(() => props.groupBy),
+  {
+    activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
+    currentUid: computed(() => authStore.user?.uid),
+    currentUserDisplayName: computed(() => authStore.user?.displayName),
+  },
+);
 
 function clearSearch() {
   searchQuery.value = "";
@@ -172,55 +122,25 @@ function clearSearch() {
         <div
           v-else-if="
             filteredMovies.length > 0 &&
-            groupBy === 'members' &&
-            memberSections.length > 0
+            groupBy !== 'none' &&
+            activeGroupSections.length > 0
           "
           class="space-y-6"
         >
           <section
-            v-for="section in memberSections"
-            :key="section.uid"
-            class="space-y-3"
-          >
-            <div class="flex items-center gap-2">
-              <span
-                class="w-3 h-3 rounded-full shrink-0"
-                :style="{ backgroundColor: section.userColor }"
-              ></span>
-              <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
-                {{ section.title }}
-              </h2>
-              <span
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
-              >
-                ({{ section.movies.length }})
-              </span>
-            </div>
-
-            <div :class="gridClass">
-              <MovieCard
-                v-for="movie in section.movies"
-                :key="movie.id"
-                :movie="movie"
-                @click="$emit('open-movie-modal', movie.id)"
-                show-user-color
-              />
-            </div>
-          </section>
-        </div>
-
-        <div
-          v-else-if="processedCustomSections.length > 0 && groupBy === '5years'"
-          class="space-y-6"
-        >
-          <section
-            v-for="section in processedCustomSections"
-            :key="section.title"
+            v-for="section in activeGroupSections"
+            :key="section.id || section.title"
             class="space-y-3"
           >
             <div
               class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800/60 pb-2"
             >
+              <span
+                v-if="section.userColor"
+                class="w-3 h-3 rounded-full shrink-0"
+                :style="{ backgroundColor: section.userColor }"
+              ></span>
+
               <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
                 {{ section.title }}
               </h2>
@@ -237,6 +157,7 @@ function clearSearch() {
                 :key="movie.id"
                 :movie="movie"
                 @click="$emit('open-movie-modal', movie.id)"
+                :show-user-color="type === 'saved' || groupBy === 'members'"
               />
             </div>
           </section>

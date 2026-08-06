@@ -115,6 +115,17 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
         };
         average_rating = Number(review.rating).toFixed(1);
 
+        const cast =
+          movie.credits?.cast?.slice(0, 15).map((actor) => ({
+            id: actor.id,
+            name: actor.name,
+          })) || [];
+
+        const directorObj = movie.credits?.crew?.find(
+          (member) => member.job === "Director",
+        );
+        const director = directorObj ? directorObj.name : "";
+
         transaction.set(movieDocRef, {
           id: movie.id,
           title: movie.title,
@@ -123,6 +134,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           reviews: finalReviews,
           average_rating,
           release_date: movie.release_date,
+          cast: cast,
+          director: director,
           saved_by: movie.saved_by || currentUserId,
           created_at: new Date(),
         });

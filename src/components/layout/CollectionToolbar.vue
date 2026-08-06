@@ -112,19 +112,19 @@ function handlePickRandom() {
               value="rating_desc"
               class="dark:bg-[#121825]"
             >
-              Nota (Maior)
+              Nota  &#8593;
             </option>
             <option
               value="rating_asc"
               class="dark:bg-[#121825]"
             >
-              Nota (Menor)
+              Nota  &#8595;
             </option>
             <option
               value="date_desc"
               class="dark:bg-[#121825]"
             >
-              Mais recentes
+              Recentes
             </option>
           </select>
         </div>
@@ -138,7 +138,7 @@ function handlePickRandom() {
             id="group-select"
             :value="groupBy"
             @change="emit('update:groupBy', $event.target.value)"
-            class="bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer p-0 text-xs text-ellipsis overflow-hidden whitespace-nowrap max-w-[110px] sm:max-w-none"
+            class="max-w-[100px] sm:max-w-none p-0 text-xs text-ellipsis bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer overflow-hidden whitespace-nowrap"
           >
             <option
               value="none"
@@ -160,12 +160,26 @@ function handlePickRandom() {
             >
               Por 5 anos
             </option>
-            <option
+            <!-- <option
+              v-if="type === 'watched'"
               value="actors"
               class="dark:bg-[#121825]"
-              disabled
             >
-              Principais atores
+              Elenco
+            </option>
+            <option
+              v-if="type === 'watched'"
+              value="directors"
+              class="dark:bg-[#121825]"
+            >
+              Diretor
+            </option> -->
+            <option
+              v-if="type === 'saved'"
+              value="runtime"
+              class="dark:bg-[#121825]"
+            >
+              Duração
             </option>
           </select>
         </div>
