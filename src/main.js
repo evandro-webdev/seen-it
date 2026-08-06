@@ -6,7 +6,13 @@ import router from "./router";
 import "./style.css";
 import { registerSW } from 'virtual:pwa-register'
 
-registerSW({ immediate: true })
+registerSW({
+  onNeedRefresh() {
+  },
+  onOfflineReady() {
+    console.log("App pronto para uso offline.");
+  }
+});
 
 const app = createApp(App);
 

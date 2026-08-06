@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       strategies: "generateSW",
       workbox: {
@@ -19,9 +19,6 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /OneSignalSDKWorker/],
         navigateFallbackAllowlist: [/^(?!\/__)/],
-
-        clientsClaim: true,
-        skipWaiting: true
       },
       manifest: {
         name: "Seen It",
