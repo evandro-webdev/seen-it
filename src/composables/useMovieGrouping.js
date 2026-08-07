@@ -91,14 +91,49 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
       }
     });
 
-    return Object.values(actorMaps)
-      .filter((actor) => actor.movies.length >= 3)
+    const eligibleActors = Object.values(actorMaps).filter(
+      (actor) => actor.movies.length >= 3,
+    );
+
+    const combinedGroups = {};
+
+    eligibleActors.forEach((actor) => {
+      const movieSignature = actor.movies
+        .map((m) => m.id)
+        .sort()
+        .join("-");
+
+      if (!combinedGroups[movieSignature]) {
+        combinedGroups[movieSignature] = {
+          actors: [],
+          movies: actor.movies,
+        };
+      }
+
+      combinedGroups[movieSignature].actors.push(actor.name);
+    });
+
+    return Object.values(combinedGroups)
       .sort((a, b) => b.movies.length - a.movies.length)
-      .map((actor) => ({
-        id: actor.id,
-        title: actor.name,
-        movies: actor.movies,
-      }));
+      .map((group) => {
+        const actorsNames = group.actors;
+        let titleText = "";
+
+        if (actorsNames.length === 1) {
+          titleText = actorsNames[0];
+        } else if (actorsNames.length === 2) {
+          titleText = `${actorsNames[0]} e ${actorsNames[1]}`;
+        } else {
+          titleText = `${actorsNames.slice(0, 2).join(", ")} +${actorsNames.length - 2} atores`;
+        }
+
+        return {
+          id: group.movies.map((m) => m.id).join("-"),
+          title: titleText,
+          fullTitle: actorsNames.join(", "),
+          movies: group.movies,
+        };
+      });
   });
 
   const directorSections = computed(() => {
@@ -121,9 +156,7 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
         };
       }
 
-      if (
-        !directorMaps[dirId].movies.some((m) => m.id === movie.id)
-      ) {
+      if (!directorMaps[dirId].movies.some((m) => m.id === movie.id)) {
         directorMaps[dirId].movies.push(movie);
       }
     });

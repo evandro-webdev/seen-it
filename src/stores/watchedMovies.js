@@ -121,10 +121,11 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
             name: actor.name,
           })) || [];
 
-        const directorObj = movie.credits?.crew?.find(
+        const crewList = movie.credits?.crew || [];
+        const directorObj = crewList.find(
           (member) => member.job === "Director",
         );
-        const director = directorObj ? directorObj.name : "";
+
 
         transaction.set(movieDocRef, {
           id: movie.id,
@@ -135,7 +136,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           average_rating,
           release_date: movie.release_date,
           cast: cast,
-          director: director,
+          director: directorObj ? { id: directorObj.id, name: directorObj.name } : null,
           saved_by: movie.saved_by || currentUserId,
           created_at: new Date(),
         });

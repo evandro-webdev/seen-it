@@ -76,6 +76,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       title: movie.title,
       poster_path: movie.poster_path,
       vote_average: movie.vote_average,
+      runtime: movie.runtime,
     };
 
     if (groupStore.activeGroup) {
