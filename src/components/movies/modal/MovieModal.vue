@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, computed } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
 import { useSavedMoviesStore } from "@/stores/savedMovies.js";
 import { useGroupsStore } from "@/stores/groups";
@@ -7,16 +7,7 @@ import { useAuthStore } from "@/stores/auth.js";
 import { useToastStore } from "@/stores/toast.js";
 import { useModalHistory } from "@/composables/useModalHistory.js";
 
-import {
-  Sparkles,
-  ArrowLeft,
-  Check,
-  X,
-  SquarePen,
-  Loader2,
-  Play,
-  ChevronDown,
-} from "@lucide/vue";
+import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
 import MovieHeader from "./MovieHeader.vue";
 import MovieMetadata from "./MovieMetadata.vue";
@@ -26,6 +17,8 @@ import MovieRateForm from "../rating/MovieRateForm.vue";
 
 import SaveButton from "../ui/buttons/SaveButton.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
+import MovieTrailer from "./MovieTrailer.vue";
+import MovieCredits from "./MovieCredits.vue";
 
 const props = defineProps({
   movie: {
@@ -73,13 +66,10 @@ async function submitRating() {
   try {
     isSubmitting.value = true;
 
-    await watchedMoviesStore.saveWatchedMovie(
-      props.movie,
-      {
-        rating: formData.rating,
-        comment: formData.comment,
-      }
-    );
+    await watchedMoviesStore.saveWatchedMovie(props.movie, {
+      rating: formData.rating,
+      comment: formData.comment,
+    });
 
     showRateForm.value = false;
     toastStore.success("Avaliação salva com sucesso!");
@@ -157,54 +147,15 @@ function unlockScroll() {
 
             <MovieMetadata :movie="movie" />
 
-            <div
+            <MovieCredits
+              :movie="movie"
+            />
+            
+            <MovieTrailer
               v-if="movie?.trailerKey"
-              class="my-4 border-t border-b border-gray-100 dark:border-[#222938] py-2"
-            >
-              <button
-                @click="isTrailerOpen = !isTrailerOpen"
-                type="button"
-                class="w-full flex items-center justify-between py-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <div class="flex items-center gap-2">
-                  <div
-                    class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
-                  >
-                    <Play class="w-4 h-4 fill-current" />
-                  </div>
-                  <span>Trailer Oficial</span>
-                </div>
-
-                <ChevronDown
-                  class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                  :class="{ 'rotate-180': isTrailerOpen }"
-                />
-              </button>
-
-              <div
-                v-if="isTrailerOpen"
-                class="mt-3"
-              >
-                <div
-                  class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-lg"
-                >
-                  <iframe
-                    :src="`https://www.youtube-nocookie.com/embed/${movie.trailerKey}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`"
-                    title="Trailer do filme"
-                    class="w-full h-full border-0"
-                    allow="
-                      accelerometer;
-                      autoplay;
-                      clipboard-write;
-                      encrypted-media;
-                      gyroscope;
-                      picture-in-picture;
-                    "
-                    allowfullscreen
-                  ></iframe>
-                </div>
-              </div>
-            </div>
+              :movie="movie"
+              v-model:is-trailer-open="isTrailerOpen"
+            />
 
             <MovieRatingsRow
               :movie="movie"

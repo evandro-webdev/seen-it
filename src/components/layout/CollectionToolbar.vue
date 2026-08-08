@@ -112,19 +112,19 @@ function handlePickRandom() {
               value="rating_desc"
               class="dark:bg-[#121825]"
             >
-              Nota  &#8593;
+              Maior nota
             </option>
             <option
               value="rating_asc"
               class="dark:bg-[#121825]"
             >
-              Nota  &#8595;
+              Menor nota
             </option>
             <option
               value="date_desc"
               class="dark:bg-[#121825]"
             >
-              Recentes
+              Mais recentes
             </option>
           </select>
         </div>
@@ -144,8 +144,9 @@ function handlePickRandom() {
               value="none"
               class="dark:bg-[#121825]"
             >
-              Sem grupo
+              Nenhum
             </option>
+
             <option
               v-if="groupsStore.activeGroup"
               value="members"
@@ -153,6 +154,31 @@ function handlePickRandom() {
             >
               Por membro
             </option>
+
+            <option
+              v-if="type === 'watched'"
+              value="actors"
+              class="dark:bg-[#121825]"
+            >
+              Por elenco
+            </option>
+
+            <option
+              v-if="type === 'watched'"
+              value="directors"
+              class="dark:bg-[#121825]"
+            >
+              Por diretor
+            </option>
+
+            <option
+              v-if="type === 'watched'"
+              value="decades"
+              class="dark:bg-[#121825]"
+            >
+              Por década
+            </option>
+
             <option
               v-if="type === 'watched'"
               value="5years"
@@ -160,26 +186,13 @@ function handlePickRandom() {
             >
               Por 5 anos
             </option>
-            <!-- <option
-              v-if="type === 'watched'"
-              value="actors"
-              class="dark:bg-[#121825]"
-            >
-              Elenco
-            </option>
-            <option
-              v-if="type === 'watched'"
-              value="directors"
-              class="dark:bg-[#121825]"
-            >
-              Diretor
-            </option> -->
+
             <option
               v-if="type === 'saved'"
               value="runtime"
               class="dark:bg-[#121825]"
             >
-              Duração
+              Por duração
             </option>
           </select>
         </div>

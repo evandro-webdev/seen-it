@@ -119,13 +119,20 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       const docRef = await saveMovie(movie);
 
       if (docRef) {
-        savedMovies.value.push({
+        const movieData = {
           docId: docRef.id,
           id: movie.id,
           title: movie.title,
           poster_path: movie.poster_path,
           vote_average: movie.vote_average,
-        });
+          runtime: movie.runtime,
+        };
+
+        if (groupStore.activeGroup) {
+          movieData.saved_by = authStore.user.uid;
+        }
+
+        savedMovies.value.push(movieData);
         savedMoviesIds.value.push(strMovieId);
       }
     }

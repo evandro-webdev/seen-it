@@ -51,11 +51,18 @@ async function openNotificationsModal() {
   <header class="p-4">
     <div class="flex justify-between items-center relative">
       <div class="mr-auto space-x-3 flex items-center">
+        <div
+          v-if="authStore.loading"
+          class="text-[#0088FF] opacity-50 animate-pulse pointer-events-none"
+        >
+          <Menu class="w-6 h-6" />
+        </div>
+
         <button
-          v-if="authStore.isAuthenticated"
+          v-else-if="authStore.isAuthenticated"
           @click="isMenuOpen = !isMenuOpen"
           ref="menuButtonRef"
-          class="text-[#0088FF]"
+          class="text-[#0088FF] transition-opacity"
         >
           <Menu class="w-6 h-6" />
         </button>
@@ -83,17 +90,26 @@ async function openNotificationsModal() {
 
       <div class="ml-auto space-x-3 flex items-center">
         <ToggleThemeButton />
+
+        <div
+          v-if="authStore.loading"
+          class="text-[#0088FF] opacity-50 animate-pulse pointer-events-none"
+        >
+          <Bell class="w-6 h-6" />
+        </div>
+
         <button
-          v-if="authStore.isAuthenticated"
+          v-else-if="authStore.isAuthenticated"
           @click="openNotificationsModal"
-          class="relative text-[#0088FF]"
+          class="relative text-[#0088FF] transition-opacity"
         >
           <Bell class="w-6 h-6" />
           <span
             v-if="notificationsStore.unreadCount > 0"
             class="absolute -top-1.5 -right-1.5 w-4 h-4 text-xs font-semibold rounded-full text-white bg-red-600 block"
-            >{{ notificationsStore.unreadCount }}</span
           >
+            {{ notificationsStore.unreadCount }}
+          </span>
         </button>
       </div>
 

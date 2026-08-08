@@ -1,5 +1,45 @@
 import { computed } from "vue";
 
+function groupMoviesByYearStep(moviesList, step = 5) {
+  const groups = {};
+
+  moviesList.forEach((movie) => {
+    const releaseYear = movie.release_date
+      ? parseInt(movie.release_date.slice(0, 4), 10)
+      : null;
+
+    let rangeLabel = "Ano desconhecido";
+    let sortKey = -1;
+
+    if (releaseYear && !isNaN(releaseYear)) {
+      const startYear = Math.floor(releaseYear / step) * step;
+
+      if (step === 10) {
+        const decadeShort = startYear % 100;
+        rangeLabel =
+          startYear < 2000 ? `Anos ${decadeShort}` : `Década de ${startYear}`;
+      } else {
+        const endYear = startYear + step - 1;
+        rangeLabel = `${startYear} - ${endYear}`;
+      }
+
+      sortKey = startYear;
+    }
+
+    if (!groups[rangeLabel]) {
+      groups[rangeLabel] = {
+        id: `range-${step}-${sortKey}`,
+        title: rangeLabel,
+        sortKey,
+        movies: [],
+      };
+    }
+    groups[rangeLabel].movies.push(movie);
+  });
+
+  return Object.values(groups).sort((a, b) => b.sortKey - a.sortKey);
+}
+
 export function useMovieGrouping(movies, groupBy, options = {}) {
   const memberSections = computed(() => {
     if (groupBy.value !== "members") return [];
@@ -172,37 +212,15 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
   });
 
   const yearSections = computed(() => {
-    if (groupBy.value !== "5years") return [];
+    if (groupBy.value === "5years") {
+      return groupMoviesByYearStep(movies.value, 5);
+    }
 
-    const groups = {};
+    if (groupBy.value === "decades") {
+      return groupMoviesByYearStep(movies.value, 10);
+    }
 
-    movies.value.forEach((movie) => {
-      const releaseYear = movie.release_date
-        ? parseInt(movie.release_date.slice(0, 4), 10)
-        : null;
-
-      let rangeLabel = "Ano desconhecido";
-      let sortKey = -1;
-
-      if (releaseYear && !isNaN(releaseYear)) {
-        const startYear = Math.floor(releaseYear / 5) * 5;
-        const endYear = startYear + 4;
-        rangeLabel = `${startYear} - ${endYear}`;
-        sortKey = startYear;
-      }
-
-      if (!groups[rangeLabel]) {
-        groups[rangeLabel] = {
-          id: rangeLabel,
-          title: rangeLabel,
-          sortKey,
-          movies: [],
-        };
-      }
-      groups[rangeLabel].movies.push(movie);
-    });
-
-    return Object.values(groups).sort((a, b) => b.sortKey - a.sortKey);
+    return [];
   });
 
   const activeGroupSections = computed(() => {
@@ -210,7 +228,8 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
     if (groupBy.value === "runtime") return runtimeSections.value;
     if (groupBy.value === "actors") return actorSections.value;
     if (groupBy.value === "directors") return directorSections.value;
-    if (groupBy.value === "5years") return yearSections.value;
+    if (groupBy.value === "5years" || groupBy.value === "decades")
+      return yearSections.value;
     return [];
   });
 

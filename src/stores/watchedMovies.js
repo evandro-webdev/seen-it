@@ -86,12 +86,15 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     let finalReviews = {};
     let average_rating = "0";
 
+    let cast = [];
+    let director = null;
+    let savedBy = currentUserId;
+
     await runTransaction(db, async (transaction) => {
       const docSnap = await transaction.get(movieDocRef);
 
       if (docSnap.exists()) {
         const existingData = docSnap.data();
-
         finalReviews = {
           ...existingData.reviews,
           [currentUserId]: newUserReview,
@@ -110,12 +113,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           updated_at: new Date(),
         });
       } else {
-        finalReviews = {
-          [currentUserId]: newUserReview,
-        };
+        finalReviews = { [currentUserId]: newUserReview };
         average_rating = Number(review.rating).toFixed(1);
 
-        const cast =
+        cast =
           movie.credits?.cast?.slice(0, 15).map((actor) => ({
             id: actor.id,
             name: actor.name,
@@ -125,7 +126,11 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
         const directorObj = crewList.find(
           (member) => member.job === "Director",
         );
+        director = directorObj
+          ? { id: directorObj.id, name: directorObj.name }
+          : null;
 
+        savedBy = movie.saved_by || currentUserId;
 
         transaction.set(movieDocRef, {
           id: movie.id,
@@ -134,10 +139,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           poster_path: movie.poster_path || "",
           reviews: finalReviews,
           average_rating,
-          release_date: movie.release_date,
-          cast: cast,
-          director: directorObj ? { id: directorObj.id, name: directorObj.name } : null,
-          saved_by: movie.saved_by || currentUserId,
+          release_date: movie.release_date || "",
+          cast,
+          director,
+          saved_by: savedBy,
           created_at: new Date(),
         });
       }
@@ -147,17 +152,25 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       (m) => String(m.id) === String(movie.id),
     );
 
-    const localMovieData = {
-      ...movie,
-      docId: String(movie.id),
-      reviews: finalReviews,
-      average_rating,
-    };
-
     if (existingLocalIndex !== -1) {
-      watchedMovies.value[existingLocalIndex] = localMovieData;
+      watchedMovies.value[existingLocalIndex] = {
+        ...watchedMovies.value[existingLocalIndex],
+        reviews: finalReviews,
+        average_rating,
+      };
     } else {
-      watchedMovies.value.push(localMovieData);
+      const newLocalMovie = {
+        ...movie,
+        docId: String(movie.id),
+        reviews: finalReviews,
+        average_rating,
+        cast,
+        director,
+        saved_by: savedBy,
+        created_at: new Date(),
+      };
+
+      watchedMovies.value.push(newLocalMovie);
       watchedMoviesIds.value.push(movie.id);
     }
 
