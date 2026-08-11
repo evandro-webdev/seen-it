@@ -6,7 +6,7 @@ import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
 import { useToastStore } from "@/stores/toast.js";
 import { useModalHistory } from "@/composables/useModalHistory.js";
-import { haptic } from "@/utils/haaptics.js";
+import { haptic } from "@/utils/haptics.js";
 
 import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
