@@ -1,14 +1,10 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import {
-  getMovieWithCredits,
-  searchMovies,
   getPopularMovies,
   getTopRatedMovies,
   getUpcomingMovies,
   getTrendingMovies,
-  getGenres,
-  getMoviesByGenre,
 } from "@/services/tmdb.js";
 
 export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
@@ -17,20 +13,16 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
   const topRatedMovies = ref([]);
   const upcomingMovies = ref([]);
 
-  const genres = ref([]);
-  const selectedGenreId = ref(null);
-  const genreMovies = ref([]);
-  const isLoadingGenreMovies = ref(false);
-
-  const searchResults = ref([]);
-  const isSearching = ref(false);
-
-  const currentPage = ref(1);
-  const totalPages = ref(1);
-  const lastQuery = ref("");
-  const isLoadingMore = ref(false);
-
   const isLoading = ref(false);
+  const isLoadingCategoryMovies = ref(false);
+  const isLoadingMoreCategoryMovies = ref(false);
+
+  const selectedCategory = ref(null);
+  const categoryTitle = ref("");
+  const categoryMovies = ref([]);
+
+  const categoryCurrentPage = ref(1);
+  const categoryTotalPages = ref(1);
 
   async function loadDiscover() {
     if (popularMovies.value.length > 0) return;
@@ -38,21 +30,17 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     try {
       isLoading.value = true;
 
-      const [trending, popular, topRated, upcoming, genreData] =
-        await Promise.all([
-          getTrendingMovies(),
-          getPopularMovies(),
-          getTopRatedMovies(),
-          getUpcomingMovies(),
-          getGenres(),
-        ]);
+      const [trending, popular, topRated, upcoming] = await Promise.all([
+        getTrendingMovies(),
+        getPopularMovies(),
+        getTopRatedMovies(),
+        getUpcomingMovies(),
+      ]);
 
       heroMovies.value = trending.results.slice(0, 5);
       popularMovies.value = popular.results;
       topRatedMovies.value = topRated.results;
       upcomingMovies.value = upcoming.results;
-
-      genres.value = genreData.genres || [];
     } catch (error) {
       console.log(error);
     } finally {
@@ -60,110 +48,90 @@ export const useDiscoverMoviesStore = defineStore("discoverMovies", () => {
     }
   }
 
-  async function searchForMovies(query) {
-    if (!query.trim()) return;
-
-    searchResults.value = [];
-    currentPage.value = 1;
-    totalPages.value = 1;
-    lastQuery.value = query;
-
-    isSearching.value = true;
-    isLoading.value = true;
-
-    try {
-      const data = await searchMovies(query, 1);
-      totalPages.value = data.total_pages;
-
-      const moviesWithCredits = await Promise.all(
-        data.results.map((movie) =>
-          getMovieWithCredits(movie.id).catch(() => null),
-        ),
-      );
-
-      searchResults.value = moviesWithCredits.filter(Boolean);
-    } catch (error) {
-      console.error("Erro ao buscar filmes:", error);
-    } finally {
-      isLoading.value = false;
+  function getCategoryFetcher(category) {
+    switch (category) {
+      case "popular":
+        return getPopularMovies;
+      case "topRated":
+        return getTopRatedMovies;
+      case "upcoming":
+        return getUpcomingMovies;
+      default:
+        return getPopularMovies;
     }
   }
 
-  async function loadMoreMovies() {
+  async function selectCategory(categoryKey, title) {
+    selectedCategory.value = categoryKey;
+    categoryTitle.value = title;
+    categoryMovies.value = [];
+    categoryCurrentPage.value = 1;
+
+    isLoadingCategoryMovies.value = true;
+
+    try {
+      const fetcher = getCategoryFetcher(categoryKey);
+      const data = await fetcher(1);
+
+      categoryMovies.value = data.results || [];
+      categoryTotalPages.value = data.total_pages || 1;
+    } catch (error) {
+      console.error("Erro ao buscar filmes da categoria:", error);
+    } finally {
+      isLoadingCategoryMovies.value = false;
+    }
+  }
+
+  async function loadMoreCategoryMovies() {
     if (
-      isLoadingMore.value ||
-      currentPage.value >= totalPages.value ||
-      !lastQuery.value
+      isLoadingMoreCategoryMovies.value ||
+      categoryCurrentPage.value >= categoryTotalPages.value ||
+      !selectedCategory.value
     ) {
       return;
     }
 
-    isLoadingMore.value = true;
-    const nextPage = currentPage.value + 1;
+    isLoadingMoreCategoryMovies.value = true;
+    const nextPage = categoryCurrentPage.value + 1;
 
     try {
-      const data = await searchMovies(lastQuery.value, nextPage);
+      const fetcher = getCategoryFetcher(selectedCategory.value);
+      const data = await fetcher(nextPage);
 
-      const newMovies = await Promise.all(
-        data.results.map((movie) =>
-          getMovieWithCredits(movie.id).catch(() => null),
-        ),
-      );
-
-      const validNewMovies = newMovies.filter(Boolean);
-      searchResults.value = [...searchResults.value, ...validNewMovies];
-      currentPage.value = nextPage;
+      categoryMovies.value = [...categoryMovies.value, ...(data.results || [])];
+      categoryCurrentPage.value = nextPage;
     } catch (error) {
-      console.error("Erro ao carregar mais filmes:", error);
+      console.error("Erro ao carregar mais filmes da categoria:", error);
     } finally {
-      isLoadingMore.value = false;
+      isLoadingMoreCategoryMovies.value = false;
     }
   }
 
-  async function selectGenre(genreId) {
-    if (selectedGenreId.value === genreId) {
-      selectedGenreId.value = null;
-      genreMovies.value = [];
-      return;
-    }
-
-    selectedGenreId.value = genreId;
-    isLoadingGenreMovies.value = true;
-
-    try {
-      const data = await getMoviesByGenre(genreId);
-      genreMovies.value = data.results;
-    } catch (error) {
-      console.error("Erro ao buscar filmes por gênero:", error);
-    } finally {
-      isLoadingGenreMovies.value = false;
-    }
-  }
-
-  function clearSearch() {
-    isSearching.value = false;
-    searchResults.value = [];
+  function clearCategory(){
+    selectedCategory.value = null;
+    categoryTitle.value = "";
+    categoryMovies.value = [];
+    categoryCurrentPage.value = 1;
+    categoryTotalPages.value = 1;
   }
 
   return {
-    searchResults,
     heroMovies,
     popularMovies,
     topRatedMovies,
     upcomingMovies,
-    searchForMovies,
-    isSearching,
     isLoading,
-    clearSearch,
     loadDiscover,
-    currentPage,
-    totalPages,
-    isLoadingMore,
-    loadMoreMovies,
-    genres,
-    selectedGenreId,
-    genreMovies,
-    isLoadingGenreMovies,
-    selectGenre,
+
+    selectedCategory,
+    categoryTitle,
+    categoryMovies,
+    isLoadingCategoryMovies,
+    isLoadingMoreCategoryMovies,
+    categoryCurrentPage,
+    categoryTotalPages,
+    selectCategory,
+    loadMoreCategoryMovies,
+    clearCategory,
   };
 });

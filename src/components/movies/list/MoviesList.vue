@@ -22,9 +22,13 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  category: {
+    type: String,
+    default: "",
+  },
 });
 
-const emit = defineEmits(["open-movie-modal"]);
+const emit = defineEmits(["open-movie-modal", "see-all"]);
 </script>
 
 <template>
@@ -40,10 +44,17 @@ const emit = defineEmits(["open-movie-modal"]);
           {{ title }}
         </h2>
       </div>
-      <button class="text-xs font-semibold text-[#0088FF]">Ver todos</button>
+      <button
+        @click="emit('see-all', category)"
+        class="text-xs font-semibold text-[#0088FF]"
+      >
+        Ver todos
+      </button>
     </div>
 
-    <div class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory">
+    <div
+      class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory"
+    >
       <template v-if="loading">
         <MovieCardSkeleton
           v-for="n in 4"

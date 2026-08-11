@@ -28,45 +28,11 @@ const sortedMovies = computed(() => {
     return 0;
   });
 });
-
-function get5YearRange(year) {
-  if (!year || isNaN(year)) return "Ano desconhecido";
-  const startYear = Math.floor(year / 5) * 5;
-  const endYear = startYear + 4;
-  return `${startYear} - ${endYear}`;
-}
-
-const activeSections = computed(() => {
-  if (currentGroupBy.value !== "5years") return [];
-
-  const groups = {};
-  sortedMovies.value.forEach((movie) => {
-    const releaseYear = movie.release_date
-      ? parseInt(movie.release_date.slice(0, 4), 10)
-      : null;
-    const rangeLabel = get5YearRange(releaseYear);
-
-    if (!groups[rangeLabel]) {
-      groups[rangeLabel] = {
-        title: rangeLabel,
-        sortKey:
-          releaseYear && !isNaN(releaseYear)
-            ? Math.floor(releaseYear / 5) * 5
-            : -1,
-        movies: [],
-      };
-    }
-    groups[rangeLabel].movies.push(movie);
-  });
-
-  return Object.values(groups).sort((a, b) => b.sortKey - a.sortKey);
-});
 </script>
 
 <template>
   <MoviesCollection
     :movies="sortedMovies"
-    :custom-sections="activeSections"
     :is-loading="watchedMoviesStore.isLoading"
     type="watched"
     v-model:sort-by="currentSort"

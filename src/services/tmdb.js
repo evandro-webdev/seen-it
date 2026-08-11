@@ -49,32 +49,32 @@ export async function getMovieWithCredits(movieId) {
   return fetchTMDB(`/movie/${movieId}?language=pt-BR&append_to_response=credits`);
 }
 
-export async function getPopularMovies() {
+export async function getPopularMovies(page = 1) {
   const allowedLanguages = "en|pt|fr|ko|ja";
   return fetchTMDB(
-    `/discover/movie?include_adult=false&language=pt-BR&page=1` +
+    `/discover/movie?include_adult=false&language=pt-BR&page=${page}` +
       `&with_original_language=${allowedLanguages}` +
       `&vote_count.gte=50` +
       `&sort_by=popularity.desc`
   );
 }
 
-export async function getTopRatedMovies() {
+export async function getTopRatedMovies(page = 1) {
   const allowedLanguages = "en|pt|fr|ko|ja";
   return fetchTMDB(
-    `/discover/movie?include_adult=false&language=pt-BR&page=1` +
+    `/discover/movie?include_adult=false&language=pt-BR&page=${page}` +
       `&vote_count.gte=300` +
       `&with_original_language=${allowedLanguages}` +
       `&sort_by=vote_average.desc`
   );
 }
 
-export async function getUpcomingMovies() {
+export async function getUpcomingMovies(page = 1) {
   const today = new Date().toISOString().split("T")[0];
   const allowedLanguages = "en|pt|fr|ko|ja";
 
   return fetchTMDB(
-    `/discover/movie?include_adult=false&region=BR&language=pt-BR&page=1` +
+    `/discover/movie?include_adult=false&region=BR&language=pt-BR&page=${page}` +
       `&primary_release_date.gte=${today}` +
       `&with_original_language=${allowedLanguages}` +
       `&popularity.gte=5` +

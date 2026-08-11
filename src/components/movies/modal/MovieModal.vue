@@ -6,7 +6,6 @@ import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
 import { useToastStore } from "@/stores/toast.js";
 import { useModalHistory } from "@/composables/useModalHistory.js";
-import { haptic } from "@/utils/haptics.js";
 
 import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
@@ -102,11 +101,9 @@ async function submitRating() {
     });
 
     showRateForm.value = false;
-    haptic.success();
     toastStore.success("Avaliação salva com sucesso!");
   } catch (error) {
     console.error("Erro ao salvar avaliação:", error);
-    haptic.error();
     toastStore.error("Ocorreu um erro ao salvar sua avaliação.");
   } finally {
     isSubmitting.value = false;
