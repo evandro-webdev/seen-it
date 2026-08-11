@@ -13,7 +13,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: "primary",
-    validator: (val) => ["primary", "secondary", "ghost"].includes(val),
+    validator: (val) => ["primary", "secondary", "ghost", "danger"].includes(val),
   },
   size: {
     type: String,
@@ -40,6 +40,8 @@ const variantClasses = computed(() => {
       return "text-gray-700 dark:text-white bg-gray-100 dark:bg-[#161f30] border border-gray-200 dark:border-[#242C3C]";
     case "ghost":
       return "text-gray-700 dark:text-white";
+    case "danger":
+      return "text-white bg-red-600 active:scale-99 shadow-lg shadow-red-500/10";
     default:
       return "";
   }

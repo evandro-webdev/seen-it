@@ -31,8 +31,8 @@ watch(
         groupsStore.loadActiveGroupMembers();
       }
 
-      savedMoviesStore.loadSavedMovies(true);
-      watchedMoviesStore.loadWatchedMovies(true);
+      savedMoviesStore.setupSavedMoviesListener();
+      watchedMoviesStore.setupWatchedMoviesListener();
 
       notificationsStore.listenToNotifications();
       authStore.setupNotifications();

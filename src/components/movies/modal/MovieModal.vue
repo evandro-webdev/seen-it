@@ -6,6 +6,7 @@ import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth.js";
 import { useToastStore } from "@/stores/toast.js";
 import { useModalHistory } from "@/composables/useModalHistory.js";
+import { haptic } from "@/utils/haaptics.js";
 
 import { Sparkles, ArrowLeft, Check, X, SquarePen, Loader2 } from "@lucide/vue";
 
@@ -19,6 +20,7 @@ import SaveButton from "../ui/buttons/SaveButton.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
 import MovieTrailer from "./MovieTrailer.vue";
 import MovieCredits from "./MovieCredits.vue";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal.vue";
 
 const props = defineProps({
   movie: {
@@ -35,7 +37,40 @@ const savedMoviesStore = useSavedMoviesStore();
 const groupStore = useGroupsStore();
 const authStore = useAuthStore();
 const toastStore = useToastStore();
+
 const isTrailerOpen = ref(false);
+const showRateForm = ref(false);
+const selectedReviewer = ref(null);
+const rateFormRef = ref(null);
+const isSubmitting = ref(false);
+
+const isConfirmDeleteOpen = ref(false);
+const isDeleting = ref(false);
+
+async function handleConfirmDelete() {
+  try {
+    isDeleting.value = true;
+    await watchedMoviesStore.removeMyRating(activeMovie.value.id);
+
+    toastStore.success("Sua avaliação foi removida!");
+    isConfirmDeleteOpen.value = false;
+  } catch (error) {
+    console.error("Erro ao remover avaliação:", error);
+    toastStore.error("Não foi possível remover a avaliação.");
+  } finally {
+    isDeleting.value = false;
+  }
+}
+
+const activeMovie = computed(() => {
+  if (!props.movie) return null;
+
+  const storeMovie = watchedMoviesStore.watchedMovies.find(
+    (m) => String(m.id) === String(props.movie.id),
+  );
+
+  return storeMovie ? { ...props.movie, ...storeMovie } : props.movie;
+});
 
 const isModalOpen = computed(() => !!props.movie);
 const { handleCloseClick } = useModalHistory(isModalOpen, () => emit("close"));
@@ -53,11 +88,6 @@ const currentUser = computed(
 );
 const avatarUrl = computed(() => authStore.user?.avatar_url || "");
 
-const showRateForm = ref(false);
-const selectedReviewer = ref(null);
-const rateFormRef = ref(null);
-const isSubmitting = ref(false);
-
 async function submitRating() {
   if (!rateFormRef.value || isSubmitting.value) return;
 
@@ -72,9 +102,11 @@ async function submitRating() {
     });
 
     showRateForm.value = false;
+    haptic.success();
     toastStore.success("Avaliação salva com sucesso!");
   } catch (error) {
     console.error("Erro ao salvar avaliação:", error);
+    haptic.error();
     toastStore.error("Ocorreu um erro ao salvar sua avaliação.");
   } finally {
     isSubmitting.value = false;
@@ -147,10 +179,8 @@ function unlockScroll() {
 
             <MovieMetadata :movie="movie" />
 
-            <MovieCredits
-              :movie="movie"
-            />
-            
+            <MovieCredits :movie="movie" />
+
             <MovieTrailer
               v-if="movie?.trailerKey"
               :movie="movie"
@@ -158,7 +188,7 @@ function unlockScroll() {
             />
 
             <MovieRatingsRow
-              :movie="movie"
+              :movie="activeMovie"
               :members="
                 groupStore.activeGroup ? groupStore.activeGroupMembers : null
               "
@@ -167,12 +197,13 @@ function unlockScroll() {
 
             <MovieCommentBox
               v-if="
-                selectedReviewer && movie.reviews[selectedReviewer]?.comment
+                selectedReviewer &&
+                activeMovie.reviews[selectedReviewer]?.comment
               "
               :reviewer-name="
                 groupStore.activeGroupMembers[selectedReviewer]?.name
               "
-              :comment="movie.reviews[selectedReviewer].comment"
+              :comment="activeMovie.reviews[selectedReviewer].comment"
               :user-color="
                 groupStore.activeGroupMembers[selectedReviewer]?.color
               "
@@ -186,6 +217,10 @@ function unlockScroll() {
             :current-user="currentUser"
             :avatar-url="avatarUrl"
             @cancel="showRateForm = false"
+            :rating="activeMovie?.reviews?.[authStore.user?.uid]?.rating ?? 5.0"
+            :comment="
+              activeMovie?.reviews?.[authStore.user?.uid]?.comment ?? ''
+            "
           />
         </div>
       </div>
@@ -230,13 +265,14 @@ function unlockScroll() {
             class="flex items-center gap-3 w-full"
           >
             <BaseButton
-              @click="watchedMoviesStore.deleteWatchedMovie(movie.id)"
-              label="Remover"
+              @click="isConfirmDeleteOpen = true"
+              label="Remover nota"
               :icon="X"
               size="md"
               variant="ghost"
             />
             <BaseButton
+              @click="showRateForm = true"
               label="Editar avaliação"
               :icon="SquarePen"
               size="md"
@@ -262,6 +298,13 @@ function unlockScroll() {
           </div>
         </template>
       </div>
+
+      <ConfirmDeleteModal
+        :is-open="isConfirmDeleteOpen"
+        :is-loading="isDeleting"
+        @close="isConfirmDeleteOpen = false"
+        @confirm="handleConfirmDelete"
+      />
     </div>
   </Transition>
 </template>

@@ -2,11 +2,11 @@ import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import {
   db,
-  getDocs,
   collection,
   deleteDoc,
   doc,
   setDoc,
+  onSnapshot,
 } from "@/services/firebase.js";
 import { useGroupsStore } from "./groups";
 import { useNotificationsStore } from "./notifications";
@@ -16,6 +16,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const savedMovies = ref([]);
   const savedMoviesIds = ref([]);
   const isLoading = ref(false);
+  let unsubscribeListener = null;
 
   const groupStore = useGroupsStore();
   const authStore = useAuthStore();
@@ -30,38 +31,50 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     return `groups/${activeGroup.id}/savedMovies`;
   }
 
-  async function loadSavedMovies(forceReload = true) {
-    if (!forceReload && savedMovies.value.length > 0) return;
+  async function setupSavedMoviesListener() {
+    if (unsubscribeListener) {
+      unsubscribeListener();
+      unsubscribeListener = null;
+    }
 
     const collectionPath = getTargetCollectionPath();
-    if (!collectionPath) return;
+    if (!collectionPath) {
+      savedMovies.value = [];
+      savedMoviesIds.value = [];
+      return;
+    }
 
     isLoading.value = true;
 
-    try {
-      const snapshot = await getDocs(collection(db, collectionPath));
-
-      savedMovies.value = snapshot.docs.map((doc) => ({
-        docId: doc.id,
-        ...doc.data(),
-      }));
-
-      savedMoviesIds.value = savedMovies.value.map((movie) => String(movie.id));
-    } catch (error) {
-      console.error("Erro ao carregar filmes salvos:", error);
-    } finally {
-      isLoading.value = false;
-    }
+    unsubscribeListener = onSnapshot(
+      collection(db, collectionPath),
+      (snapshot) => {
+        savedMovies.value = snapshot.docs.map((doc) => ({
+          docId: doc.id,
+          ...doc.data(),
+        }));
+        savedMoviesIds.value = savedMovies.value.map((movie) => String(movie.id));
+        isLoading.value = false;
+      },
+      (error) => {
+        console.error(
+          "Erro ao escutar filmes assistidos em tempo real:",
+          error,
+        );
+        isLoading.value = false;
+      },
+    );
   }
 
   watch(
     [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
-    async ([groupId, userId]) => {
-      savedMovies.value = [];
-      savedMoviesIds.value = [];
-
+    ([groupId, userId]) => {
       if (groupId || userId) {
-        await loadSavedMovies(true);
+        setupSavedMoviesListener();
+      } else {
+        if (unsubscribeListener) unsubscribeListener();
+        savedMovies.value = [];
+        savedMoviesIds.value = [];
       }
     },
     { immediate: true },
@@ -145,7 +158,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   return {
     savedMovies,
     savedMoviesIds,
-    loadSavedMovies,
+    setupSavedMoviesListener,
     isAlreadySaved,
     toggleSaved,
     isLoading,

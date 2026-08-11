@@ -3,15 +3,32 @@ import { ref } from "vue";
 import BaseSlider from "@/components/ui/BaseSlider.vue";
 
 const props = defineProps({
-  movie: { type: Object, required: true },
-  currentUser: { type: Object, required: true },
-  avatarUrl: { type: String, default: "" },
+  movie: {
+    type: Object,
+    required: true,
+  },
+  currentUser: {
+    type: Object,
+    required: true,
+  },
+  avatarUrl: {
+    type: String,
+    default: "",
+  },
+  rating: {
+    type: Number,
+    default: 5.0,
+  },
+  comment: {
+    type: String,
+    default: "",
+  },
 });
 
 defineEmits(["save", "cancel"]);
 
-const rating = ref(5.0);
-const comment = ref("");
+const rating = ref(props.rating);
+const comment = ref(props.comment);
 
 function getFormData() {
   return {

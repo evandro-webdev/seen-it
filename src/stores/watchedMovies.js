@@ -7,10 +7,9 @@ import { useGroupsStore } from "./groups.js";
 import {
   db,
   doc,
-  getDocs,
   collection,
-  deleteDoc,
   runTransaction,
+  onSnapshot,
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";
 
@@ -18,6 +17,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const watchedMovies = ref([]);
   const watchedMoviesIds = ref([]);
   const isLoading = ref(false);
+  let unsubscribeListener = null;
 
   const groupStore = useGroupsStore();
   const authStore = useAuthStore();
@@ -33,36 +33,50 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     return `groups/${activeGroup.id}/watchedMovies`;
   }
 
-  async function loadWatchedMovies() {
-    if (watchedMovies.value.length > 0) return;
+  function setupWatchedMoviesListener() {
+    if (unsubscribeListener) {
+      unsubscribeListener();
+      unsubscribeListener = null;
+    }
 
     const collectionPath = getTargetCollectionPath();
-    if (!collectionPath) return;
+    if (!collectionPath) {
+      watchedMovies.value = [];
+      watchedMoviesIds.value = [];
+      return;
+    }
 
     isLoading.value = true;
 
-    try {
-      const snapshot = await getDocs(collection(db, collectionPath));
-      watchedMovies.value = snapshot.docs.map((doc) => ({
-        docId: doc.id,
-        ...doc.data(),
-      }));
-      watchedMoviesIds.value = watchedMovies.value.map((movie) => movie.id);
-    } catch (error) {
-      console.error("Erro ao carregar filmes assistidos:", error);
-    } finally {
-      isLoading.value = false;
-    }
+    unsubscribeListener = onSnapshot(
+      collection(db, collectionPath),
+      (snapshot) => {
+        watchedMovies.value = snapshot.docs.map((doc) => ({
+          docId: doc.id,
+          ...doc.data(),
+        }));
+        watchedMoviesIds.value = watchedMovies.value.map((movie) => String(movie.id));
+        isLoading.value = false;
+      },
+      (error) => {
+        console.error(
+          "Erro ao escutar filmes assistidos em tempo real:",
+          error,
+        );
+        isLoading.value = false;
+      },
+    );
   }
 
   watch(
     [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
-    async ([groupId, userId]) => {
-      watchedMovies.value = [];
-      watchedMoviesIds.value = [];
-
+    ([groupId, userId]) => {
       if (groupId || userId) {
-        await loadWatchedMovies();
+        setupWatchedMoviesListener();
+      } else {
+        if (unsubscribeListener) unsubscribeListener();
+        watchedMovies.value = [];
+        watchedMoviesIds.value = [];
       }
     },
     { immediate: true },
@@ -183,19 +197,44 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     }
   }
 
-  async function deleteWatchedMovie(id) {
+  async function removeMyRating(movieId) {
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) return;
 
-    await deleteDoc(doc(db, collectionPath, String(id)));
+    const currentUserId = authStore.user?.uid;
+    if (!currentUserId) return;
 
-    watchedMovies.value = watchedMovies.value.filter(
-      (movie) => String(movie.id) !== String(id),
-    );
+    const movieDocRef = doc(db, collectionPath, String(movieId));
 
-    watchedMoviesIds.value = watchedMoviesIds.value.filter(
-      (movieId) => String(movieId) !== String(id),
-    );
+    await runTransaction(db, async (transaction) => {
+      const docSnap = await transaction.get(movieDocRef);
+      if (!docSnap.exists()) return;
+
+      const existingData = docSnap.data();
+      const updatedReviews = { ...existingData.reviews };
+
+      delete updatedReviews[currentUserId];
+
+      const remainingUserIds = Object.keys(updatedReviews);
+
+      if (remainingUserIds.length === 0) {
+        transaction.delete(movieDocRef);
+      } else {
+        const ratings = Object.values(updatedReviews).map((r) =>
+          Number(r.rating),
+        );
+
+        const newAverage = (
+          ratings.reduce((a, b) => a + b, 0) / ratings.length
+        ).toFixed(1);
+
+        transaction.update(movieDocRef, {
+          reviews: updatedReviews,
+          average_rating: newAverage,
+          updated_at: new Date(),
+        });
+      }
+    });
   }
 
   function isAlreadyWatched(movieId) {
@@ -219,9 +258,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
   return {
     watchedMovies,
-    loadWatchedMovies,
+    setupWatchedMoviesListener,
     saveWatchedMovie,
-    deleteWatchedMovie,
+    removeMyRating,
     isAlreadyWatched,
     isLoading,
   };
