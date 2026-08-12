@@ -4,17 +4,12 @@ import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
 import { useSearchMoviesStore } from "@/stores/searchMovies.js";
 import { useGenreMoviesStore } from "@/stores/genreMovies.js";
 
-import { Flame, Award, Clapperboard, ArrowLeft } from "@lucide/vue";
-
 import SearchBar from "@/components/layout/SearchBar.vue";
-import MovieCardDetailed from "@/components/movies/cards/MovieCardDetailed.vue";
-import MoviesList from "@/components/movies/list/MoviesList.vue";
-import MoviesHeroCarousel from "@/components/movies/list/MoviesHeroCarousel.vue";
 import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
-import MovieSearchEmpty from "@/components/movies/ui/messages/MovieSearchEmpty.vue";
-import MovieCard from "@/components/movies/cards/MovieCard.vue";
-import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 import NotInternetConnection from "@/components/movies/ui/messages/NotInternetConnection.vue";
+import DiscoverHomeSection from "@/components/movies/DiscoverHomeSection.vue";
+import MoviesSearchResults from "@/components/movies/list/MoviesSearchResults.vue";
+import MoviesGrid from "@/components/movies/list/MoviesGrid.vue";
 
 defineEmits(["open-movie-modal"]);
 
@@ -134,165 +129,48 @@ function clearSearch() {
 
     <div
       v-else
-      class="h-[100%] pt-2 flex flex-col"
+      class="h-full pt-2 flex flex-col"
     >
-      <div
+      <MoviesSearchResults
         v-if="searchMoviesStore.isSearching"
-        class="space-y-4"
-      >
-        <LoadingSpinner
-          v-if="searchMoviesStore.isLoading"
-          full-screen
-        />
+        :search-results="searchMoviesStore.searchResults"
+        :is-loading="searchMoviesStore.isLoading"
+        :is-loading-more="searchMoviesStore.isLoadingMore"
+        :search-query="searchQuery"
+        @open-movie-modal="$emit('open-movie-modal', $event)"
+        @clear-search="clearSearch"
+      />
 
-        <template v-else>
-          <MovieSearchEmpty
-            v-if="searchMoviesStore.searchResults.length === 0"
-            :search-query="searchQuery"
-            @clear="clearSearch"
-          />
-
-          <MovieCardDetailed
-            v-else
-            v-for="movie in searchMoviesStore.searchResults"
-            :key="movie.id"
-            :movie="movie"
-            @click="$emit('open-movie-modal', movie.id)"
-          />
-
-          <LoadingSpinner
-            v-if="searchMoviesStore.isLoadingMore"
-            size="sm"
-          />
-        </template>
-      </div>
-
-      <div
+      <MoviesGrid
         v-else-if="genreMoviesStore.selectedGenreId"
-        class="pt-2 space-y-4"
-      >
-        <h2 class="font-bold text-[#10355E] dark:text-[#B0D5FE] text-base">
-          Filmes de
-          {{
-            genreMoviesStore.genres.find(
-              (g) => g.id === genreMoviesStore.selectedGenreId,
-            )?.name
-          }}
-        </h2>
+        :title="`Filmes de ${genreMoviesStore.genres.find((g) => g.id === genreMoviesStore.selectedGenreId)?.name}`"
+        :movies="genreMoviesStore.genreMovies"
+        :is-loading="genreMoviesStore.isLoadingGenreMovies"
+        :is-loading-more="genreMoviesStore.isLoadingMoreGenreMovies"
+        @open-movie-modal="$emit('open-movie-modal', $event)"
+      />
 
-        <LoadingSpinner
-          v-if="genreMoviesStore.isLoadingGenreMovies"
-          full-screen
-        />
-
-        <template v-else>
-          <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            <MovieCard
-              v-for="movie in genreMoviesStore.genreMovies"
-              :key="movie.id"
-              :movie="movie"
-              @click="$emit('open-movie-modal', movie.id)"
-            />
-          </div>
-
-          <LoadingSpinner
-            v-if="genreMoviesStore.isLoadingMoreGenreMovies"
-            size="sm"
-          />
-        </template>
-      </div>
-
-      <div
+      <MoviesGrid
         v-else-if="discoverMoviesStore.selectedCategory"
-        class="pt-2 space-y-4"
-      >
-        <div class="flex items-center gap-2">
-          <button
-            @click="discoverMoviesStore.clearCategory()"
-            class="p-1 text-gray-500 hover:text-slate-800 dark:hover:text-white"
-          >
-            <ArrowLeft class="w-5 h-5" />
-          </button>
-          <h2 class="font-bold text-[#10355E] dark:text-[#B0D5FE] text-base">
-            {{ discoverMoviesStore.categoryTitle }}
-          </h2>
-        </div>
+        :title="discoverMoviesStore.categoryTitle"
+        :movies="discoverMoviesStore.categoryMovies"
+        :is-loading="discoverMoviesStore.isLoadingCategoryMovies"
+        :is-loading-more="discoverMoviesStore.isLoadingMoreCategoryMovies"
+        show-back-button
+        @back="discoverMoviesStore.clearCategory()"
+        @open-movie-modal="$emit('open-movie-modal', $event)"
+      />
 
-        <LoadingSpinner
-          v-if="discoverMoviesStore.isLoadingCategoryMovies"
-          full-screen
-        />
-
-        <template v-else>
-          <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            <MovieCard
-              v-for="movie in discoverMoviesStore.categoryMovies"
-              :key="movie.id"
-              :movie="movie"
-              @click="$emit('open-movie-modal', movie.id)"
-            />
-          </div>
-
-          <LoadingSpinner
-            v-if="discoverMoviesStore.isLoadingMoreCategoryMovies"
-            size="sm"
-          />
-        </template>
-      </div>
-
-      <div
+      <DiscoverHomeSection
         v-else
-        class="space-y-8"
-      >
-        <MoviesHeroCarousel
-          :movies="discoverMoviesStore.heroMovies"
-          @open-movie-modal="$emit('open-movie-modal', $event)"
-          :loading="discoverMoviesStore.isLoading"
-        />
-
-        <MoviesList
-          :icon="Flame"
-          title="Mais vistos do momento"
-          category="popular"
-          :movies="discoverMoviesStore.popularMovies"
-          @open-movie-modal="$emit('open-movie-modal', $event)"
-          @see-all="
-            discoverMoviesStore.selectCategory(
-              'popular',
-              'Mais vistos do momento',
-            )
-          "
-          :loading="discoverMoviesStore.isLoading"
-        />
-
-        <MoviesList
-          :icon="Clapperboard"
-          title="Mais esperados"
-          category="upcoming"
-          :movies="discoverMoviesStore.upcomingMovies"
-          @open-movie-modal="$emit('open-movie-modal', $event)"
-          @see-all="
-            discoverMoviesStore.selectCategory('upcoming', 'Mais esperados')
-          "
-          :loading="discoverMoviesStore.isLoading"
-          upcoming
-        />
-
-        <MoviesList
-          :icon="Award"
-          title="Melhores avaliados"
-          category="top_rated"
-          :movies="discoverMoviesStore.topRatedMovies"
-          @open-movie-modal="$emit('open-movie-modal', $event)"
-          @see-all="
-            discoverMoviesStore.selectCategory(
-              'top_rated',
-              'Melhores avaliados',
-            )
-          "
-          :loading="discoverMoviesStore.isLoading"
-        />
-      </div>
+        :hero-movies="discoverMoviesStore.heroMovies"
+        :popular-movies="discoverMoviesStore.popularMovies"
+        :upcoming-movies="discoverMoviesStore.upcomingMovies"
+        :top-rated-movies="discoverMoviesStore.topRatedMovies"
+        :is-loading="discoverMoviesStore.isLoading"
+        @open-movie-modal="$emit('open-movie-modal', $event)"
+        @see-all="discoverMoviesStore.selectCategory"
+      />
     </div>
   </div>
 </template>

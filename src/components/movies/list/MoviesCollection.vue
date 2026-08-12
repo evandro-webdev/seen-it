@@ -11,6 +11,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 import MovieSearchEmpty from "../ui/messages/MovieSearchEmpty.vue";
 import MoviesTrackedEmpty from "../ui/messages/MoviesTrackedEmpty.vue";
 import CollectionToolbar from "@/components/layout/CollectionToolbar.vue";
+import MoviesGroupedSection from "./MoviesGroupedSection.vue";
 
 const props = defineProps({
   movies: {
@@ -73,8 +74,27 @@ const filteredMovies = computed(() => {
   );
 });
 
+const pendingMovies = computed(() => {
+  if (props.type !== "watched" || !authStore.user?.uid) return [];
+
+  const uid = authStore.user.uid;
+  return filteredMovies.value.filter((movie) => {
+    return !movie.reviews || !movie.reviews[uid];
+  });
+});
+
+const ratedMovies = computed(() => {
+  if (props.type !== "watched" || !authStore.user?.uid)
+    return filteredMovies.value;
+
+  const uid = authStore.user.uid;
+  return filteredMovies.value.filter(
+    (movie) => movie.reviews && movie.reviews[uid],
+  );
+});
+
 const { activeGroupSections } = useMovieGrouping(
-  filteredMovies,
+  ratedMovies,
   computed(() => props.groupBy),
   {
     activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
@@ -119,73 +139,69 @@ function clearSearch() {
           <LoadingSpinner />
         </div>
 
-        <div
-          v-else-if="
-            filteredMovies.length > 0 &&
-            groupBy !== 'none' &&
-            activeGroupSections.length > 0
-          "
-          class="space-y-6"
-        >
+        <template v-else>
           <section
-            v-for="section in activeGroupSections"
-            :key="section.id || section.title"
-            class="space-y-3"
+            v-if="type === 'watched' && pendingMovies.length > 0"
+            class="mb-6 pb-6 space-y-3 border-b border-gray-100 dark:border-gray-800/60"
           >
-            <div
-              class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800/60 pb-2"
-            >
+            <div class="flex items-center gap-2">
               <span
-                v-if="section.userColor"
-                class="w-3 h-3 rounded-full shrink-0"
-                :style="{ backgroundColor: section.userColor }"
+                class="w-2.5 h-2.5 rounded-full bg-[#10355E] dark:bg-[#B0D5FE] animate-pulse"
               ></span>
-
-              <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
-                {{ section.title }}
-              </h2>
-              <span
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
+              <h2
+                class="text-base font-semibold text-[#10355E] dark:text-[#B0D5FE]"
               >
-                ({{ section.movies.length }})
-              </span>
+                {{ authStore.user?.displayName?.split(" ")[0] }}, você ainda não
+                avaliou:
+              </h2>
             </div>
 
             <div :class="gridClass">
               <MovieCard
-                v-for="movie in section.movies"
+                v-for="movie in pendingMovies"
                 :key="movie.id"
                 :movie="movie"
                 @click="$emit('open-movie-modal', movie.id)"
-                :show-user-color="type === 'saved' || groupBy === 'members'"
               />
             </div>
           </section>
-        </div>
 
-        <section
-          v-else-if="filteredMovies.length > 0"
-          :class="gridClass"
-        >
-          <MovieCard
-            v-for="movie in filteredMovies"
-            :key="movie.id"
-            :movie="movie"
-            @click="$emit('open-movie-modal', movie.id)"
-            show-user-color
+          <MoviesGroupedSection
+            v-if="
+              ratedMovies.length > 0 &&
+              groupBy !== 'none' &&
+              activeGroupSections.length > 0
+            "
+            :active-group-sections="activeGroupSections"
+            :grid-class="gridClass"
+            :type="type"
+            @open-movie-modal="$emit('open-movie-modal', $event)"
           />
-        </section>
 
-        <MovieSearchEmpty
-          v-else-if="searchQuery"
-          :search-query="searchQuery"
-          @clear="clearSearch"
-        />
+          <section
+            v-else-if="ratedMovies.length > 0"
+            :class="gridClass"
+          >
+            <MovieCard
+              v-for="movie in ratedMovies"
+              :key="movie.id"
+              :movie="movie"
+              @click="$emit('open-movie-modal', movie.id)"
+              show-user-color
+            />
+          </section>
 
-        <MoviesTrackedEmpty
-          v-else-if="!isLoading"
-          :type="type"
-        />
+          <MovieSearchEmpty
+            v-else-if="searchQuery"
+            :search-query="searchQuery"
+            @clear="clearSearch"
+          />
+
+          <MoviesTrackedEmpty
+            v-else-if="pendingMovies.length === 0"
+            :type="type"
+          />
+        </template>
       </div>
     </template>
   </div>

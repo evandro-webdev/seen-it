@@ -19,13 +19,13 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   const isLoading = ref(false);
   let unsubscribeListener = null;
 
-  const groupStore = useGroupsStore();
+  const groupsStore = useGroupsStore();
   const authStore = useAuthStore();
   const notificationsStore = useNotificationsStore();
   const savedMoviesStore = useSavedMoviesStore();
 
   function getTargetCollectionPath() {
-    const activeGroup = groupStore.activeGroup;
+    const activeGroup = groupsStore.activeGroup;
     if (!activeGroup) {
       if (!authStore.user?.uid) return null;
       return `users/${authStore.user.uid}/watchedMovies`;
@@ -55,7 +55,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           docId: doc.id,
           ...doc.data(),
         }));
-        watchedMoviesIds.value = watchedMovies.value.map((movie) => String(movie.id));
+        watchedMoviesIds.value = watchedMovies.value.map((movie) =>
+          String(movie.id),
+        );
         isLoading.value = false;
       },
       (error) => {
@@ -69,7 +71,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
   }
 
   watch(
-    [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
+    [() => groupsStore.activeGroup?.id, () => authStore.user?.uid],
     ([groupId, userId]) => {
       if (groupId || userId) {
         setupWatchedMoviesListener();
@@ -144,9 +146,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           ? { id: directorObj.id, name: directorObj.name }
           : null;
 
-        savedBy = movie.saved_by || currentUserId;
-
-        transaction.set(movieDocRef, {
+        const movieData = {
           id: movie.id,
           title: movie.title,
           original_title: movie.original_title || "",
@@ -156,9 +156,14 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           release_date: movie.release_date || "",
           cast,
           director,
-          saved_by: savedBy,
           created_at: new Date(),
-        });
+        };
+
+        if (groupsStore.activeGroup) {
+          movieData.saved_by = movie.saved_by || currentUserId;
+        }
+
+        transaction.set(movieDocRef, movieData);
       }
     });
 
@@ -188,7 +193,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watchedMoviesIds.value.push(movie.id);
     }
 
-    if (groupStore.activeGroup) {
+    if (groupsStore.activeGroup) {
       await notificationsStore.dispatchWatchedMovieNotification(movie);
     }
 
@@ -241,19 +246,15 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     const currentUserId = authStore.user?.uid;
     if (!currentUserId) return false;
 
-    if (!groupStore.activeGroup) {
-      return watchedMoviesIds.value.includes(movieId);
-    }
+    const targetId = String(movieId);
 
-    const groupMovie = watchedMovies.value.find(
-      (movie) => String(movie.id) === String(movieId),
-    );
+    const movie = watchedMovies.value.find((m) => String(m.id) === targetId);
 
-    if (!groupMovie) {
+    if (!movie) {
       return false;
     }
 
-    return !!(groupMovie.reviews && groupMovie.reviews[currentUserId]);
+    return !!(movie.reviews && movie.reviews[currentUserId]);
   }
 
   return {
