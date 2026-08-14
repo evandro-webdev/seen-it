@@ -39,7 +39,7 @@ async function handleAuthentication() {
   try {
     if (currentForm.value === "register") {
       await authStore.register(email.value, password.value, name.value);
-      toastStore.success(`Conta criada com sucesso! Bem-vindo, ${name.value.split("")[0]}!`);
+      toastStore.success(`Conta criada com sucesso! Bem-vindo, ${name.value.split(" ")[0]}!`);
     } else {
       await authStore.login(email.value, password.value);
       toastStore.success("Login realizado com sucesso!");
@@ -88,7 +88,7 @@ async function handleAuthentication() {
             v-model="name"
             required
             class="w-full p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            placeholder="Nome completo"
+            placeholder="Digite seu nome"
           />
 
           <input
@@ -96,7 +96,7 @@ async function handleAuthentication() {
             v-model="email"
             required
             class="w-full p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            placeholder="E-mail"
+            placeholder="Digite seu mail"
           />
 
           <input

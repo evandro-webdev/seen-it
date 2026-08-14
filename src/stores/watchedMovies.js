@@ -10,6 +10,7 @@ import {
   collection,
   runTransaction,
   onSnapshot,
+  increment,
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";
 
@@ -101,10 +102,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
     let finalReviews = {};
     let average_rating = "0";
-
     let cast = [];
     let director = null;
     let savedBy = currentUserId;
+    let isNewMovieInGroup = false;
 
     await runTransaction(db, async (transaction) => {
       const docSnap = await transaction.get(movieDocRef);
@@ -129,6 +130,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           updated_at: new Date(),
         });
       } else {
+        isNewMovieInGroup = true;
         finalReviews = { [currentUserId]: newUserReview };
         average_rating = Number(review.rating).toFixed(1);
 
@@ -165,6 +167,13 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
         transaction.set(movieDocRef, movieData);
       }
+
+      if (groupsStore.activeGroup && isNewMovieInGroup) {
+        const groupDocRef = doc(db, "groups", groupsStore.activeGroup.id);
+        transaction.update(groupDocRef, {
+          total_watched: increment(1),
+        });
+      }
     });
 
     const existingLocalIndex = watchedMovies.value.findIndex(
@@ -193,7 +202,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       watchedMoviesIds.value.push(movie.id);
     }
 
-    if (groupsStore.activeGroup) {
+    if (groupsStore.activeGroup && isNewMovieInGroup) {
+      groupsStore.activeGroup.total_watched =
+        (groupsStore.activeGroup.total_watched || 0) + 1;
       await notificationsStore.dispatchWatchedMovieNotification(movie);
     }
 

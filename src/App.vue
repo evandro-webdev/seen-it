@@ -28,7 +28,7 @@ watch(
     if (newUid) {
       groupsStore.getGroups();
       if (groupsStore.activeGroup) {
-        groupsStore.loadActiveGroupMembers();
+        groupsStore.loadGroupMembers();
       }
 
       savedMoviesStore.setupSavedMoviesListener();
@@ -66,7 +66,6 @@ watch(
     :movie="movieDetailsStore.selectedMovie"
     @close="movieDetailsStore.closeMovie"
   />
-
   <GroupListModal :groups="groupsStore.groups" />
   <ProfileModal />
   <NotificationsModal />

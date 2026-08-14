@@ -1,12 +1,13 @@
 <script setup>
 import { ref } from "vue";
-import { Menu, Bell, X, FolderHeart } from "@lucide/vue";
 
 import { useGroupsStore } from "@/stores/groups.js";
 import { useProfileStore } from "@/stores/profile.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useNotificationsStore } from "@/stores/notifications.js";
 import { useToastStore } from "@/stores/toast.js";
+
+import { Menu, Bell, X, FolderHeart } from "@lucide/vue";
 
 import MenuDropdown from "./Menu.vue";
 import ToggleThemeButton from "@/components/ui/ToggleThemeButton.vue";
@@ -45,6 +46,11 @@ async function openNotificationsModal() {
   notificationsStore.openNotificationsModal();
   await notificationsStore.cleanOldNotifications();
 }
+
+function handleCloseGroup() {
+  toastStore.success(`Fechou o grupo: ${groupsStore.activeGroup.name}`);
+  groupsStore.clearActiveGroup();
+}
 </script>
 
 <template>
@@ -80,7 +86,7 @@ async function openNotificationsModal() {
           <span>{{ groupsStore.activeGroup.name }}</span>
 
           <button
-            @click.stop="groupsStore.clearActiveGroup"
+            @click.stop="handleCloseGroup"
             class="ml-1 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
           >
             <X class="w-3 h-3" />

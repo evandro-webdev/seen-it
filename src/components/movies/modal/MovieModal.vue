@@ -33,7 +33,7 @@ const emit = defineEmits(["close"]);
 
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
-const groupStore = useGroupsStore();
+const groupsStore = useGroupsStore();
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 
@@ -187,7 +187,7 @@ function unlockScroll() {
             <MovieRatingsRow
               :movie="activeMovie"
               :members="
-                groupStore.activeGroup ? groupStore.activeGroupMembers : null
+                groupsStore.activeGroup ? groupsStore.activeGroupMembers : null
               "
               v-model="selectedReviewer"
             />
@@ -198,11 +198,11 @@ function unlockScroll() {
                 activeMovie.reviews[selectedReviewer]?.comment
               "
               :reviewer-name="
-                groupStore.activeGroupMembers[selectedReviewer]?.name
+                groupsStore.activeGroupMembers[selectedReviewer]?.name
               "
               :comment="activeMovie.reviews[selectedReviewer].comment"
               :user-color="
-                groupStore.activeGroupMembers[selectedReviewer]?.color
+                groupsStore.activeGroupMembers[selectedReviewer]?.color
               "
             />
           </div>

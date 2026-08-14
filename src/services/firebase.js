@@ -18,6 +18,9 @@ import {
   runTransaction,
   writeBatch,
   limit,
+  startAt,
+  endAt,
+  increment
 } from "firebase/firestore";
 
 import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
@@ -57,4 +60,7 @@ export {
   runTransaction,
   writeBatch,
   limit,
+  startAt,
+  endAt,
+  increment
 };

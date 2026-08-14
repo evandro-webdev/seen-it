@@ -151,7 +151,7 @@ function clearSearch() {
               <h2
                 class="text-base font-semibold text-[#10355E] dark:text-[#B0D5FE]"
               >
-                {{ authStore.user?.displayName?.split(" ")[0] }}, você ainda não
+                {{ authStore.user?.displayName }}, você ainda não
                 avaliou:
               </h2>
             </div>

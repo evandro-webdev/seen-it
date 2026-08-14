@@ -6,8 +6,7 @@ import { useToastStore } from "@/stores/toast.js";
 import { onClickOutside } from "@vueuse/core";
 import { useModalHistory } from "@/composables/useModalHistory.js";
 
-import { Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
-
+import { Camera, Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
 import BaseButton from "../ui/BaseButton.vue";
 
 const profileStore = useProfileStore();
@@ -15,7 +14,7 @@ const authStore = useAuthStore();
 const toastStore = useToastStore();
 
 const isSubmitting = ref(false);
-const profileModalRef = ref(false);
+const profileModalRef = ref(null);
 
 const name = ref("");
 const selectedColor = ref("");
@@ -46,7 +45,6 @@ function handleFileChange(event) {
 
   if (file) {
     selectedFile.value = file;
-
     avatarPreview.value = URL.createObjectURL(file);
   }
 }
@@ -99,30 +97,70 @@ function unlockScroll() {
     >
       <div
         ref="profileModalRef"
-        class="w-full py-6 px-4 bg-white dark:bg-[#121825] rounded-t-2xl overflow-y-auto space-y-8 modal-content"
+        class="w-full py-6 px-4 bg-white dark:bg-[#121825] rounded-t-2xl overflow-y-auto space-y-6 modal-content max-h-[85vh]"
       >
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-3">
+            <div class="p-3 rounded-2xl bg-blue-50 dark:bg-[#273056] shrink-0">
+              <User class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h2
+                class="text-xl font-bold text-gray-900 dark:text-white leading-tight"
+              >
+                Meu Perfil
+              </h2>
+              <span
+                class="text-xs font-medium text-gray-500 dark:text-[#9EB2CD]"
+              >
+                Edite suas informações
+              </span>
+            </div>
+          </div>
+
+          <button
+            @click="handleCloseClick"
+            type="button"
+            class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-95 transition-all"
+            aria-label="Fechar"
+          >
+            <X class="w-5 h-5 text-gray-600 dark:text-[#A7B0C9]" />
+          </button>
+        </div>
+
+        <form
+          @submit.prevent="handleUpdate"
+          class="space-y-6"
+        >
+          <div class="flex flex-col items-center justify-center gap-2 pt-2">
             <label
               for="avatar"
-              class="cursor-pointer group"
+              class="relative cursor-pointer group active:scale-95 transition-transform"
             >
               <div
-                v-if="avatarPreview"
-                class="w-15 h-15 rounded-full overflow-hidden border-2 border-transparent group-hover:opacity-80 transition-opacity"
+                class="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500/30 dark:border-blue-500/20 bg-gray-100 dark:bg-[#181F2F] flex items-center justify-center shadow-inner"
               >
                 <img
+                  v-if="avatarPreview"
                   :src="avatarPreview"
                   class="w-full h-full object-cover"
                 />
+                <User
+                  v-else
+                  class="w-10 h-10 text-gray-400"
+                />
               </div>
+
               <div
-                v-else
-                class="p-4 rounded-full bg-blue-50 dark:bg-[#273056] hover:bg-blue-100 dark:hover:bg-[#313c6c] transition-colors"
+                class="absolute bottom-0 right-0 p-2 rounded-full bg-blue-600 text-white shadow-lg border-2 border-white dark:border-[#121825]"
               >
-                <User class="w-7 h-7 text-blue-600 dark:text-white" />
+                <Camera class="w-4 h-4" />
               </div>
             </label>
+
+            <span class="text-xs font-medium text-gray-500 dark:text-[#ABB3C3]">
+              Toque na foto para alterar
+            </span>
 
             <input
               type="file"
@@ -131,57 +169,42 @@ function unlockScroll() {
               @change="handleFileChange"
               class="hidden"
             />
+          </div>
 
-            <div>
-              <h2 class="text-3xl font-semibold text-gray-900 dark:text-white">
-                Perfil
-              </h2>
-              <span class="text-gray-500 dark:text-[#9EB2CD]">
-                Edite seu perfil
-              </span>
+          <div class="space-y-2">
+            <label
+              class="text-xs font-semibold text-gray-700 dark:text-gray-300 block"
+            >
+              Nome de exibição
+            </label>
+            <div class="relative">
+              <User
+                stroke-width="1.5"
+                class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+              />
+              <input
+                type="text"
+                v-model="name"
+                class="w-full py-3.5 pl-11 pr-4 rounded-xl border text-sm text-gray-900 placeholder-gray-400 dark:text-gray-200 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                placeholder="Digite o seu nome"
+              />
             </div>
           </div>
 
-          <button
-            @click="handleCloseClick"
-            type="button"
-            class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
-          >
-            <X class="text-gray-600 dark:text-[#A7B0C9]" />
-          </button>
-        </div>
-
-        <form
-          class="space-y-5"
-          submit.prevent
-        >
-          <div class="relative">
-            <User
-              stroke-width="1"
-              class="w-6 h-6 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
-            />
-            <input
-              type="text"
-              v-model="name"
-              class="w-full p-4 pl-13.5 rounded-2xl border text-gray-900 placeholder-gray-400 dark:text-gray-300 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              placeholder="Digite o seu nome"
-            />
-          </div>
-
-          <div class="space-y-2.5">
-            <label class="font-medium text-gray-700 dark:text-white block"
-              >Escolha a sua cor preferida:
+          <div class="space-y-3">
+            <label
+              class="text-xs font-semibold text-gray-700 dark:text-gray-300 block"
+            >
+              Cor de identificação
             </label>
-            <div class="flex gap-2">
+            <div class="flex gap-3">
               <button
                 v-for="color in colorOptions"
-                @click="selectedColor = color"
                 :key="color"
+                @click="selectedColor = color"
                 type="button"
-                class="w-8 h-8 rounded-full active:scale-95 flex items-center justify-center transition-transform"
-                :style="{
-                  backgroundColor: color,
-                }"
+                class="w-8 h-8 rounded-full active:scale-90 flex items-center justify-center transition-all relative"
+                :style="{ backgroundColor: color }"
               >
                 <Check
                   v-if="selectedColor === color"
@@ -189,15 +212,14 @@ function unlockScroll() {
                 />
               </button>
             </div>
-            <p class="text-sm text-gray-900 dark:text-[#9EB2CD]">
-              Essa cor será exibida na lista de notas
+            <p class="text-[11px] text-gray-500 dark:text-[#9EB2CD]">
+              Esta cor será usada para identificar seus itens e notas.
             </p>
           </div>
 
           <BaseButton
-            @click="handleUpdate"
+            type="submit"
             label="Salvar alterações"
-            :icon="UserRoundCheck"
             variant="primary"
             size="lg"
             :disabled="isSubmitting"
@@ -206,11 +228,11 @@ function unlockScroll() {
             <template #icon>
               <Loader2
                 v-if="isSubmitting"
-                class="w-4 h-4 animate-spin"
+                class="w-5 h-5 animate-spin"
               />
               <UserRoundCheck
                 v-else
-                class="w-4 h-4 transition-all"
+                class="w-5 h-5"
               />
             </template>
           </BaseButton>

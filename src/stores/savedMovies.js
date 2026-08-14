@@ -7,6 +7,8 @@ import {
   doc,
   setDoc,
   onSnapshot,
+  updateDoc,
+  increment,
 } from "@/services/firebase.js";
 import { useGroupsStore } from "./groups";
 import { useNotificationsStore } from "./notifications";
@@ -18,12 +20,12 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const isLoading = ref(false);
   let unsubscribeListener = null;
 
-  const groupStore = useGroupsStore();
+  const groupsStore = useGroupsStore();
   const authStore = useAuthStore();
   const notificationsStore = useNotificationsStore();
 
   function getTargetCollectionPath() {
-    const activeGroup = groupStore.activeGroup;
+    const activeGroup = groupsStore.activeGroup;
     if (!activeGroup) {
       if (!authStore.user?.uid) return null;
       return `users/${authStore.user.uid}/savedMovies`;
@@ -53,7 +55,9 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
           docId: doc.id,
           ...doc.data(),
         }));
-        savedMoviesIds.value = savedMovies.value.map((movie) => String(movie.id));
+        savedMoviesIds.value = savedMovies.value.map((movie) =>
+          String(movie.id),
+        );
         isLoading.value = false;
       },
       (error) => {
@@ -67,7 +71,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
   }
 
   watch(
-    [() => groupStore.activeGroup?.id, () => authStore.user?.uid],
+    [() => groupsStore.activeGroup?.id, () => authStore.user?.uid],
     ([groupId, userId]) => {
       if (groupId || userId) {
         setupSavedMoviesListener();
@@ -92,14 +96,23 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
       runtime: movie.runtime,
     };
 
-    if (groupStore.activeGroup) {
+    if (groupsStore.activeGroup) {
       movieData.saved_by = authStore.user.uid;
     }
 
     const movieDocRef = doc(db, collectionPath, String(movie.id));
     await setDoc(movieDocRef, movieData);
 
-    if (groupStore.activeGroup) {
+    if (groupsStore.activeGroup) {
+      const groupDocRef = doc(db, "groups", groupsStore.activeGroup.id);
+
+      await updateDoc(groupDocRef, {
+        total_saved: increment(1),
+      });
+
+      groupsStore.activeGroup.total_saved =
+        (groupsStore.activeGroup.total_saved || 0) + 1;
+
       await notificationsStore.dispatchSavedMovieNotification(
         movie.id,
         movie.title,
@@ -141,7 +154,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
           runtime: movie.runtime,
         };
 
-        if (groupStore.activeGroup) {
+        if (groupsStore.activeGroup) {
           movieData.saved_by = authStore.user.uid;
         }
 

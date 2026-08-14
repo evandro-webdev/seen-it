@@ -9,9 +9,14 @@ import {
   getDocs,
   updateDoc,
   arrayUnion,
+  orderBy,
+  startAt,
+  endAt,
+  limit,
 } from "../services/firebase";
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
+import { slugifyUsername } from "@/utils/username";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
@@ -21,6 +26,8 @@ export const useGroupsStore = defineStore("groups", () => {
 
   const isGroupsModalOpen = ref(false);
   const isLoading = ref(false);
+
+  const authStore = useAuthStore();
 
   function getInitialActiveGroup() {
     try {
@@ -44,7 +51,7 @@ export const useGroupsStore = defineStore("groups", () => {
     activeGroup.value = group;
     if (group) {
       localStorage.setItem("activeGroup", JSON.stringify(group));
-      loadActiveGroupMembers();
+      loadGroupMembers();
     } else {
       clearActiveGroup();
     }
@@ -57,8 +64,6 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function getGroups() {
-    const authStore = useAuthStore();
-
     if (!authStore.user?.uid) return [];
 
     isLoading.value = true;
@@ -66,7 +71,7 @@ export const useGroupsStore = defineStore("groups", () => {
     try {
       const q = query(
         collection(db, "groups"),
-        where("membersIds", "array-contains", authStore.user.uid),
+        where("members", "array-contains", authStore.user.uid),
       );
 
       const querySnapshot = await getDocs(q);
@@ -75,63 +80,78 @@ export const useGroupsStore = defineStore("groups", () => {
         id: doc.id,
         ...doc.data(),
       }));
+    } catch (error) {
+      console.error("Erro ao buscar grupos do usuário:", error);
     } finally {
       isLoading.value = false;
     }
   }
 
-  async function createGroup({ groupName, emails, color }) {
-    const authStore = useAuthStore();
-    const currentUserId = authStore.user.uid;
-    const currentUserEmail = authStore.user.email;
+  async function loadGroupMembers(targetMemberIds = null) {
+    const isCustomTarget = Array.isArray(targetMemberIds);
 
-    let memberObjects = [
-      { id: currentUserId, name: authStore.user.displayName },
-    ];
+    const memberIds = isCustomTarget
+      ? targetMemberIds
+      : activeGroup.value?.members;
 
-    if (emails && emails.length > 0) {
-      const emailsToSearch = emails.filter(
-        (email) => email !== currentUserEmail,
+    if (!memberIds || !memberIds.length) {
+      if (!isCustomTarget) activeGroupMembers.value = {};
+      return {};
+    }
+
+    try {
+      const q = query(
+        collection(db, "users"),
+        where("__name__", "in", memberIds),
       );
 
-      if (emailsToSearch.length > 0) {
-        const usersQuery = query(
-          collection(db, "users"),
-          where("email", "in", emailsToSearch),
-        );
+      const snapshot = await getDocs(q);
 
-        const querySnapshot = await getDocs(usersQuery);
+      const membersMap = {};
+      snapshot.forEach((docSnap) => {
+        membersMap[docSnap.id] = {
+          uid: docSnap.id,
+          ...docSnap.data(),
+        };
+      });
 
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-
-          memberObjects.push({ id: doc.id, name: userData.name });
-        });
-
-        if (querySnapshot.size < emailsToSearch.length) {
-          throw new Error(
-            "Um ou mais e-mails digitados não possuem conta no aplicativo. Verifique a lista.",
-          );
-        }
+      if (!isCustomTarget) {
+        activeGroupMembers.value = membersMap;
       }
+
+      return membersMap;
+    } catch (error) {
+      console.error("Erro ao carregar membros do grupo:", error);
+      return {};
     }
+  }
+
+  async function createGroup({ groupName, invitedMembersIds = [], color }) {
+    const currentUserId = authStore.user.uid;
+
+    if (!currentUserId) return;
+
+    const allMembersIds = Array.from(
+      new Set([currentUserId, ...invitedMembersIds]),
+    );
 
     const newGroupPayload = {
       name: groupName,
-      created_by: currentUserId,
-      members: memberObjects,
-      membersIds: memberObjects.map((member) => member.id),
+      members: allMembersIds,
       color: color,
+      created_by: currentUserId,
       created_at: new Date(),
     };
 
     const groupRef = await addDoc(collection(db, "groups"), newGroupPayload);
 
-    for (const member of memberObjects) {
-      await updateDoc(doc(db, "users", member.id), {
+    const updatePromises = allMembersIds.map((memberId) =>
+      updateDoc(doc(db, "users", memberId), {
         my_groups: arrayUnion(groupRef.id),
-      });
-    }
+      }),
+    );
+
+    await Promise.all(updatePromises);
 
     const createdGroup = {
       id: groupRef.id,
@@ -144,39 +164,53 @@ export const useGroupsStore = defineStore("groups", () => {
     closeGroupsModal();
   }
 
-  async function loadActiveGroupMembers() {
-    if (!activeGroup.value?.membersIds?.length) return;
+  async function searchUsersByUsername(searchQuery) {
+    const cleanQuery = slugifyUsername(searchQuery);
 
-    try {
-      const q = query(
-        collection(db, "users"),
-        where("__name__", "in", activeGroup.value.membersIds),
-      );
+    if (!cleanQuery || cleanQuery.length < 2) return [];
 
-      const snapshot = await getDocs(q);
+    const usersRef = collection(db, "users");
 
-      const membersMap = {};
-      snapshot.forEach((doc) => {
-        membersMap[doc.id] = doc.data();
+    const q = query(
+      usersRef,
+      orderBy("username"),
+      startAt(cleanQuery),
+      endAt(cleanQuery + "\uf8ff"),
+      limit(8),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const results = [];
+
+    querySnapshot.forEach((docSnap) => {
+      if (docSnap.id === authStore.user?.uid) return;
+
+      const data = docSnap.data();
+
+      results.push({
+        uid: docSnap.id,
+        name: data.name,
+        username: data.username,
+        avatar_url: data.avatar_url,
+        color: data.color,
       });
+    });
 
-      activeGroupMembers.value = membersMap;
-    } catch (error) {
-      console.error("Erro ao carregar membros do grupo:", error);
-    }
+    return results;
   }
 
   return {
-    getGroups,
-    createGroup,
     groups,
     isGroupsModalOpen,
+    activeGroup,
+    activeGroupMembers,
     openGroupsModal,
     closeGroupsModal,
-    activeGroup,
+    getGroups,
+    createGroup,
     setActiveGroup,
     clearActiveGroup,
-    loadActiveGroupMembers,
-    activeGroupMembers,
+    loadGroupMembers,
+    searchUsersByUsername,
   };
 });
