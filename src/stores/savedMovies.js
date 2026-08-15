@@ -110,9 +110,6 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
         total_saved: increment(1),
       });
 
-      groupsStore.activeGroup.total_saved =
-        (groupsStore.activeGroup.total_saved || 0) + 1;
-
       await notificationsStore.dispatchSavedMovieNotification(
         movie.id,
         movie.title,
@@ -126,7 +123,15 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) return;
 
-    await deleteDoc(doc(db, collectionPath, String(movieId)));
+    const movieDocRef = doc(db, collectionPath, String(movieId));
+    await deleteDoc(movieDocRef);
+
+    if (groupsStore.activeGroup) {
+      const groupDocRef = doc(db, "groups", groupsStore.activeGroup.id);
+      await updateDoc(groupDocRef, {
+        total_saved: increment(-1),
+      });
+    }
   }
 
   async function toggleSaved(movie) {
@@ -134,33 +139,8 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
 
     if (isAlreadySaved(strMovieId)) {
       await unsaveMovie(strMovieId);
-
-      savedMovies.value = savedMovies.value.filter(
-        (m) => String(m.id) !== strMovieId,
-      );
-      savedMoviesIds.value = savedMoviesIds.value.filter(
-        (id) => String(id) !== strMovieId,
-      );
     } else {
-      const docRef = await saveMovie(movie);
-
-      if (docRef) {
-        const movieData = {
-          docId: docRef.id,
-          id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          vote_average: movie.vote_average,
-          runtime: movie.runtime,
-        };
-
-        if (groupsStore.activeGroup) {
-          movieData.saved_by = authStore.user.uid;
-        }
-
-        savedMovies.value.push(movieData);
-        savedMoviesIds.value.push(strMovieId);
-      }
+      await saveMovie(movie);
     }
   }
 

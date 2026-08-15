@@ -176,33 +176,8 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       }
     });
 
-    const existingLocalIndex = watchedMovies.value.findIndex(
-      (m) => String(m.id) === String(movie.id),
-    );
-
-    if (existingLocalIndex !== -1) {
-      watchedMovies.value[existingLocalIndex] = {
-        ...watchedMovies.value[existingLocalIndex],
-        reviews: finalReviews,
-        average_rating,
-      };
-    } else {
-      const newLocalMovie = {
-        ...movie,
-        docId: String(movie.id),
-        reviews: finalReviews,
-        average_rating,
-        cast,
-        director,
-        saved_by: savedBy,
-        created_at: new Date(),
-      };
-
-      watchedMovies.value.push(newLocalMovie);
-      watchedMoviesIds.value.push(movie.id);
-    }
-
     if (groupsStore.activeGroup && isNewMovieInGroup) {
+      // todo: remover em breve quando adionar onSnapshot na listagem de grupos
       groupsStore.activeGroup.total_watched =
         (groupsStore.activeGroup.total_watched || 0) + 1;
       await notificationsStore.dispatchWatchedMovieNotification(movie);
@@ -234,6 +209,12 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       const remainingUserIds = Object.keys(updatedReviews);
 
       if (remainingUserIds.length === 0) {
+        if (groupsStore.activeGroup) {
+          const groupDocRef = doc(db, "groups", groupsStore.activeGroup.id);
+          transaction.update(groupDocRef, {
+            total_watched: increment(-1),
+          });
+        }
         transaction.delete(movieDocRef);
       } else {
         const ratings = Object.values(updatedReviews).map((r) =>

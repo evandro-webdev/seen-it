@@ -13,6 +13,8 @@ import {
   startAt,
   endAt,
   limit,
+  deleteDoc,
+  writeBatch,
 } from "../services/firebase";
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
@@ -199,6 +201,41 @@ export const useGroupsStore = defineStore("groups", () => {
     return results;
   }
 
+  async function deleteGroup(groupId) {
+    const currentUserId = authStore.user?.uid;
+    const targetGroup =
+      groups?.value.find((g) => g.id === groupId) || activeGroup;
+
+    if (
+      !currentUserId ||
+      !targetGroup ||
+      targetGroup.created_by !== currentUserId
+    )
+      return;
+
+    const batch = writeBatch(db);
+
+    const savedMoviesRef = collection(db, `groups/${groupId}/savedMovies`);
+    const watchedMoviesRef = collection(db, `groups/${groupId}/watchedMovies`);
+
+    const [savedSnap, watchedSnap] = await Promise.all([
+      getDocs(savedMoviesRef),
+      getDocs(watchedMoviesRef),
+    ]);
+
+    savedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
+    watchedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
+
+    const groupDocRef = doc(db, "groups", groupId);
+    batch.delete(groupDocRef);
+
+    await batch.commit();
+
+    if (activeGroup?.id === groupId) {
+      clearActiveGroup();
+    }
+  }
+
   return {
     groups,
     isGroupsModalOpen,
@@ -208,6 +245,7 @@ export const useGroupsStore = defineStore("groups", () => {
     closeGroupsModal,
     getGroups,
     createGroup,
+    deleteGroup,
     setActiveGroup,
     clearActiveGroup,
     loadGroupMembers,

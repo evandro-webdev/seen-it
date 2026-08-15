@@ -1,8 +1,12 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useGroupsStore } from "@/stores/groups";
+import { useToastStore } from "@/stores/toast.js";
 import { useAuthStore } from "@/stores/auth";
+
 import { ArrowLeft, Pencil, Trash2, UsersRound } from "@lucide/vue";
+
+import ConfirmDeleteModal from "../ui/ConfirmDeleteModal.vue";
 
 const props = defineProps({
   group: {
@@ -15,11 +19,15 @@ const emit = defineEmits(["back", "edit"]);
 
 const groupsStore = useGroupsStore();
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 
 const membersList = ref([]);
 const isLoadingMembers = ref(true);
 
 const isOwner = computed(() => props.group?.created_by === authStore.user?.uid);
+
+const isConfirmDeleteOpen = ref(false);
+const isDeleting = ref(false);
 
 onMounted(async () => {
   try {
@@ -35,16 +43,18 @@ onMounted(async () => {
   }
 });
 
-async function handleDeleteGroup() {
-  if (
-    confirm(`Tem certeza que deseja excluir o grupo "${props.group.name}"?`)
-  ) {
-    try {
-      await groupsStore.deleteGroup(props.group.id);
-      emit("back");
-    } catch (error) {
-      console.error("Erro ao excluir grupo:", error);
-    }
+async function handleConfirmDelete() {
+  try {
+    isDeleting.value = true;
+    await groupsStore.deleteGroup(props.group.id);
+
+    toastStore.success(`Grupo "${props.group.name}" excluído com sucesso`);
+    isConfirmDeleteOpen.value = false;
+  } catch (error) {
+    console.error("Erro ao remover avaliação:", error);
+    toastStore.error(`Não foi possível excluir o grupo: "${props.group.name}"`);
+  } finally {
+    isDeleting.value = false;
   }
 }
 </script>
@@ -175,12 +185,21 @@ async function handleDeleteGroup() {
     >
       <button
         type="button"
-        @click="handleDeleteGroup"
+        @click="isConfirmDeleteOpen = true"
         class="w-full p-3 rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
       >
         <Trash2 class="w-4 h-4" />
         Excluir Grupo
       </button>
     </div>
+
+    <ConfirmDeleteModal
+      :is-open="isConfirmDeleteOpen"
+      :is-loading="isDeleting"
+      title="Excluir grupo?"
+      description="Essa ação removerá todos os filmes salvos e avaliados neste grupo."
+      @close="isConfirmDeleteOpen = false"
+      @confirm="handleConfirmDelete"
+    />
   </div>
 </template>
