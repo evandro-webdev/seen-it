@@ -6,11 +6,11 @@ defineProps({
   isOpen: Boolean,
   title: {
     type: String,
-    default: "Remover avaliação?",
+    required: true,
   },
   description: {
     type: String,
-    default: "Sua nota e comentário serão excluídos permanentemente.",
+    required: true,
   },
   isLoading: Boolean,
 });
@@ -22,7 +22,7 @@ const emit = defineEmits(["confirm", "close"]);
   <Transition name="fade">
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      class="fixed inset-0 z-50 p-4 bg-black/60 backdrop-blur-sm flex items-center justify-center"
       @click.self="emit('close')"
     >
       <div
@@ -38,7 +38,7 @@ const emit = defineEmits(["confirm", "close"]);
           <h3 class="text-base font-semibold text-slate-800 dark:text-white">
             {{ title }}
           </h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class=" mt-1 text-balance text-sm text-gray-500 dark:text-gray-400">
             {{ description }}
           </p>
         </div>
@@ -47,7 +47,6 @@ const emit = defineEmits(["confirm", "close"]);
           <BaseButton
             label="Cancelar"
             variant="ghost"
-            size="sm"
             block
             :disabled="isLoading"
             @click="emit('close')"
@@ -55,7 +54,6 @@ const emit = defineEmits(["confirm", "close"]);
           <BaseButton
             label="Remover"
             variant="danger"
-            size="sm"
             block
             :disabled="isLoading"
             @click="emit('confirm')"

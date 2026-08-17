@@ -46,7 +46,7 @@ const toastStore = useToastStore();
 
         <button
           @click="toastStore.remove(toast.id)"
-          class="p-1 rounded-lg opacity-60 hover:opacity-100 transition-opacity"
+          class="p-1 rounded-lg"
         >
           <X class="w-4 h-4" />
         </button>

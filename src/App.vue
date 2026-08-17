@@ -26,7 +26,7 @@ watch(
   () => authStore.user?.uid,
   (newUid, oldUid) => {
     if (newUid) {
-      groupsStore.getGroups();
+      groupsStore.setupGroupsListener();
       if (groupsStore.activeGroup) {
         groupsStore.loadGroupMembers();
       }

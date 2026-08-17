@@ -13,7 +13,10 @@ const props = defineProps({
   variant: {
     type: String,
     default: "primary",
-    validator: (val) => ["primary", "secondary", "ghost", "danger"].includes(val),
+    validator: (val) =>
+      ["primary", "secondary", "ghost", "danger", "danger-outline"].includes(
+        val,
+      ),
   },
   size: {
     type: String,
@@ -35,13 +38,15 @@ defineEmits(["click"]);
 const variantClasses = computed(() => {
   switch (props.variant) {
     case "primary":
-      return "text-white bg-[#0088FF] active:scale-99 shadow-lg shadow-blue-500/10";
+      return "text-white bg-[#0088FF] active:bg-blue-600 active:scale-95 shadow-lg shadow-blue-500/10";
     case "secondary":
-      return "text-gray-700 dark:text-white bg-gray-100 dark:bg-[#161f30] border border-gray-200 dark:border-[#242C3C]";
+      return "text-gray-700 dark:text-white bg-gray-100 dark:bg-[#161f30] border border-gray-200 dark:border-[#242C3C] active:bg-gray-200 dark:active:bg-[#1f2b42] active:scale-95";
     case "ghost":
-      return "text-gray-700 dark:text-white";
+      return "text-gray-700 dark:text-white active:bg-gray-100 dark:active:bg-[#161f30] active:scale-95";
     case "danger":
-      return "text-white bg-red-600 active:scale-99 shadow-lg shadow-red-500/10";
+      return "text-white bg-red-600 dark:bg-red-700 active:bg-red-700 dark:active:bg-red-800 active:scale-95 shadow-lg shadow-red-500/10";
+    case "danger-outline":
+      return "text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 dark:border-red-500/30 active:bg-red-500/20 active:scale-95";
     default:
       return "";
   }

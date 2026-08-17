@@ -60,6 +60,14 @@ watch(gridCols, (newVal) => {
   localStorage.setItem("app_grid_cols", newVal.toString());
 });
 
+watch(
+  () => groupsStore.activeGroup,
+  () => {
+    emit("update:groupBy", "none");
+    emit("update:sortBy", "rating_desc");
+  },
+);
+
 const gridClass = computed(() => {
   return gridCols.value === 3
     ? "grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
@@ -151,8 +159,7 @@ function clearSearch() {
               <h2
                 class="text-base font-semibold text-[#10355E] dark:text-[#B0D5FE]"
               >
-                {{ authStore.user?.displayName }}, você ainda não
-                avaliou:
+                {{ authStore.user?.displayName }}, você ainda não avaliou:
               </h2>
             </div>
 

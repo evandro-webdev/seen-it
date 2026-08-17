@@ -97,7 +97,7 @@ function unlockScroll() {
           <button
             @click="handleCloseClick"
             type="button"
-            class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-95 transition-all"
+            class="p-2 rounded-full bg-gray-100 dark:bg-[#222838] active:scale-95 transition-all"
             aria-label="Fechar"
           >
             <X class="w-5 h-5 text-gray-600 dark:text-[#A7B0C9]" />

@@ -78,7 +78,7 @@ function unlockScroll() {
               v-if="notificationsStore.unreadCount > 0"
               @click="notificationsStore.markAllAsRead"
               type="button"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-[#0088FF] transition-colors"
+              class="px-3 py-1.5 rounded-full text-xs font-medium text-[#0088FF] flex items-center gap-1.5"
               title="Marcar todas como lidas"
             >
               <CheckCheck class="w-4 h-4" />
@@ -88,7 +88,7 @@ function unlockScroll() {
             <button
               @click="handleCloseClick"
               type="button"
-              class="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#222838] dark:hover:bg-slate-800 active:scale-98 transition-colors"
+              class="p-1.5 rounded-full bg-gray-100 dark:bg-[#222838] active:scale-98"
             >
               <X class="text-gray-600 dark:text-[#A7B0C9]" />
             </button>

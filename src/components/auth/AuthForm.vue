@@ -116,7 +116,7 @@ async function handleAuthentication() {
           }}
           <button
             @click.prevent="toggleForm"
-            class="text-[#0088FF] font-semibold hover:underline bg-transparent border-none p-0 inline-block"
+            class="text-[#0088FF] font-semibold bg-transparent border-none p-0 inline-block"
           >
             {{ currentForm === "register" ? "Entrar" : "Criar conta" }}
           </button>

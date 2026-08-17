@@ -45,14 +45,14 @@ const formattedRating = computed(() => {
 <template>
   <div class="flex items-center gap-3.5 cursor-pointer group">
     <div
-      class="relative shrink-0 w-[120px] h-[180px] rounded-xl overflow-hidden bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-center shadow-sm group-hover:shadow-md transition-shadow"
+      class="relative shrink-0 w-[120px] h-[180px] rounded-xl overflow-hidden bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-center shadow-sm"
     >
       <img
         v-if="movie.poster_path"
         :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
         :alt="movie.title"
         loading="lazy"
-        class="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+        class="w-full h-full object-cover rounded-xl transition-transform duration-300"
       />
       <div
         v-else
@@ -81,7 +81,7 @@ const formattedRating = computed(() => {
     <div class="flex flex-col justify-center gap-1.5 flex-1 min-w-0">
       <div class="space-y-0.5">
         <h3
-          class="text-sm font-bold text-gray-800 dark:text-white truncate group-hover:text-[#0088FF] transition-colors"
+          class="text-sm font-bold text-gray-800 dark:text-white truncate transition-colors"
         >
           {{ movie.title || "Título Desconhecido" }}
         </h3>

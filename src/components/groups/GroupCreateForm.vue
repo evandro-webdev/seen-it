@@ -133,7 +133,7 @@ async function handleCreateGroup() {
           :key="user.uid"
           type="button"
           @click="selectUser(user)"
-          class="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-[#242C3C] transition-colors flex items-center justify-between"
+          class="w-full p-3 text-left transition-colors flex items-center justify-between"
         >
           <div class="flex items-center gap-3">
             <div
@@ -190,7 +190,7 @@ async function handleCreateGroup() {
           <button
             type="button"
             @click="removeMember(member.uid)"
-            class="hover:text-red-500 transition-colors ml-1"
+            class="transition-colors ml-1"
           >
             <X class="w-4 h-4" />
           </button>

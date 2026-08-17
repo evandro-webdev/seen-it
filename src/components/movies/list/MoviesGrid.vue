@@ -35,7 +35,7 @@ const emit = defineEmits(["open-movie-modal", "back"]);
       <button
         v-if="showBackButton"
         @click="emit('back')"
-        class="p-1 text-gray-500 hover:text-slate-800 dark:hover:text-white"
+        class="p-1 text-gray-500"
       >
         <ArrowLeft class="w-5 h-5" />
       </button>

@@ -223,7 +223,7 @@ function unlockScroll() {
       </div>
 
       <div
-        class="shrink-0 p-4 bg-white/90 dark:bg-[#0F111D]/90 backdrop-blur-md border-t border-gray-100 dark:border-[#1E2638] z-30"
+        class="shrink-0 p-4 border-t border-gray-100 dark:border-[#1E2638] bg-white/90 dark:bg-[#0F111D]/90 backdrop-blur-md z-30"
       >
         <div
           v-if="showRateForm"
@@ -291,6 +291,7 @@ function unlockScroll() {
               :icon="Sparkles"
               size="md"
               block
+              :disabled="new Date(movie.release_date) > new Date()"
             />
           </div>
         </template>
@@ -301,6 +302,8 @@ function unlockScroll() {
         :is-loading="isDeleting"
         @close="isConfirmDeleteOpen = false"
         @confirm="handleConfirmDelete"
+        title="Remover avaliação?"
+        description="Sua nota e comentário serão excluídos permanentemente."
       />
     </div>
   </Transition>

@@ -13,8 +13,8 @@ import {
   startAt,
   endAt,
   limit,
-  deleteDoc,
   writeBatch,
+  onSnapshot,
 } from "../services/firebase";
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
@@ -28,6 +28,7 @@ export const useGroupsStore = defineStore("groups", () => {
 
   const isGroupsModalOpen = ref(false);
   const isLoading = ref(false);
+  let unsubscribeListener = null;
 
   const authStore = useAuthStore();
 
@@ -41,14 +42,6 @@ export const useGroupsStore = defineStore("groups", () => {
     }
   }
 
-  function openGroupsModal() {
-    isGroupsModalOpen.value = true;
-  }
-
-  function closeGroupsModal() {
-    isGroupsModalOpen.value = false;
-  }
-
   function setActiveGroup(group) {
     activeGroup.value = group;
     if (group) {
@@ -59,34 +52,29 @@ export const useGroupsStore = defineStore("groups", () => {
     }
   }
 
-  function clearActiveGroup() {
-    activeGroup.value = null;
-    activeGroupMembers.value = {};
-    localStorage.removeItem("activeGroup");
-  }
-
-  async function getGroups() {
-    if (!authStore.user?.uid) return [];
+  function setupGroupsListener() {
+    if (unsubscribeListener) {
+      unsubscribeListener();
+      unsubscribeListener = null;
+    }
 
     isLoading.value = true;
 
-    try {
-      const q = query(
-        collection(db, "groups"),
-        where("members", "array-contains", authStore.user.uid),
-      );
+    unsubscribeListener = onSnapshot(
+      collection(db, "groups"),
+      (snapshot) => {
+        groups.value = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-      const querySnapshot = await getDocs(q);
-
-      groups.value = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    } catch (error) {
-      console.error("Erro ao buscar grupos do usuário:", error);
-    } finally {
-      isLoading.value = false;
-    }
+        isLoading.value = false;
+      },
+      (error) => {
+        console.error("Erro ao buscar grupos:", error);
+        isLoading.value = false;
+      },
+    );
   }
 
   async function loadGroupMembers(targetMemberIds = null) {
@@ -160,7 +148,6 @@ export const useGroupsStore = defineStore("groups", () => {
       ...newGroupPayload,
     };
 
-    groups.value.push(createdGroup);
     setActiveGroup(createdGroup);
 
     closeGroupsModal();
@@ -231,9 +218,23 @@ export const useGroupsStore = defineStore("groups", () => {
 
     await batch.commit();
 
-    if (activeGroup?.id === groupId) {
+    if (activeGroup.value?.id === groupId) {
       clearActiveGroup();
     }
+  }
+
+  function clearActiveGroup() {
+    activeGroup.value = null;
+    activeGroupMembers.value = {};
+    localStorage.removeItem("activeGroup");
+  }
+
+  function openGroupsModal() {
+    isGroupsModalOpen.value = true;
+  }
+
+  function closeGroupsModal() {
+    isGroupsModalOpen.value = false;
   }
 
   return {
@@ -243,7 +244,7 @@ export const useGroupsStore = defineStore("groups", () => {
     activeGroupMembers,
     openGroupsModal,
     closeGroupsModal,
-    getGroups,
+    setupGroupsListener,
     createGroup,
     deleteGroup,
     setActiveGroup,

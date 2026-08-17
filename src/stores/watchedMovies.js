@@ -63,7 +63,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       },
       (error) => {
         console.error(
-          "Erro ao escutar filmes assistidos em tempo real:",
+          "Erro ao buscar filmes:",
           error,
         );
         isLoading.value = false;

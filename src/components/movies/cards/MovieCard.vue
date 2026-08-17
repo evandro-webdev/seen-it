@@ -66,13 +66,18 @@ function handleImageError() {
 function formatDate(dateString) {
   if (!dateString) return "Em breve";
   const [year, month, day] = dateString.split("-");
+
+  if (year > new Date().getFullYear()) {
+    return year;
+  }
+  
   return `${day}/${month}`;
 }
 </script>
 
 <template>
   <div
-    class="group space-y-1.5 overflow-hidden cursor-pointer flex flex-col transition-transform duration-200 active:scale-95 select-none snap-start"
+    class="space-y-1.5 overflow-hidden cursor-pointer flex flex-col transition-transform duration-200 active:scale-95 select-none snap-start"
     :class="fixedWidth ? 'w-[125px] sm:w-[140px] shrink-0' : 'w-full'"
   >
     <div
@@ -84,7 +89,7 @@ function formatDate(dateString) {
         :alt="movie.title"
         loading="lazy"
         @error="handleImageError"
-        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        class="w-full h-full object-cover transition-transform duration-300"
       />
 
       <div
@@ -113,9 +118,7 @@ function formatDate(dateString) {
           'bg-black/65 border border-white/10': !badgeBackgroundColor,
         }"
         :style="
-          badgeBackgroundColor
-            ? { backgroundColor: badgeBackgroundColor }
-            : {}
+          badgeBackgroundColor ? { backgroundColor: badgeBackgroundColor } : {}
         "
       >
         <Star class="w-2.5 h-2.5 fill-white text-white" />
@@ -125,7 +128,7 @@ function formatDate(dateString) {
 
     <div class="pt-0.5">
       <h3
-        class="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100 leading-tight line-clamp-1 group-hover:text-[#0088FF] transition-colors"
+        class="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100 leading-tight line-clamp-1"
         :title="movie.title"
       >
         {{ movie.title }}

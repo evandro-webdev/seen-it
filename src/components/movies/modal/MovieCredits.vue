@@ -58,7 +58,7 @@ const hasCredits = computed(() => {
     <button
       @click="isOpen = !isOpen"
       type="button"
-      class="w-full flex items-center justify-between py-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+      class="w-full py-1 text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
         <div

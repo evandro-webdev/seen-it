@@ -75,7 +75,7 @@ function handleCloseGroup() {
 
         <div
           v-if="groupsStore.activeGroup"
-          class="py-1 px-3 rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 border"
+          class="py-1 px-3 rounded-full border text-xs font-semibold flex items-center gap-1.5 "
           :style="{
             backgroundColor: `${groupsStore.activeGroup.color.primary}1e`,
             borderColor: `${groupsStore.activeGroup.color.primary}50`,
@@ -87,7 +87,7 @@ function handleCloseGroup() {
 
           <button
             @click.stop="handleCloseGroup"
-            class="ml-1 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+            class="ml-1 p-0.5 rounded-full"
           >
             <X class="w-3 h-3" />
           </button>

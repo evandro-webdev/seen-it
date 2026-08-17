@@ -29,7 +29,7 @@ defineEmits(["clear"]);
       <button
         @click="$emit('clear')"
         type="button"
-        class="text-xs font-semibold hover:underline inline-flex items-center text-[#0088FF]"
+        class="text-xs font-semibold text-[#0088FF] inline-flex items-center"
       >
         Limpar pesquisa
       </button>

@@ -209,7 +209,7 @@ function handlePickRandom() {
               'p-1 rounded-md transition-all cursor-pointer',
               cols === 2
                 ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+                : 'text-gray-400',
             ]"
             title="2 Colunas"
           >
@@ -222,7 +222,7 @@ function handlePickRandom() {
               'p-1 rounded-md transition-all cursor-pointer',
               cols === 3
                 ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+                : 'text-gray-400',
             ]"
             title="3 Colunas"
           >

@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 import { ArrowLeft, Pencil, Trash2, UsersRound } from "@lucide/vue";
 
 import ConfirmDeleteModal from "../ui/ConfirmDeleteModal.vue";
+import BaseButton from "../ui/BaseButton.vue";
 
 const props = defineProps({
   group: {
@@ -46,13 +47,16 @@ onMounted(async () => {
 async function handleConfirmDelete() {
   try {
     isDeleting.value = true;
+
     await groupsStore.deleteGroup(props.group.id);
 
-    toastStore.success(`Grupo "${props.group.name}" excluído com sucesso`);
     isConfirmDeleteOpen.value = false;
+    emit("back");
+
+    toastStore.success(`Grupo "${props.group.name}" excluído com sucesso`);
   } catch (error) {
     console.error("Erro ao remover avaliação:", error);
-    toastStore.error(`Não foi possível excluir o grupo: "${props.group.name}"`);
+    toastStore.error(`Não foi possível excluir o grupo "${props.group.name}"`);
   } finally {
     isDeleting.value = false;
   }
@@ -65,7 +69,7 @@ async function handleConfirmDelete() {
       <button
         type="button"
         @click="emit('back')"
-        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+        class="p-2 rounded-full transition-colors"
       >
         <ArrowLeft class="w-5 h-5 text-gray-600 dark:text-[#A7B0C9]" />
       </button>
@@ -103,7 +107,7 @@ async function handleConfirmDelete() {
         v-if="isOwner"
         type="button"
         @click="emit('edit', group)"
-        class="p-2 rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+        class="p-2 rounded-xl text-blue-600 dark:text-blue-400"
         title="Editar grupo"
       >
         <Pencil class="w-5 h-5" />
@@ -171,7 +175,7 @@ async function handleConfirmDelete() {
 
           <span
             v-if="member.uid === group.created_by"
-            class="text-[10px] bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md font-medium"
+            class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
           >
             Criador
           </span>
@@ -183,14 +187,14 @@ async function handleConfirmDelete() {
       v-if="isOwner"
       class="pt-2"
     >
-      <button
-        type="button"
+      <BaseButton
+        variant="danger-outline"
+        size="md"
+        block
+        :icon="Trash2"
+        label="Excluir Grupo"
         @click="isConfirmDeleteOpen = true"
-        class="w-full p-3 rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-      >
-        <Trash2 class="w-4 h-4" />
-        Excluir Grupo
-      </button>
+      />
     </div>
 
     <ConfirmDeleteModal

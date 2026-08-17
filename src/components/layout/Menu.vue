@@ -53,7 +53,7 @@ onClickOutside(
     <button
       @click="emit('open-groups-modal')"
       type="button"
-      class="py-3 px-4 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-[#1a1d30] transition-colors duration-300 flex items-center gap-3 w-full"
+      class="w-full py-3 px-4 text-left text-gray-700 dark:text-gray-200 flex items-center gap-3"
     >
       <UsersRound class="w-5 h-5 text-[#0088FF] shrink-0" />
       <span class="text-sm font-medium">Grupos</span>
@@ -62,7 +62,7 @@ onClickOutside(
     <button
       @click="emit('logout')"
       type="button"
-      class="py-3 px-4 text-left text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors duration-300 flex items-center gap-3 w-full"
+      class="w-full py-3 px-4 text-left text-red-500 dark:text-red-400 flex items-center gap-3"
     >
       <SquareArrowRightExit
         class="w-5 h-5 scale-x-[-1] text-red-500 dark:text-red-400 shrink-0"

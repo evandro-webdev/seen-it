@@ -37,7 +37,7 @@ function handleOpenMenu(event) {
     :class="[
       isActive
         ? 'border-blue-500/50 bg-blue-50/40 dark:bg-blue-950/20 dark:border-blue-500/40'
-        : 'border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F] hover:border-gray-200 dark:hover:border-slate-700',
+        : 'border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]',
     ]"
   >
     <div class="flex items-center gap-3 min-w-0">
@@ -90,7 +90,7 @@ function handleOpenMenu(event) {
       <button
         type="button"
         @click="handleOpenMenu"
-        class="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 dark:text-[#A4ADC5] dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-slate-700/50 transition-colors"
+        class="p-1.5 rounded-xl text-gray-400 dark:text-[#A4ADC5]"
         title="Opções do grupo"
       >
         <MoreVertical class="w-5 h-5" />

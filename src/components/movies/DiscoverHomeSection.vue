@@ -12,6 +12,11 @@ defineProps({
 });
 
 const emit = defineEmits(["open-movie-modal", "see-all"]);
+
+function handleSeeAllMovies(category, title) {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  emit('see-all', category, title)
+}
 </script>
 
 <template>
@@ -29,7 +34,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
       :movies="popularMovies"
       :loading="isLoading"
       @open-movie-modal="emit('open-movie-modal', $event)"
-      @see-all="emit('see-all', 'popular', 'Mais vistos do momento')"
+      @see-all="handleSeeAllMovies('popular', 'Mais vistos do momento')"
     />
 
     <MoviesList
@@ -40,7 +45,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
       :loading="isLoading"
       upcoming
       @open-movie-modal="emit('open-movie-modal', $event)"
-      @see-all="emit('see-all', 'upcoming', 'Mais esperados')"
+      @see-all="handleSeeAllMovies('upcoming', 'Mais esperados')"
     />
 
     <MoviesList
@@ -50,7 +55,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
       :movies="topRatedMovies"
       :loading="isLoading"
       @open-movie-modal="emit('open-movie-modal', $event)"
-      @see-all="emit('see-all', 'top_rated', 'Melhores avaliados')"
+      @see-all="handleSeeAllMovies('top_rated', 'Melhores avaliados')"
     />
   </div>
 </template>
