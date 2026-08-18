@@ -8,6 +8,7 @@ import { useModalHistory } from "@/composables/useModalHistory.js";
 
 import { Camera, Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
 import BaseButton from "../ui/BaseButton.vue";
+import BaseInput from "../forms/BaseInput.vue";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -64,6 +65,8 @@ async function handleUpdate() {
     toastStore.success("Perfil atualizado!");
     profileStore.closeProfileModal();
   } catch (error) {
+    isSubmitting.value = false;
+
     console.error("Erro ao atualizar perfil:", error);
     toastStore.error("Falha ao atualizar o perfil.");
   } finally {
@@ -171,25 +174,12 @@ function unlockScroll() {
             />
           </div>
 
-          <div class="space-y-2">
-            <label
-              class="text-xs font-semibold text-gray-700 dark:text-gray-300 block"
-            >
-              Nome de exibição
-            </label>
-            <div class="relative">
-              <User
-                stroke-width="1.5"
-                class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-              />
-              <input
-                type="text"
-                v-model="name"
-                class="w-full py-3.5 pl-11 pr-4 rounded-xl border text-sm text-gray-900 placeholder-gray-400 dark:text-gray-200 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                placeholder="Digite o seu nome"
-              />
-            </div>
-          </div>
+          <BaseInput
+            v-model="name"
+            label="Nome de exibição"
+            placeholder="Digite o seu nome"
+            :icon="User"
+          />
 
           <div class="space-y-3">
             <label

@@ -1,10 +1,16 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ==========================================
+   1. THEME & FONTS
+   ========================================== */
 @theme {
   --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+/* ==========================================
+   2. BASE & MOBILE RESET
+   ========================================== */
 html, body {
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -17,23 +23,14 @@ input, textarea {
   user-select: text;
 }
 
-.overflow-x-auto::-webkit-scrollbar {
-  display: none;
-}
+/* ==========================================
+   3. TRANSITIONS (TRANSIÇÕES GERAIS E TABS)
+   ========================================== */
 
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-}
-
+/* Fade Simples */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
@@ -41,6 +38,7 @@ input, textarea {
   opacity: 0;
 }
 
+/* Troca de Abas / Navegação Leve */
 .fade-tab-enter-active,
 .fade-tab-leave-active {
   transition: all 0.2s ease;
@@ -56,6 +54,27 @@ input, textarea {
   transform: translateY(-8px);
 }
 
+/* Toggle de Tema Dark/Light */
+.theme-toggle-enter-active,
+.theme-toggle-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+
+.theme-toggle-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+
+/* ==========================================
+   4. MODALS & BOTTOM SHEETS
+   ========================================== */
+
+/* Transição Principal do Modal / Overlay + Container */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.4s ease;
@@ -76,7 +95,18 @@ input, textarea {
   transform: translateY(100%);
 }
 
+/* Slide Up Parcial */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease;
+}
 
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+}
+
+/* Slide Full Screen */
 .slide-full-enter-active,
 .slide-full-leave-active {
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -87,21 +117,9 @@ input, textarea {
   transform: translateY(100%);
 }
 
-.theme-toggle-enter-active,
-.theme-toggle-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.theme-toggle-enter-from {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0.6);
-}
-
-.theme-toggle-leave-to {
-  opacity: 0;
-  transform: rotate(90deg) scale(0.6);
-}
-
+/* ==========================================
+   5. KEYFRAMES & UTILITIES
+   ========================================== */
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -115,4 +133,8 @@ input, textarea {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
 }

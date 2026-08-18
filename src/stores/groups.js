@@ -15,6 +15,7 @@ import {
   limit,
   writeBatch,
   onSnapshot,
+  arrayRemove,
 } from "../services/firebase";
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
@@ -197,21 +198,40 @@ export const useGroupsStore = defineStore("groups", () => {
       !currentUserId ||
       !targetGroup ||
       targetGroup.created_by !== currentUserId
-    )
-      return;
+    ) {
+      throw new Error("Operação não permitida.");
+    }
 
     const batch = writeBatch(db);
 
     const savedMoviesRef = collection(db, `groups/${groupId}/savedMovies`);
     const watchedMoviesRef = collection(db, `groups/${groupId}/watchedMovies`);
+    const groupNotificationsQuery = query(
+      collection(db, "notifications"),
+      where("group_id", "==", groupId),
+    );
 
-    const [savedSnap, watchedSnap] = await Promise.all([
+    const [savedSnap, watchedSnap, groupNotificationsSnap] = await Promise.all([
       getDocs(savedMoviesRef),
       getDocs(watchedMoviesRef),
+      getDocs(groupNotificationsQuery),
     ]);
 
     savedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
     watchedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
+    groupNotificationsSnap.forEach((docSnap) => batch.delete(docSnap.ref));
+
+    const membersIds = Array.isArray(targetGroup.members)
+      ? targetGroup.members
+      : Object.keys(targetGroup.members || {});
+
+    membersIds.forEach((memberId) => {
+      const userDocRef = doc(db, "users", memberId);
+
+      batch.update(userDocRef, {
+        my_groups: arrayRemove(groupId),
+      });
+    });
 
     const groupDocRef = doc(db, "groups", groupId);
     batch.delete(groupDocRef);

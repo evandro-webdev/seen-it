@@ -1,8 +1,10 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth.js";
-import { Loader2 } from "@lucide/vue";
+import { Asterisk, AtSign, Loader2, LogIn, User } from "@lucide/vue";
 import { useToastStore } from "@/stores/toast";
+import BaseInput from "../forms/BaseInput.vue";
+import BaseButton from "../ui/BaseButton.vue";
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
@@ -39,7 +41,9 @@ async function handleAuthentication() {
   try {
     if (currentForm.value === "register") {
       await authStore.register(email.value, password.value, name.value);
-      toastStore.success(`Conta criada com sucesso! Bem-vindo, ${name.value.split(" ")[0]}!`);
+      toastStore.success(
+        `Conta criada com sucesso! Bem-vindo, ${name.value.split(" ")[0]}!`,
+      );
     } else {
       await authStore.login(email.value, password.value);
       toastStore.success("Login realizado com sucesso!");
@@ -48,7 +52,10 @@ async function handleAuthentication() {
     console.error("Erro na autenticação: ", error);
 
     let message = "Erro ao autenticar. Tente novamente.";
-    if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found") {
+    if (
+      error.code === "auth/invalid-credential" ||
+      error.code === "auth/user-not-found"
+    ) {
       message = "E-mail ou senha incorretos.";
     } else if (error.code === "auth/email-already-in-use") {
       message = "Este e-mail já está em uso.";
@@ -82,29 +89,28 @@ async function handleAuthentication() {
         class="space-y-5"
       >
         <div class="space-y-3.5">
-          <input
+          <BaseInput
             v-if="currentForm === 'register'"
-            type="text"
             v-model="name"
-            required
-            class="w-full p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            label="Nome"
             placeholder="Digite seu nome"
+            :icon="User"
           />
 
-          <input
-            type="email"
+          <BaseInput
             v-model="email"
-            required
-            class="w-full p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            placeholder="Digite seu mail"
+            type="email"
+            label="Email"
+            placeholder="Digite seu email"
+            :icon="AtSign"
           />
 
-          <input
-            type="password"
+          <BaseInput
             v-model="password"
-            required
-            class="w-full p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 bg-[#F7F7F7] dark:bg-[#282E4D] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            type="password"
+            label="Senha"
             placeholder="Senha"
+            :icon="Asterisk"
           />
         </div>
 
@@ -116,25 +122,32 @@ async function handleAuthentication() {
           }}
           <button
             @click.prevent="toggleForm"
+            type="button"
             class="text-[#0088FF] font-semibold bg-transparent border-none p-0 inline-block"
           >
             {{ currentForm === "register" ? "Entrar" : "Criar conta" }}
           </button>
         </p>
 
-        <button
+        <BaseButton
           type="submit"
+          size="lg"
+          :label="currentForm === 'register' ? 'Criar conta' : 'Entrar'"
+          :icon="LogIn"
           :disabled="isSubmiting"
-          class="w-full py-3.5 px-6 rounded-xl font-semibold text-white bg-[#0088FF] flex items-center justify-center gap-2 shadow-md shadow-blue-500/10 active:scale-98 transition-transform"
+          block
         >
-          <Loader2
-            v-if="isSubmiting"
-            class="w-4 h-4 animate-spin text-current"
-          />
-          <span>
-            {{ currentForm === "register" ? "Criar conta" : "Entrar" }}
-          </span>
-        </button>
+          <template #icon>
+            <Loader2
+              v-if="isSubmiting"
+              class="w-5 h-5 animate-spin"
+            />
+            <LogIn
+              v-else
+              class="w-5 h-5"
+            />
+          </template>
+        </BaseButton>
       </form>
     </div>
   </div>

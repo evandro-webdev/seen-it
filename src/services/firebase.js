@@ -20,7 +20,8 @@ import {
   limit,
   startAt,
   endAt,
-  increment
+  increment,
+  arrayRemove,
 } from "firebase/firestore";
 
 import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
@@ -62,5 +63,6 @@ export {
   limit,
   startAt,
   endAt,
-  increment
+  increment,
+  arrayRemove,
 };

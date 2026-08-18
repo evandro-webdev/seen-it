@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   AtSign,
   Check,
+  Loader2,
   Plus,
   Popcorn,
   UsersRound,
@@ -14,6 +15,7 @@ import {
 } from "@lucide/vue";
 
 import BaseButton from "../ui/BaseButton.vue";
+import BaseInput from "../forms/BaseInput.vue";
 
 const emit = defineEmits(["closeForm"]);
 const groupsStore = useGroupsStore();
@@ -32,6 +34,7 @@ const groupName = ref("");
 const searchQuery = ref("");
 const searchResults = ref([]);
 const isSearching = ref(false);
+const isSubmitting = ref(false);
 const members = ref([]);
 const selectedColor = ref(colorOptions[0]);
 
@@ -72,6 +75,8 @@ async function handleCreateGroup() {
   if (!groupName.value.trim()) return;
 
   try {
+    isSubmitting.value = true;
+
     await groupsStore.createGroup({
       groupName: groupName.value,
       invitedMembersIds: members.value.map((m) => m.uid),
@@ -82,11 +87,15 @@ async function handleCreateGroup() {
     members.value = [];
     searchQuery.value = "";
 
-    toastStore.success(`Grupo ${groupName.value} criado com sucesso.`)
+    toastStore.success(`Grupo ${groupName.value} criado com sucesso.`);
     emit("closeForm");
   } catch (error) {
-    toastStore.error(`Erro ao criar grupo`)
+    isSubmitting.value = false;
+
+    toastStore.error(`Erro ao criar grupo`);
     console.error("Erro ao criar grupo:", error.message);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 </script>
@@ -96,33 +105,20 @@ async function handleCreateGroup() {
     @submit.prevent="handleCreateGroup"
     class="space-y-5"
   >
-    <div class="relative">
-      <Popcorn
-        stroke-width="1"
-        class="w-6 h-6 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
-      />
-      <input
-        type="text"
-        v-model="groupName"
-        class="w-full p-4 pl-13.5 rounded-2xl border text-gray-900 placeholder-gray-400 dark:text-gray-300 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-        placeholder="Digite o nome do grupo"
-        required
-      />
-    </div>
+    <BaseInput
+      v-model="searchQuery"
+      label="Nome do grupo"
+      placeholder="Digite o nome do grupo"
+      :icon="Popcorn"
+    />
 
     <div class="relative">
-      <div class="relative">
-        <AtSign
-          stroke-width="1"
-          class="w-6 h-6 text-gray-400 absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none"
-        />
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="w-full p-4 pl-13.5 rounded-2xl border text-gray-900 placeholder-gray-400 dark:text-gray-300 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#181f2f] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          placeholder="Nome de usuário do participante"
-        />
-      </div>
+      <BaseInput
+        v-model="searchQuery"
+        label="Participantes"
+        placeholder="Nome de usuário participante"
+        :icon="AtSign"
+      />
 
       <div
         v-if="searchResults.length > 0"
@@ -199,7 +195,7 @@ async function handleCreateGroup() {
     </div>
 
     <div class="space-y-2.5">
-      <label class="font-medium text-gray-700 dark:text-white block">
+      <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 block select-none">
         Escolha a cor do grupo:
       </label>
       <div class="flex gap-2">
@@ -232,13 +228,24 @@ async function handleCreateGroup() {
       />
 
       <BaseButton
-        label="Criar Grupo"
-        :icon="UsersRound"
+        type="submit"
+        label="Criar grupo"
         variant="primary"
         size="lg"
-        type="submit"
+        :disabled="isSubmitting"
         block
-      />
+      >
+        <template #icon>
+          <Loader2
+            v-if="isSubmitting"
+            class="w-5 h-5 animate-spin"
+          />
+          <UsersRound
+            v-else
+            class="w-5 h-5"
+          />
+        </template>
+      </BaseButton>
     </div>
   </form>
 </template>
