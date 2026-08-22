@@ -59,10 +59,21 @@ export const useGroupsStore = defineStore("groups", () => {
       unsubscribeListener = null;
     }
 
+    const currentUserId = authStore.user?.uid;
+    if (!currentUserId) {
+      groups.value = [];
+      return;
+    }
+
     isLoading.value = true;
 
-    unsubscribeListener = onSnapshot(
+    const q = query(
       collection(db, "groups"),
+      where("members", "array-contains", currentUserId),
+    );
+
+    unsubscribeListener = onSnapshot(
+      q,
       (snapshot) => {
         groups.value = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -72,7 +83,7 @@ export const useGroupsStore = defineStore("groups", () => {
         isLoading.value = false;
       },
       (error) => {
-        console.error("Erro ao buscar grupos:", error);
+        console.error("Erro ao buscar grupos do usuário:", error);
         isLoading.value = false;
       },
     );

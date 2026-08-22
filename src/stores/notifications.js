@@ -28,7 +28,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
   let unsubscribe = null;
 
   const unreadCount = computed(() => {
-    return notifications.value.filter((n) => !n.isRead).length;
+    return notifications.value.filter((n) => !n.is_read).length;
   });
 
   function openNotificationsModal() {
@@ -51,7 +51,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     const q = query(
       collection(db, "notifications"),
-      where("userId", "==", uid),
+      where("user_id", "==", uid),
       where("group_id", "==", activeGroup.id),
       orderBy("created_at", "desc"),
       limit(25),
@@ -105,14 +105,14 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     const promises = membersToNotificate.map((uid) => {
       return addDoc(collection(db, "notifications"), {
-        userId: uid,
+        user_id: uid,
         sender_id: authStore.user.uid,
         sender_name: authStore.user.displayName,
         group_id: groupsStore.activeGroup.id,
         movie_id: movie.id,
         movie_title: movie.title,
         type: "movie_rated",
-        isRead: false,
+        is_read: false,
         created_at: new Date(),
       });
     });
@@ -136,14 +136,14 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     const promises = membersToNotificate.map((uid) => {
       return addDoc(collection(db, "notifications"), {
-        userId: uid,
+        user_id: uid,
         sender_id: authStore.user.uid,
         sender_name: authStore.user.displayName,
         group_id: groupsStore.activeGroup.id,
         movie_id: movieId,
         movie_title: movieTitle,
         type: "movie_saved",
-        isRead: false,
+        is_read: false,
         created_at: new Date(),
       });
     });
@@ -159,7 +159,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
   async function markAsRead(notificationId) {
     try {
       await updateDoc(doc(db, "notifications", notificationId), {
-        isRead: true,
+        is_read: true,
       });
     } catch (error) {
       console.error("Erro ao marcar como lida: ", error);
@@ -172,7 +172,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     if (!activeGroupId) return;
 
     const unreadNotifications = notifications.value.filter(
-      (n) => !n.isRead && n.group_id === activeGroupId,
+      (n) => !n.is_read && n.group_id === activeGroupId,
     );
 
     if (unreadNotifications.length === 0) return;
@@ -182,7 +182,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
       unreadNotifications.forEach((notification) => {
         const notiRef = doc(db, "notifications", notification.id);
-        batch.update(notiRef, { isRead: true });
+        batch.update(notiRef, { is_read: true });
       });
 
       await batch.commit();
@@ -196,7 +196,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     if (!activeGroupId) return;
 
-    const TWO_WEEKS_MS = 10 * 24 * 60 * 60 * 1000;
+    const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
     const fourteenDaysAgo = new Date(Date.now() - TWO_WEEKS_MS);
 
     try {

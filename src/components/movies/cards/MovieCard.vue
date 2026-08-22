@@ -44,6 +44,8 @@ const badgeColorMap = {
   "#D75870": "#A92B45",
   "#55C06E": "#2A7C3F",
   "#F69F40": "#B25900",
+  "#2DD4BF": "#117366",
+  "#EC4899": "#A31A60",
 };
 
 const badgeBackgroundColor = computed(() => {
@@ -70,7 +72,7 @@ function formatDate(dateString) {
   if (year > new Date().getFullYear()) {
     return year;
   }
-  
+
   return `${day}/${month}`;
 }
 </script>

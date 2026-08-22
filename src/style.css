@@ -38,6 +38,16 @@ input, textarea {
   opacity: 0;
 }
 
+.fade-fast-enter-active,
+.fade-fast-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-fast-enter-from,
+.fade-fast-leave-to {
+  opacity: 0;
+}
+
 /* Troca de Abas / Navegação Leve */
 .fade-tab-enter-active,
 .fade-tab-leave-active {

@@ -6,9 +6,20 @@ import { useToastStore } from "@/stores/toast.js";
 import { onClickOutside } from "@vueuse/core";
 import { useModalHistory } from "@/composables/useModalHistory.js";
 
-import { Camera, Check, Loader2, User, UserRoundCheck, X } from "@lucide/vue";
+import {
+  AtSign,
+  Camera,
+  Check,
+  Loader2,
+  User,
+  UserRoundCheck,
+  X,
+} from "@lucide/vue";
 import BaseButton from "../ui/BaseButton.vue";
 import BaseInput from "../forms/BaseInput.vue";
+import ModalHeader from "../ui/ModalHeader.vue";
+import ProfileAvatar from "./ProfileAvatar.vue";
+import ColorPicker from "../forms/ColorPicker.vue";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -18,22 +29,43 @@ const isSubmitting = ref(false);
 const profileModalRef = ref(null);
 
 const name = ref("");
+const username = ref("");
 const selectedColor = ref("");
 const avatarPreview = ref(null);
 const selectedFile = ref(null);
 
-const colorOptions = ["#338CD5", "#9367EB", "#D75870", "#55C06E", "#F69F40"];
+const colorOptions = [
+  "#338CD5",
+  "#9367EB",
+  "#D75870",
+  "#55C06E",
+  "#F69F40",
+  "#2DD4BF",
+  "#EC4899",
+];
 
 const isModalOpen = computed(() => profileStore.isProfileModalOpen);
 const { handleCloseClick } = useModalHistory(isModalOpen, () =>
   profileStore.closeProfileModal(),
 );
 
+const hasChanges = computed(() => {
+  if (!authStore.user) return false;
+
+  return (
+    name.value !== (authStore.user.displayName || "") ||
+    username.value !== (authStore.user.username || "") ||
+    selectedColor.value !== (authStore.user.color || "") ||
+    selectedFile.value !== null
+  );
+});
+
 watch(
   () => authStore.user,
   (newUser) => {
     if (newUser) {
       name.value = newUser.displayName || "";
+      username.value = newUser.username;
       selectedColor.value = newUser.color || "";
       avatarPreview.value = newUser.avatar_url || null;
     }
@@ -58,6 +90,7 @@ async function handleUpdate() {
 
     await profileStore.updateProfile({
       name: name.value,
+      username: username.value,
       color: selectedColor.value,
       imageFile: selectedFile.value,
     });
@@ -102,77 +135,21 @@ function unlockScroll() {
         ref="profileModalRef"
         class="w-full py-6 px-4 bg-white dark:bg-[#121825] rounded-t-2xl overflow-y-auto space-y-6 modal-content max-h-[85vh]"
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="p-3 rounded-2xl bg-blue-50 dark:bg-[#273056] shrink-0">
-              <User class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h2
-                class="text-xl font-bold text-gray-900 dark:text-white leading-tight"
-              >
-                Meu Perfil
-              </h2>
-              <span
-                class="text-xs font-medium text-gray-500 dark:text-[#9EB2CD]"
-              >
-                Edite suas informações
-              </span>
-            </div>
-          </div>
-
-          <button
-            @click="handleCloseClick"
-            type="button"
-            class="p-2 rounded-full bg-gray-100 dark:bg-[#222838] active:scale-95"
-            aria-label="Fechar"
-          >
-            <X class="w-5 h-5 text-gray-600 dark:text-[#A7B0C9]" />
-          </button>
-        </div>
+        <ModalHeader
+          title="Meu Perfil"
+          subtitle="Edite suas informações"
+          :icon="User"
+          @close="handleCloseClick"
+        />
 
         <form
           @submit.prevent="handleUpdate"
-          class="space-y-6"
+          class="space-y-4"
         >
-          <div class="flex flex-col items-center justify-center gap-2 pt-2">
-            <label
-              for="avatar"
-              class="relative cursor-pointer group active:scale-95 transition-transform"
-            >
-              <div
-                class="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500/30 dark:border-blue-500/20 bg-gray-100 dark:bg-[#181F2F] flex items-center justify-center shadow-inner"
-              >
-                <img
-                  v-if="avatarPreview"
-                  :src="avatarPreview"
-                  class="w-full h-full object-cover"
-                />
-                <User
-                  v-else
-                  class="w-10 h-10 text-gray-400"
-                />
-              </div>
-
-              <div
-                class="absolute bottom-0 right-0 p-2 rounded-full bg-blue-600 text-white shadow-lg border-2 border-white dark:border-[#121825]"
-              >
-                <Camera class="w-4 h-4" />
-              </div>
-            </label>
-
-            <span class="text-xs font-medium text-gray-500 dark:text-[#ABB3C3]">
-              Toque na foto para alterar
-            </span>
-
-            <input
-              type="file"
-              id="avatar"
-              accept="image/*"
-              @change="handleFileChange"
-              class="hidden"
-            />
-          </div>
+          <ProfileAvatar
+            :avatar-preview="avatarPreview"
+            @file-change="handleFileChange"
+          />
 
           <BaseInput
             v-model="name"
@@ -181,38 +158,26 @@ function unlockScroll() {
             :icon="User"
           />
 
-          <div class="space-y-3">
-            <label
-              class="text-xs font-semibold text-gray-700 dark:text-gray-300 block"
-            >
-              Cor de identificação
-            </label>
-            <div class="flex gap-3">
-              <button
-                v-for="color in colorOptions"
-                :key="color"
-                @click="selectedColor = color"
-                type="button"
-                class="w-8 h-8 rounded-full active:scale-90 flex items-center justify-center transition-all relative"
-                :style="{ backgroundColor: color }"
-              >
-                <Check
-                  v-if="selectedColor === color"
-                  class="text-white w-4 h-4"
-                />
-              </button>
-            </div>
-            <p class="text-[11px] text-gray-500 dark:text-[#9EB2CD]">
-              Esta cor será usada para identificar seus itens e notas.
-            </p>
-          </div>
+          <BaseInput
+            v-model="username"
+            label="Nome usuário"
+            placeholder="Digite o seu nome de usuário"
+            :icon="AtSign"
+          />
+
+          <ColorPicker
+            v-model="selectedColor"
+            :options="colorOptions"
+            label="Cor de identificação"
+            description="Esta cor será usada para identificar suas notas."
+          />
 
           <BaseButton
             type="submit"
             label="Salvar alterações"
             variant="primary"
             size="lg"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || !hasChanges"
             block
           >
             <template #icon>

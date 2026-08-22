@@ -19,7 +19,7 @@ const { handleCloseClick } = useModalHistory(isModalOpen, () =>
 );
 
 async function handleNotificationClick(notification) {
-  if (!notification.isRead) {
+  if (!notification.is_read) {
     await notificationsStore.markAsRead(notification.id);
   }
 

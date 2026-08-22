@@ -10,8 +10,8 @@ import { useSavedMoviesStore } from "./stores/savedMovies.js";
 import Header from "./components/layout/Header.vue";
 import NavigationBar from "./components/layout/NavigationBar.vue";
 import MovieModal from "./components/movies/modal/MovieModal.vue";
-import GroupListModal from "./components/groups/GroupListModal.vue";
 import ProfileModal from "./components/profile/ProfileModal.vue";
+import GroupsModal from "./components/groups/GroupsModal.vue";
 import NotificationsModal from "./components/notifications/NotificationsModal.vue";
 import ToastContainer from "./components/ui/ToastContainer.vue";
 
@@ -66,7 +66,7 @@ watch(
     :movie="movieDetailsStore.selectedMovie"
     @close="movieDetailsStore.closeMovie"
   />
-  <GroupListModal :groups="groupsStore.groups" />
+  <GroupsModal :groups="groupsStore.groups" />
   <ProfileModal />
   <NotificationsModal />
   <ToastContainer />

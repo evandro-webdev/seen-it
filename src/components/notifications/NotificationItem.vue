@@ -32,14 +32,14 @@ const actionDescription =
   <div
     class="relative px-3 py-4 rounded-xl border flex justify-between items-center transition-all duration-300 cursor-pointer"
     :class="[
-      !notification.isRead
+      !notification.is_read
         ? 'border-blue-100 dark:border-[#2b3a55] bg-blue-50/30 dark:bg-[#1e2638] shadow-sm'
         : 'border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]',
     ]"
   >
     <div
       class="flex items-start gap-3 transition-opacity duration-300 min-w-0 w-full"
-      :class="notification.isRead ? 'opacity-65' : 'opacity-100'"
+      :class="notification.is_read ? 'opacity-65' : 'opacity-100'"
     >
       <img
         :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${notification.sender_id}.jpg`"
@@ -53,7 +53,7 @@ const actionDescription =
           <span
             class="font-semibold"
             :class="
-              !notification.isRead
+              !notification.is_read
                 ? 'text-gray-900 dark:text-white'
                 : 'text-gray-700 dark:text-gray-300'
             "
@@ -73,7 +73,7 @@ const actionDescription =
             {{ formatRelativeTime(notification.created_at) }}
           </span>
           <span
-            v-if="!notification.isRead"
+            v-if="!notification.is_read"
             class="text-[10px] font-bold text-[#0088FF] dark:text-[#38a3ff] uppercase tracking-wider"
           >
             • Nova
@@ -85,7 +85,7 @@ const actionDescription =
     <ChevronRight
       class="w-5 h-5 transition-opacity shrink-0 ml-2"
       :class="
-        notification.isRead
+        notification.is_read
           ? 'text-gray-300 dark:text-[#242C3C] opacity-50'
           : 'text-gray-400 dark:text-[#A4ADC5]'
       "

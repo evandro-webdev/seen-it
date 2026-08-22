@@ -5,17 +5,15 @@ import { useToastStore } from "@/stores/toast.js";
 
 import {
   ArrowLeft,
-  AtSign,
-  Check,
   Loader2,
-  Plus,
   Popcorn,
-  UsersRound,
-  X,
+  UsersRound
 } from "@lucide/vue";
 
 import BaseButton from "../ui/BaseButton.vue";
 import BaseInput from "../forms/BaseInput.vue";
+import ColorPicker from "../forms/ColorPicker.vue";
+import UserPicker from "../forms/users/UserPicker.vue";
 
 const emit = defineEmits(["closeForm"]);
 const groupsStore = useGroupsStore();
@@ -59,18 +57,6 @@ watch(searchQuery, async (newQuery) => {
   }
 });
 
-function selectUser(user) {
-  if (!members.value.some((m) => m.uid === user.uid)) {
-    members.value.push(user);
-  }
-  searchQuery.value = "";
-  searchResults.value = [];
-}
-
-function removeMember(uid) {
-  members.value = members.value.filter((item) => item.uid !== uid);
-}
-
 async function handleCreateGroup() {
   if (!groupName.value.trim()) return;
 
@@ -103,119 +89,27 @@ async function handleCreateGroup() {
 <template>
   <form
     @submit.prevent="handleCreateGroup"
-    class="space-y-5"
+    class="space-y-4"
   >
     <BaseInput
-      v-model="searchQuery"
+      v-model="groupName"
       label="Nome do grupo"
       placeholder="Digite o nome do grupo"
       :icon="Popcorn"
     />
 
-    <div class="relative">
-      <BaseInput
-        v-model="searchQuery"
-        label="Participantes"
-        placeholder="Nome de usuário participante"
-        :icon="AtSign"
-      />
+    <UserPicker
+      v-model="members"
+      v-model:search-query="searchQuery"
+      :search-results="searchResults"
+      @select-user="searchQuery = ''"
+    />
 
-      <div
-        v-if="searchResults.length > 0"
-        class="absolute z-20 left-0 right-0 max-h-56 mt-2 rounded-2xl border border-gray-200 dark:border-[#242C3C] bg-white dark:bg-[#181f2f] shadow-xl overflow-y-auto divide-y divide-gray-100 dark:divide-slate-800"
-      >
-        <button
-          v-for="user in searchResults"
-          :key="user.uid"
-          type="button"
-          @click="selectUser(user)"
-          class="w-full p-3 text-left transition-colors flex items-center justify-between"
-        >
-          <div class="flex items-center gap-3">
-            <div
-              class="w-9 h-9 rounded-full text-sm font-medium text-white flex items-center justify-center overflow-hidden"
-              :style="{ backgroundColor: user.color || '#1D4776' }"
-            >
-              <img
-                v-if="user.avatar_url"
-                :src="user.avatar_url"
-                :alt="user.name"
-                class="w-full h-full object-cover"
-              />
-              <span v-else>{{ user.name?.[0]?.toUpperCase() }}</span>
-            </div>
-
-            <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ user.name }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                @{{ user.username }}
-              </p>
-            </div>
-          </div>
-
-          <Plus class="w-5 h-5 text-gray-400" />
-        </button>
-      </div>
-
-      <div
-        v-if="members.length"
-        class="mt-3 flex flex-wrap gap-2"
-      >
-        <span
-          v-for="member in members"
-          :key="member.uid"
-          class="py-1.5 pl-2 pr-3 rounded-xl text-sm border border-gray-200 dark:border-transparent text-gray-700 dark:text-white bg-gray-100 dark:bg-[#242C3C] flex items-center gap-2"
-        >
-          <div
-            class="w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center overflow-hidden"
-            :style="{ backgroundColor: member.color || '#1D4776' }"
-          >
-            <img
-              v-if="member.avatar_url"
-              :src="member.avatar_url"
-              class="w-full h-full object-cover"
-            />
-            <span v-else>{{ member.name?.[0]?.toUpperCase() }}</span>
-          </div>
-
-          <span class="font-medium">{{ member.name }}</span>
-          <span class="text-xs text-gray-400">(@{{ member.username }})</span>
-
-          <button
-            type="button"
-            @click="removeMember(member.uid)"
-            class="transition-colors ml-1"
-          >
-            <X class="w-4 h-4" />
-          </button>
-        </span>
-      </div>
-    </div>
-
-    <div class="space-y-2.5">
-      <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 block select-none">
-        Escolha a cor do grupo:
-      </label>
-      <div class="flex gap-2">
-        <button
-          v-for="(color, index) in colorOptions"
-          @click="selectedColor = color"
-          :key="index"
-          type="button"
-          class="w-8 h-8 rounded-full active:scale-95 flex items-center justify-center transition-transform"
-          :style="{
-            backgroundImage: `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
-          }"
-        >
-          <Check
-            v-if="selectedColor.primary === color.primary"
-            class="text-white w-4 h-4"
-          />
-        </button>
-      </div>
-    </div>
+    <ColorPicker
+      v-model="selectedColor"
+      :options="colorOptions"
+      label="Escolha a cor do grupo:"
+    />
 
     <div class="flex gap-2 pt-2">
       <BaseButton

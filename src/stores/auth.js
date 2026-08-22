@@ -22,26 +22,13 @@ export const useAuthStore = defineStore("auth", () => {
   onAuthStateChanged(auth, async (firebaseUser) => {
     try {
       if (firebaseUser) {
-        let currentDisplayName = firebaseUser.displayName || "";
-        const firstName = getFirstName(currentDisplayName);
-
-        // remover em breve
-        if (currentDisplayName.includes(" ")) {
-          await updateProfile(firebaseUser, { displayName: firstName });
-          currentDisplayName = firstName;
-
-          await updateDoc(doc(db, "users", firebaseUser.uid), {
-            name: firstName,
-          });
-        }
-
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const docSnap = await getDoc(userDocRef);
         const userData = docSnap.exists() ? docSnap.data() : {};
 
         user.value = {
           uid: firebaseUser.uid,
-          displayName: currentDisplayName,
+          displayName: firebaseUser.displayName || "",
           email: firebaseUser.email,
           username: userData.username,
           color: userData.color || "#1D4776",

@@ -62,10 +62,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
         isLoading.value = false;
       },
       (error) => {
-        console.error(
-          "Erro ao buscar filmes:",
-          error,
-        );
+        console.error("Erro ao buscar filmes:", error);
         isLoading.value = false;
       },
     );
@@ -85,6 +82,49 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     { immediate: true },
   );
 
+  function calculateAverageRating(reviews) {
+    const ratings = Object.values(reviews).map((r) => Number(r.rating));
+    if (ratings.length === 0) return "0.0";
+    return (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
+  }
+
+  function formatNewMoviePayload(
+    movie,
+    currentUserId,
+    userReview,
+    activeGroupId,
+  ) {
+    const cast =
+      movie.credits?.cast?.slice(0, 15).map((actor) => ({
+        id: actor.id,
+        name: actor.name,
+      })) || [];
+
+    const directorObj = movie.credits?.crew?.find((m) => m.job === "Director");
+    const director = directorObj
+      ? { id: directorObj.id, name: directorObj.name }
+      : null;
+
+    const movieData = {
+      id: movie.id,
+      title: movie.title,
+      original_title: movie.original_title || "",
+      poster_path: movie.poster_path || "",
+      reviews: { [currentUserId]: userReview },
+      average_rating: Number(userReview.rating).toFixed(1),
+      release_date: movie.release_date || "",
+      cast,
+      director,
+      created_at: new Date(),
+    };
+
+    if (activeGroupId) {
+      movieData.saved_by = movie.saved_by || currentUserId;
+    }
+
+    return movieData;
+  }
+
   async function saveWatchedMovie(movie, review) {
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) return null;
@@ -101,10 +141,6 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     };
 
     let finalReviews = {};
-    let average_rating = "0";
-    let cast = [];
-    let director = null;
-    let savedBy = currentUserId;
     let isNewMovieInGroup = false;
 
     await runTransaction(db, async (transaction) => {
@@ -117,55 +153,22 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
           [currentUserId]: newUserReview,
         };
 
-        const ratings = Object.values(finalReviews).map((r) =>
-          Number(r.rating),
-        );
-        average_rating = (
-          ratings.reduce((a, b) => a + b, 0) / ratings.length
-        ).toFixed(1);
-
         transaction.update(movieDocRef, {
           [`reviews.${currentUserId}`]: newUserReview,
-          average_rating,
+          average_rating: calculateAverageRating(finalReviews),
           updated_at: new Date(),
         });
       } else {
         isNewMovieInGroup = true;
-        finalReviews = { [currentUserId]: newUserReview };
-        average_rating = Number(review.rating).toFixed(1);
 
-        cast =
-          movie.credits?.cast?.slice(0, 15).map((actor) => ({
-            id: actor.id,
-            name: actor.name,
-          })) || [];
-
-        const crewList = movie.credits?.crew || [];
-        const directorObj = crewList.find(
-          (member) => member.job === "Director",
+        const newMovieData = formatNewMoviePayload(
+          movie,
+          currentUserId,
+          newUserReview,
+          groupsStore.activeGroup?.id,
         );
-        director = directorObj
-          ? { id: directorObj.id, name: directorObj.name }
-          : null;
 
-        const movieData = {
-          id: movie.id,
-          title: movie.title,
-          original_title: movie.original_title || "",
-          poster_path: movie.poster_path || "",
-          reviews: finalReviews,
-          average_rating,
-          release_date: movie.release_date || "",
-          cast,
-          director,
-          created_at: new Date(),
-        };
-
-        if (groupsStore.activeGroup) {
-          movieData.saved_by = movie.saved_by || currentUserId;
-        }
-
-        transaction.set(movieDocRef, movieData);
+        transaction.set(movieDocRef, newMovieData);
       }
 
       if (groupsStore.activeGroup && isNewMovieInGroup) {
@@ -176,10 +179,7 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
       }
     });
 
-    if (groupsStore.activeGroup && isNewMovieInGroup) {
-      // todo: remover em breve quando adionar onSnapshot na listagem de grupos
-      groupsStore.activeGroup.total_watched =
-        (groupsStore.activeGroup.total_watched || 0) + 1;
+    if (groupsStore.activeGroup) {
       await notificationsStore.dispatchWatchedMovieNotification(movie);
     }
 
@@ -217,17 +217,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
         }
         transaction.delete(movieDocRef);
       } else {
-        const ratings = Object.values(updatedReviews).map((r) =>
-          Number(r.rating),
-        );
-
-        const newAverage = (
-          ratings.reduce((a, b) => a + b, 0) / ratings.length
-        ).toFixed(1);
-
         transaction.update(movieDocRef, {
           reviews: updatedReviews,
-          average_rating: newAverage,
+          average_rating: calculateAverageRating(updatedReviews),
           updated_at: new Date(),
         });
       }
@@ -251,10 +243,10 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
 
   return {
     watchedMovies,
+    isLoading,
     setupWatchedMoviesListener,
     saveWatchedMovie,
     removeMyRating,
     isAlreadyWatched,
-    isLoading,
   };
 });
