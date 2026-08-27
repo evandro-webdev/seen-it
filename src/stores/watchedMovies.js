@@ -14,7 +14,7 @@ import {
 } from "@/services/firebase.js";
 import { useNotificationsStore } from "./notifications.js";
 
-export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
+export const useWatchedMoviesStore = defineStore("watched_movies", () => {
   const watchedMovies = ref([]);
   const watchedMoviesIds = ref([]);
   const isLoading = ref(false);
@@ -29,9 +29,9 @@ export const useWatchedMoviesStore = defineStore("watchedMovies", () => {
     const activeGroup = groupsStore.activeGroup;
     if (!activeGroup) {
       if (!authStore.user?.uid) return null;
-      return `users/${authStore.user.uid}/watchedMovies`;
+      return `users/${authStore.user.uid}/watched_movies`;
     }
-    return `groups/${activeGroup.id}/watchedMovies`;
+    return `groups/${activeGroup.id}/watched_movies`;
   }
 
   function setupWatchedMoviesListener() {

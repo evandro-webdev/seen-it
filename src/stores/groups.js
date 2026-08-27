@@ -20,6 +20,7 @@ import {
 import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
 import { slugifyUsername } from "@/utils/username";
+import { createGroupSchema } from "@/schemas/group.schema";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
@@ -128,10 +129,20 @@ export const useGroupsStore = defineStore("groups", () => {
     }
   }
 
-  async function createGroup({ groupName, invitedMembersIds = [], color }) {
+  async function createGroup(payload) {
     const currentUserId = authStore.user.uid;
 
-    if (!currentUserId) return;
+    if (!currentUserId) {
+      throw new Error("Você precisa estar autenticado para criar um grupo.");
+    }
+
+    const parseResult = createGroupSchema.safeParse(payload);
+
+    if (!parseResult.success) {
+      throw new Error("Dados inválidos. Tente novamente.");
+    }
+
+    const { groupName, invitedMembersIds, color } = parseResult.data;
 
     const allMembersIds = Array.from(
       new Set([currentUserId, ...invitedMembersIds]),
@@ -215,8 +226,8 @@ export const useGroupsStore = defineStore("groups", () => {
 
     const batch = writeBatch(db);
 
-    const savedMoviesRef = collection(db, `groups/${groupId}/savedMovies`);
-    const watchedMoviesRef = collection(db, `groups/${groupId}/watchedMovies`);
+    const savedMoviesRef = collection(db, `groups/${groupId}/saved_movies`);
+    const watchedMoviesRef = collection(db, `groups/${groupId}/watched_movies`);
     const groupNotificationsQuery = query(
       collection(db, "notifications"),
       where("group_id", "==", groupId),

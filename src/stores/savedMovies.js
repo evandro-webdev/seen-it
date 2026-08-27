@@ -28,9 +28,9 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     const activeGroup = groupsStore.activeGroup;
     if (!activeGroup) {
       if (!authStore.user?.uid) return null;
-      return `users/${authStore.user.uid}/savedMovies`;
+      return `users/${authStore.user.uid}/saved_movies`;
     }
-    return `groups/${activeGroup.id}/savedMovies`;
+    return `groups/${activeGroup.id}/saved_movies`;
   }
 
   async function setupSavedMoviesListener() {
