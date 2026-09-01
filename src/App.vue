@@ -40,8 +40,7 @@ watch(
       groupsStore.groups = [];
       notificationsStore.stopListening();
     }
-  },
-  { immediate: true },
+  }
 );
 
 </script>
