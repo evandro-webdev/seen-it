@@ -101,13 +101,13 @@ export const useAuthStore = defineStore("auth", () => {
           });
         }
 
-        const currentExternalId = OneSignal.User.externalId;
-
-        if (currentExternalId !== user.value.uid) {
-          if (currentExternalId) {
-            await OneSignal.logout();
-          }
+        try {
           await OneSignal.login(user.value.uid);
+        } catch (loginError) {
+          console.warn(
+            "Sessão do OneSignal já vinculada ou em conflito:",
+            loginError,
+          );
         }
 
         await OneSignal.Notifications.requestPermission();
@@ -126,9 +126,7 @@ export const useAuthStore = defineStore("auth", () => {
     await new Promise((resolve) => {
       window.OneSignalDeferred.push(async function (OneSignal) {
         try {
-          if (OneSignal.User.externalId) {
-            await OneSignal.logout();
-          }
+          await OneSignal.logout();
         } catch (e) {
           console.warn("Aviso ignorado ao deslogar do OneSignal:", e);
         } finally {
