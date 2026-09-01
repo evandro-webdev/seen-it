@@ -99,7 +99,15 @@ export const useAuthStore = defineStore("auth", () => {
           serviceWorkerPath: "OneSignalSDKWorker.js",
         });
 
-        await OneSignal.login(user.value.uid);
+        const currentExternalId = OneSignal.User.externalId;
+
+        if (currentExternalId !== user.value.uid) {
+          if (currentExternalId) {
+            await OneSignal.logout();
+          }
+          await OneSignal.login(user.value.uid);
+        }
+
         await OneSignal.Notifications.requestPermission();
       });
     } catch (error) {
@@ -111,13 +119,21 @@ export const useAuthStore = defineStore("auth", () => {
     const groupsStore = useGroupsStore();
     groupsStore.clearActiveGroup();
 
-    if (window.OneSignal) {
-      try {
-        await window.OneSignal.logout();
-      } catch (e) {
-        console.warn("Erro ao deslogar do OneSignal:", e);
-      }
-    }
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+    await new Promise((resolve) => {
+      window.OneSignalDeferred.push(async function (OneSignal) {
+        try {
+          if (OneSignal.User.externalId) {
+            await OneSignal.logout();
+          }
+        } catch (e) {
+          console.warn("Aviso ignorado ao deslogar do OneSignal:", e);
+        } finally {
+          resolve();
+        }
+      });
+    });
 
     await signOut(auth);
     user.value = null;
