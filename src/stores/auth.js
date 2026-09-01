@@ -11,6 +11,7 @@ import {
 
 import { useGroupsStore } from "./groups";
 import { generateUniqueUsername } from "@/utils/username";
+import { initOneSignal, logoutOneSignal } from "@/services/onesignal";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -89,31 +90,16 @@ export const useAuthStore = defineStore("auth", () => {
     if (!user.value?.uid) return;
 
     try {
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      await initOneSignal();
 
-      window.OneSignalDeferred.push(async function (OneSignal) {
-        if (!OneSignal.initialized) {
-          await OneSignal.init({
-            appId: import.meta.env.VITE_ONESIGNAL_API_KEY,
-            allowLocalhostAsSecureOrigin: true,
-            serviceWorkerParam: { scope: "/" },
-            serviceWorkerPath: "OneSignalSDKWorker.js",
-          });
-        }
-
+      window.OneSignalDeferred.push(async (OneSignal) => {
         try {
           await OneSignal.login(user.value.uid);
-        } catch (loginError) {
-          console.warn(
-            "Sessão do OneSignal já vinculada ou em conflito:",
-            loginError,
-          );
-        }
-
+        } catch (e) {}
         await OneSignal.Notifications.requestPermission();
       });
     } catch (error) {
-      console.error("Erro ao inicializar OneSignal:", error);
+      console.error("Erro ao configurar notificações:", error);
     }
   }
 
@@ -121,21 +107,7 @@ export const useAuthStore = defineStore("auth", () => {
     const groupsStore = useGroupsStore();
     groupsStore.clearActiveGroup();
 
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-    await new Promise((resolve) => {
-      window.OneSignalDeferred.push(async function (OneSignal) {
-        try {
-          if (OneSignal.User && OneSignal.User.externalId) {
-            await OneSignal.logout();
-          }
-        } catch (e) {
-          console.warn("Aviso ignorado ao deslogar do OneSignal:", e);
-        } finally {
-          resolve();
-        }
-      });
-    });
+    await logoutOneSignal();
 
     await signOut(auth);
     user.value = null;
