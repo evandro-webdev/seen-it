@@ -92,12 +92,14 @@ export const useAuthStore = defineStore("auth", () => {
       window.OneSignalDeferred = window.OneSignalDeferred || [];
 
       window.OneSignalDeferred.push(async function (OneSignal) {
-        await OneSignal.init({
-          appId: import.meta.env.VITE_ONESIGNAL_API_KEY,
-          allowLocalhostAsSecureOrigin: true,
-          serviceWorkerParam: { scope: "/" },
-          serviceWorkerPath: "OneSignalSDKWorker.js",
-        });
+        if (!OneSignal.initialized) {
+          await OneSignal.init({
+            appId: import.meta.env.VITE_ONESIGNAL_API_KEY,
+            allowLocalhostAsSecureOrigin: true,
+            serviceWorkerParam: { scope: "/" },
+            serviceWorkerPath: "OneSignalSDKWorker.js",
+          });
+        }
 
         const currentExternalId = OneSignal.User.externalId;
 
