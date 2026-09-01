@@ -126,7 +126,9 @@ export const useAuthStore = defineStore("auth", () => {
     await new Promise((resolve) => {
       window.OneSignalDeferred.push(async function (OneSignal) {
         try {
-          await OneSignal.logout();
+          if (OneSignal.User && OneSignal.User.externalId) {
+            await OneSignal.logout();
+          }
         } catch (e) {
           console.warn("Aviso ignorado ao deslogar do OneSignal:", e);
         } finally {
