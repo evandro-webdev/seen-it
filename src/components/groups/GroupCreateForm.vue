@@ -43,8 +43,12 @@ const { handleSubmit, resetForm } = useForm({
   },
 });
 
-const { value: groupName, errorMessage: groupNameError } =
-  useField("groupName");
+const {
+  value: groupName,
+  errorMessage: groupNameError,
+  meta: groupNameMeta,
+} = useField("groupName");
+
 const { value: members, errorMessage: membersError } =
   useField("invitedMembers");
 const { value: selectedColor } = useField("color");
@@ -106,7 +110,7 @@ const onSubmit = handleSubmit(async (values) => {
       label="Nome do grupo"
       placeholder="Digite o nome do grupo"
       :icon="Popcorn"
-      :error="groupNameError"
+      :error="groupNameMeta.touched ? groupNameError : ''"
     />
 
     <div>

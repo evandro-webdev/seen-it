@@ -36,6 +36,9 @@ const currentSchema = computed(() => {
 
 const { handleSubmit, resetForm } = useForm({
   validationSchema: currentSchema,
+  validateOnInput: false,
+  validateOnBlur: false,
+  validateOnChange: false,
   initialValues: {
     name: "",
     email: "",
@@ -43,9 +46,9 @@ const { handleSubmit, resetForm } = useForm({
   },
 });
 
-const { value: name, errorMessage: nameError } = useField("name");
-const { value: email, errorMessage: emailError } = useField("email");
-const { value: password, errorMessage: passwordError } = useField("password");
+const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
+const { value: email, errorMessage: emailError, meta: emailMeta } = useField("email");
+const { value: password, errorMessage: passwordError, meta: passwordMeta } = useField("password");
 
 function toggleForm() {
   currentForm.value = currentForm.value === "login" ? "register" : "login";
@@ -68,6 +71,7 @@ const onSubmit = handleSubmit(async (values) => {
       toastStore.success("Login realizado com sucesso!");
     }
   } catch (error) {
+    serverError.value = error.message || "Erro ao autenticar. Tente novamente.";
     console.error("Erro na autenticação: ", error);
 
     const firebaseErrors = {
@@ -111,7 +115,7 @@ const onSubmit = handleSubmit(async (values) => {
             label="Nome"
             placeholder="Digite seu nome"
             :icon="User"
-            :error="nameError"
+            :error="nameMeta.touched ? nameError : ''"
           />
 
           <BaseInput
@@ -120,7 +124,7 @@ const onSubmit = handleSubmit(async (values) => {
             label="Email"
             placeholder="Digite seu email"
             :icon="AtSign"
-            :error="emailError"
+            :error="emailMeta.touched ? emailError : ''"
           />
 
           <BaseInput
@@ -129,7 +133,7 @@ const onSubmit = handleSubmit(async (values) => {
             label="Senha"
             placeholder="Senha"
             :icon="Asterisk"
-            :error="passwordError"
+            :error="passwordMeta.touched ? passwordError : ''"
           />
         </div>
 
