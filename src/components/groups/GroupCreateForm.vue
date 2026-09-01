@@ -21,6 +21,7 @@ const toastStore = useToastStore();
 const searchQuery = ref("");
 const searchResults = ref([]);
 const isSearching = ref(false);
+const isSubmitting = ref(false);
 
 const colorOptions = [
   { primary: "#205FE2", secondary: "#29A4FF" },
@@ -30,15 +31,15 @@ const colorOptions = [
   { primary: "#FA7F39", secondary: "#F69F40" },
   { primary: "#613FE5", secondary: "#855CF4" },
 ];
-const selectedColor = ref(colorOptions[0]);
 
 const serverError = ref("");
 
-const { handleSubmit, isSubmitting, resetForm } = useForm({
+const { handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(createGroupSchema),
   initialValues: {
     groupName: "",
     invitedMembers: [],
+    color: colorOptions[0],
   },
 });
 
@@ -46,6 +47,7 @@ const { value: groupName, errorMessage: groupNameError } =
   useField("groupName");
 const { value: members, errorMessage: membersError } =
   useField("invitedMembers");
+const { value: selectedColor } = useField("color");
 
 watch(searchQuery, async (newQuery) => {
   const cleanQuery = newQuery.trim();
@@ -70,12 +72,13 @@ watch(searchQuery, async (newQuery) => {
 
 const onSubmit = handleSubmit(async (values) => {
   serverError.value = "";
+  isSubmitting.value = true;
 
   try {
     await groupsStore.createGroup({
-      groupName: groupName.value,
-      invitedMembersIds: members.value.map((m) => m.uid),
-      color: selectedColor.value,
+      groupName: values.groupName,
+      invitedMembers: values.invitedMembers,
+      color: values.color,
     });
 
     const createdGroupName = values.groupName;
@@ -87,6 +90,8 @@ const onSubmit = handleSubmit(async (values) => {
   } catch (error) {
     serverError.value = error.message || "Erro ao criar o grupo.";
     console.error("Erro ao criar grupo:", error.message);
+  } finally {
+    isSubmitting.value = false;
   }
 });
 </script>
@@ -127,7 +132,7 @@ const onSubmit = handleSubmit(async (values) => {
 
     <div
       v-if="serverError"
-      class="p-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded"
+      class="p-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg"
     >
       {{ serverError }}
     </div>

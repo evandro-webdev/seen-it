@@ -1,20 +1,23 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth.js";
-import { Asterisk, AtSign, Loader2, LogIn, User } from "@lucide/vue";
 import { useToastStore } from "@/stores/toast";
+
+import { useForm, useField } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import { loginSchema, registerSchema } from "@/schemas/auth.schema.js";
+
+import { Asterisk, AtSign, Loader2, LogIn, User } from "@lucide/vue";
 import BaseInput from "../forms/BaseInput.vue";
 import BaseButton from "../ui/BaseButton.vue";
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 
-const name = ref("");
-const email = ref("");
-const password = ref("");
-
 const currentForm = ref("login");
-const isSubmiting = ref(false);
+const isSubmitting = ref(false);
+
+const serverError = ref("");
 
 const formTexts = computed(() => {
   return currentForm.value === "register"
@@ -25,27 +28,43 @@ const formTexts = computed(() => {
       };
 });
 
+const currentSchema = computed(() => {
+  return currentForm === "register"
+    ? toTypedSchema(registerSchema)
+    : toTypedSchema(loginSchema);
+});
+
+const { handleSubmit, resetForm } = useForm({
+  validationSchema: currentSchema,
+  initialValues: {
+    name: "",
+    email: "",
+    password: "",
+  },
+});
+
+const { value: name, errorMessage: nameError } = useField("name");
+const { value: email, errorMessage: emailError } = useField("email");
+const { value: password, errorMessage: passwordError } = useField("password");
+
 function toggleForm() {
   currentForm.value = currentForm.value === "login" ? "register" : "login";
-
-  name.value = "";
-  email.value = "";
-  password.value = "";
+  resetForm();
 }
 
-async function handleAuthentication() {
-  if (isSubmiting.value) return;
+const onSubmit = handleSubmit(async (values) => {
+  serverError.value = "";
 
-  isSubmiting.value = true;
+  isSubmitting.value = true;
 
   try {
     if (currentForm.value === "register") {
-      await authStore.register(email.value, password.value, name.value);
+      await authStore.register(values.email, values.password, values.name);
       toastStore.success(
-        `Conta criada com sucesso! Bem-vindo, ${name.value.split(" ")[0]}!`,
+        `Conta criada com sucesso! Bem-vindo, ${values.name.split(" ")[0]}!`,
       );
     } else {
-      await authStore.login(email.value, password.value);
+      await authStore.login(values.email, values.password);
       toastStore.success("Login realizado com sucesso!");
     }
   } catch (error) {
@@ -65,9 +84,9 @@ async function handleAuthentication() {
 
     toastStore.error(message);
   } finally {
-    isSubmiting.value = false;
+    isSubmitting.value = false;
   }
-}
+});
 </script>
 
 <template>
@@ -85,7 +104,7 @@ async function handleAuthentication() {
       </div>
 
       <form
-        @submit.prevent="handleAuthentication"
+        @submit.prevent="onSubmit"
         class="space-y-5"
       >
         <div class="space-y-3.5">
@@ -95,6 +114,7 @@ async function handleAuthentication() {
             label="Nome"
             placeholder="Digite seu nome"
             :icon="User"
+            :error="nameError"
           />
 
           <BaseInput
@@ -103,6 +123,7 @@ async function handleAuthentication() {
             label="Email"
             placeholder="Digite seu email"
             :icon="AtSign"
+            :error="emailError"
           />
 
           <BaseInput
@@ -111,6 +132,7 @@ async function handleAuthentication() {
             label="Senha"
             placeholder="Senha"
             :icon="Asterisk"
+            :error="passwordError"
           />
         </div>
 
@@ -134,12 +156,12 @@ async function handleAuthentication() {
           size="lg"
           :label="currentForm === 'register' ? 'Criar conta' : 'Entrar'"
           :icon="LogIn"
-          :disabled="isSubmiting"
+          :disabled="isSubmitting"
           block
         >
           <template #icon>
             <Loader2
-              v-if="isSubmiting"
+              v-if="isSubmitting"
               class="w-5 h-5 animate-spin"
             />
             <LogIn

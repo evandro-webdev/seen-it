@@ -130,7 +130,7 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function createGroup(payload) {
-    const currentUserId = authStore.user.uid;
+    const currentUserId = authStore.user?.uid;
 
     if (!currentUserId) {
       throw new Error("Você precisa estar autenticado para criar um grupo.");
@@ -142,7 +142,9 @@ export const useGroupsStore = defineStore("groups", () => {
       throw new Error("Dados inválidos. Tente novamente.");
     }
 
-    const { groupName, invitedMembersIds, color } = parseResult.data;
+    const { groupName, invitedMembers, color } = parseResult.data;
+
+    const invitedMembersIds = invitedMembers.map((m) => m.uid)
 
     const allMembersIds = Array.from(
       new Set([currentUserId, ...invitedMembersIds]),

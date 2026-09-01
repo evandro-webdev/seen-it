@@ -7,7 +7,7 @@ export const createGroupSchema = z.object({
     .min(3, "O nome do grupo deve ter pelo menos 3 caracteres.")
     .max(30, "O nome do grupo deve ter no máximo 30 caracteres."),
   invitedMembers: z
-    .array(z.string)
+    .array(z.object({ uid: z.string() }))
     .min(1, "Adicione pelo menos 1 membro ao grupo.")
     .max(5, "O grupo só pode ter no máximo 5 pessoas (incluindo você)"),
   color: z.object({
