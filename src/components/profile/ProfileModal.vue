@@ -160,7 +160,7 @@ function unlockScroll() {
 
           <BaseInput
             v-model="username"
-            label="Nome usuário"
+            label="Nome de usuário"
             placeholder="Digite o seu nome de usuário"
             :icon="AtSign"
           />

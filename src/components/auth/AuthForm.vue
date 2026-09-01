@@ -29,7 +29,7 @@ const formTexts = computed(() => {
 });
 
 const currentSchema = computed(() => {
-  return currentForm === "register"
+  return currentForm.value === "register"
     ? toTypedSchema(registerSchema)
     : toTypedSchema(loginSchema);
 });
@@ -70,18 +70,15 @@ const onSubmit = handleSubmit(async (values) => {
   } catch (error) {
     console.error("Erro na autenticação: ", error);
 
-    let message = "Erro ao autenticar. Tente novamente.";
-    if (
-      error.code === "auth/invalid-credential" ||
-      error.code === "auth/user-not-found"
-    ) {
-      message = "E-mail ou senha incorretos.";
-    } else if (error.code === "auth/email-already-in-use") {
-      message = "Este e-mail já está em uso.";
-    } else if (error.code === "auth/weak-password") {
-      message = "A senha deve ter pelo menos 6 caracteres.";
-    }
+    const firebaseErrors = {
+      "auth/invalid-credential": "E-mail ou senha incorretos.",
+      "auth/user-not-found": "E-mail ou senha incorretos.",
+      "auth/wrong-password": "E-mail ou senha incorretos.",
+      "auth/email-already-in-use": "Este e-mail já está cadastrado.",
+    };
 
+    const message =
+      firebaseErrors[error.code] || "Erro ao autenticar. Tente novamente.";
     toastStore.error(message);
   } finally {
     isSubmitting.value = false;
