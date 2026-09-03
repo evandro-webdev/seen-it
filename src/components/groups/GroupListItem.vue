@@ -4,6 +4,7 @@ import { useGroupsStore } from "@/stores/groups.js";
 import { useToastStore } from "@/stores/toast";
 
 import { Bookmark, Check, Eye, MoreVertical, UsersRound } from "@lucide/vue";
+import { getGroupTheme } from "@/constants/colors";
 
 const props = defineProps({
   group: {
@@ -15,6 +16,10 @@ const props = defineProps({
 const emit = defineEmits(["openDetails"]);
 const groupsStore = useGroupsStore();
 const toastStore = useToastStore();
+
+const groupTheme = computed(() => {
+  return getGroupTheme(props.group.theme);
+});
 
 const isActive = computed(() => groupsStore.activeGroup?.id === props.group.id);
 
@@ -44,7 +49,7 @@ function handleOpenMenu(event) {
       <div
         class="p-3 rounded-2xl shrink-0 flex items-center justify-center text-white"
         :style="{
-          backgroundImage: `linear-gradient(135deg, ${group.color?.primary || '#205FE2'}, ${group.color?.secondary || '#29A4FF'})`,
+          backgroundImage: `linear-gradient(135deg, ${groupTheme.primary}, ${groupTheme.secondary})`,
         }"
       >
         <UsersRound class="w-5 h-5" />
@@ -69,7 +74,7 @@ function handleOpenMenu(event) {
     <div class="flex items-center gap-3 pl-2 shrink-0">
       <div
         class="flex items-center gap-2 text-xs font-semibold"
-        :style="{ color: `${group.color?.secondary || '#29A4FF'}` }"
+        :style="{ color: `${groupTheme.secondary}` }"
       >
         <div
           class="flex items-center gap-1"

@@ -201,7 +201,7 @@ function unlockScroll() {
                 groupsStore.activeGroupMembers[selectedReviewer]?.name
               "
               :comment="activeMovie.reviews[selectedReviewer].comment"
-              :user-color="
+              :color="
                 groupsStore.activeGroupMembers[selectedReviewer]?.color
               "
             />

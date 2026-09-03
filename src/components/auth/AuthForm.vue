@@ -46,9 +46,21 @@ const { handleSubmit, resetForm } = useForm({
   },
 });
 
-const { value: name, errorMessage: nameError, meta: nameMeta } = useField("name");
-const { value: email, errorMessage: emailError, meta: emailMeta } = useField("email");
-const { value: password, errorMessage: passwordError, meta: passwordMeta } = useField("password");
+const {
+  value: name,
+  errorMessage: nameError,
+  meta: nameMeta,
+} = useField("name");
+const {
+  value: email,
+  errorMessage: emailError,
+  meta: emailMeta,
+} = useField("email");
+const {
+  value: password,
+  errorMessage: passwordError,
+  meta: passwordMeta,
+} = useField("password");
 
 function toggleForm() {
   currentForm.value = currentForm.value === "login" ? "register" : "login";
@@ -62,28 +74,37 @@ const onSubmit = handleSubmit(async (values) => {
 
   try {
     if (currentForm.value === "register") {
-      await authStore.register(values.email, values.password, values.name);
+      await authStore.register({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
       toastStore.success(
         `Conta criada com sucesso! Bem-vindo, ${values.name.split(" ")[0]}!`,
       );
     } else {
-      await authStore.login(values.email, values.password);
+      await authStore.login({
+        email: values.email,
+        password: values.password,
+      });
       toastStore.success("Login realizado com sucesso!");
     }
   } catch (error) {
-    serverError.value = error.message || "Erro ao autenticar. Tente novamente.";
-    console.error("Erro na autenticação: ", error);
+    console.error("Erro na autenticação:", error);
 
     const firebaseErrors = {
       "auth/invalid-credential": "E-mail ou senha incorretos.",
       "auth/user-not-found": "E-mail ou senha incorretos.",
       "auth/wrong-password": "E-mail ou senha incorretos.",
       "auth/email-already-in-use": "Este e-mail já está cadastrado.",
+      "auth/weak-password": "A senha deve ter pelo menos 6 caracteres.",
     };
-
     const message =
-      firebaseErrors[error.code] || "Erro ao autenticar. Tente novamente.";
-    toastStore.error(message);
+      firebaseErrors[error.code] ||
+      error.message ||
+      "Erro ao autenticar. Tente novamente.";
+
+    serverError.value = message;
   } finally {
     isSubmitting.value = false;
   }
@@ -135,6 +156,13 @@ const onSubmit = handleSubmit(async (values) => {
             :icon="Asterisk"
             :error="passwordMeta.touched ? passwordError : ''"
           />
+        </div>
+
+        <div
+          v-if="serverError"
+          class="p-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg"
+        >
+          {{ serverError }}
         </div>
 
         <p class="text-xs text-gray-600 dark:text-gray-400 text-center">

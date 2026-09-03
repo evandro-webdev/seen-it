@@ -8,6 +8,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { createGroupSchema } from "@/schemas/group.schema.js";
 
 import { ArrowLeft, Loader2, Popcorn, UsersRound } from "@lucide/vue";
+import { getRandomGroupTheme, GROUP_THEMES } from "@/constants/colors.js";
 
 import BaseButton from "../ui/BaseButton.vue";
 import BaseInput from "../forms/BaseInput.vue";
@@ -22,16 +23,6 @@ const searchQuery = ref("");
 const searchResults = ref([]);
 const isSearching = ref(false);
 const isSubmitting = ref(false);
-
-const colorOptions = [
-  { primary: "#205FE2", secondary: "#29A4FF" },
-  { primary: "#A23BD1", secondary: "#B27AF1" },
-  { primary: "#2CA886", secondary: "#55C06E" },
-  { primary: "#F7516A", secondary: "#FA818D" },
-  { primary: "#FA7F39", secondary: "#F69F40" },
-  { primary: "#613FE5", secondary: "#855CF4" },
-];
-
 const serverError = ref("");
 
 const { handleSubmit, resetForm } = useForm({
@@ -39,7 +30,7 @@ const { handleSubmit, resetForm } = useForm({
   initialValues: {
     groupName: "",
     invitedMembers: [],
-    color: colorOptions[0],
+    theme: getRandomGroupTheme(),
   },
 });
 
@@ -51,7 +42,7 @@ const {
 
 const { value: members, errorMessage: membersError } =
   useField("invitedMembers");
-const { value: selectedColor } = useField("color");
+const { value: selectedTheme, errorMessage: themeError } = useField("theme");
 
 watch(searchQuery, async (newQuery) => {
   const cleanQuery = newQuery.trim();
@@ -74,18 +65,16 @@ watch(searchQuery, async (newQuery) => {
   }
 });
 
-const onSubmit = handleSubmit(async (values) => {
+const onSubmit = handleSubmit(async (formValues) => {
+  if (isSubmitting.value) return;
+
   serverError.value = "";
   isSubmitting.value = true;
 
   try {
-    await groupsStore.createGroup({
-      groupName: values.groupName,
-      invitedMembers: values.invitedMembers,
-      color: values.color,
-    });
+    await groupsStore.createGroup(formValues);
 
-    const createdGroupName = values.groupName;
+    const createdGroupName = formValues.groupName;
     resetForm();
     searchQuery.value = "";
 
@@ -128,11 +117,19 @@ const onSubmit = handleSubmit(async (values) => {
       </span>
     </div>
 
-    <ColorPicker
-      v-model="selectedColor"
-      :options="colorOptions"
-      label="Escolha a cor do grupo:"
-    />
+    <div>
+      <ColorPicker
+        v-model="selectedTheme"
+        :color-options="GROUP_THEMES"
+        label="Escolha a cor do grupo:"
+      />
+      <span
+        v-if="themeError"
+        class="text-xs text-red-500 font-medium mt-2 block"
+      >
+        {{ themeError }}
+      </span>
+    </div>
 
     <div
       v-if="serverError"

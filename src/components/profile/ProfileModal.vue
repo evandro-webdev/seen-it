@@ -5,21 +5,19 @@ import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast.js";
 import { onClickOutside } from "@vueuse/core";
 import { useModalHistory } from "@/composables/useModalHistory.js";
+import { USER_COLORS } from "@/constants/colors.js";
 
-import {
-  AtSign,
-  Camera,
-  Check,
-  Loader2,
-  User,
-  UserRoundCheck,
-  X,
-} from "@lucide/vue";
+import { useForm, useField } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import { profileSchema } from "@/schemas/profile.schema.js";
+
+import { AtSign, Loader2, User, UserRoundCheck } from "@lucide/vue";
+
 import BaseButton from "../ui/BaseButton.vue";
-import BaseInput from "../forms/BaseInput.vue";
 import ModalHeader from "../ui/ModalHeader.vue";
-import ProfileAvatar from "./ProfileAvatar.vue";
+import BaseInput from "../forms/BaseInput.vue";
 import ColorPicker from "../forms/ColorPicker.vue";
+import ProfileAvatar from "./ProfileAvatar.vue";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
@@ -28,26 +26,34 @@ const toastStore = useToastStore();
 const isSubmitting = ref(false);
 const profileModalRef = ref(null);
 
-const name = ref("");
-const username = ref("");
-const selectedColor = ref("");
 const avatarPreview = ref(null);
-const selectedFile = ref(null);
 
-const colorOptions = [
-  "#338CD5",
-  "#9367EB",
-  "#D75870",
-  "#55C06E",
-  "#F69F40",
-  "#2DD4BF",
-  "#EC4899",
-];
+const serverError = ref("");
 
 const isModalOpen = computed(() => profileStore.isProfileModalOpen);
 const { handleCloseClick } = useModalHistory(isModalOpen, () =>
   profileStore.closeProfileModal(),
 );
+
+const { handleSubmit, setValues } = useForm({
+  validationSchema: toTypedSchema(profileSchema),
+});
+
+const { value: selectedFile, errorMessage: imageError } = useField("imageFile");
+
+const {
+  value: name,
+  errorMessage: nameError,
+  meta: nameMeta,
+} = useField("name");
+
+const {
+  value: username,
+  errorMessage: usernameError,
+  meta: usernameMeta,
+} = useField("username");
+
+const { value: selectedColor, errorMessage: colorError } = useField("color");
 
 const hasChanges = computed(() => {
   if (!authStore.user) return false;
@@ -61,13 +67,23 @@ const hasChanges = computed(() => {
 });
 
 watch(
-  () => authStore.user,
-  (newUser) => {
-    if (newUser) {
-      name.value = newUser.displayName || "";
-      username.value = newUser.username;
-      selectedColor.value = newUser.color || "";
+  [() => authStore.user, isModalOpen],
+  ([newUser, isOpen]) => {
+    if (newUser && isOpen) {
+      serverError.value = "";
+
+      if (avatarPreview.value && avatarPreview.value.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview.value);
+      }
+
       avatarPreview.value = newUser.avatar_url || null;
+
+      setValues({
+        name: newUser.displayName || "",
+        username: newUser.username || "",
+        color: newUser.color || "",
+        imageFile: null,
+      });
     }
   },
   { immediate: true },
@@ -77,35 +93,33 @@ function handleFileChange(event) {
   const file = event.target.files[0];
 
   if (file) {
+    if (avatarPreview.value && avatarPreview.value.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview.value);
+    }
+
     selectedFile.value = file;
     avatarPreview.value = URL.createObjectURL(file);
   }
 }
 
-async function handleUpdate() {
+const onSubmit = handleSubmit(async (formValues) => {
   if (isSubmitting.value) return;
 
-  try {
-    isSubmitting.value = true;
+  isSubmitting.value = true;
+  serverError.value = "";
 
-    await profileStore.updateProfile({
-      name: name.value,
-      username: username.value,
-      color: selectedColor.value,
-      imageFile: selectedFile.value,
-    });
+  try {
+    await profileStore.updateProfile(formValues);
 
     toastStore.success("Perfil atualizado!");
     profileStore.closeProfileModal();
   } catch (error) {
-    isSubmitting.value = false;
-
+    serverError.value = error.message || "Erro ao atualizar perfil.";
     console.error("Erro ao atualizar perfil:", error);
-    toastStore.error("Falha ao atualizar o perfil.");
   } finally {
     isSubmitting.value = false;
   }
-}
+});
 
 onClickOutside(profileModalRef, () => {
   profileStore.closeProfileModal();
@@ -143,19 +157,28 @@ function unlockScroll() {
         />
 
         <form
-          @submit.prevent="handleUpdate"
+          @submit.prevent="onSubmit"
           class="space-y-4"
         >
-          <ProfileAvatar
-            :avatar-preview="avatarPreview"
-            @file-change="handleFileChange"
-          />
+          <div>
+            <ProfileAvatar
+              :avatar-preview="avatarPreview"
+              @file-change="handleFileChange"
+            />
+            <span
+              v-if="imageError"
+              class="text-center text-xs text-red-500 font-medium mt-2 block"
+            >
+              {{ imageError }}
+            </span>
+          </div>
 
           <BaseInput
             v-model="name"
             label="Nome de exibição"
             placeholder="Digite o seu nome"
             :icon="User"
+            :error="nameMeta.touched ? nameError : ''"
           />
 
           <BaseInput
@@ -163,14 +186,30 @@ function unlockScroll() {
             label="Nome de usuário"
             placeholder="Digite o seu nome de usuário"
             :icon="AtSign"
+            :error="usernameMeta.touched ? usernameError : ''"
           />
 
-          <ColorPicker
-            v-model="selectedColor"
-            :options="colorOptions"
-            label="Cor de identificação"
-            description="Esta cor será usada para identificar suas notas."
-          />
+          <div>
+            <ColorPicker
+              v-model="selectedColor"
+              :color-options="USER_COLORS"
+              label="Cor de identificação"
+              description="Esta cor será usada para identificar suas notas."
+            />
+            <span
+              v-if="colorError"
+              class="text-xs text-red-500 font-medium mt-2 block"
+            >
+              {{ colorError }}
+            </span>
+          </div>
+
+          <div
+            v-if="serverError"
+            class="p-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg"
+          >
+            {{ serverError }}
+          </div>
 
           <BaseButton
             type="submit"

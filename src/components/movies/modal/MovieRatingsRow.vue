@@ -3,6 +3,7 @@ import { UsersRound, Star } from "@lucide/vue";
 import MovieRating from "../ui/MovieRating.vue";
 import { formatRating } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
+import { getRandomUserColor } from "@/constants/colors.js";
 
 const props = defineProps({
   movie: {
@@ -26,7 +27,7 @@ function getReviewerData(uid) {
   if (props.members && props.members[uid]) {
     return {
       name: props.members[uid].name,
-      color: props.members[uid].color || "#338CD5",
+      color: props.members[uid].color,
     };
   }
 
@@ -39,7 +40,7 @@ function getReviewerData(uid) {
 
   return {
     name: "Membro",
-    color: "#338CD5",
+    color: getRandomUserColor(),
   };
 }
 </script>

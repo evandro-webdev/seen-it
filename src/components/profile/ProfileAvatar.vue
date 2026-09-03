@@ -1,14 +1,14 @@
 <script setup>
-import { Camera, User } from '@lucide/vue';
+import { Camera, User } from "@lucide/vue";
 
 defineProps({
   avatarPreview: {
     type: String,
-    default: null
+    default: null,
   },
 });
 
-defineEmits(['file-change'])
+defineEmits(["file-change"]);
 </script>
 
 <template>
@@ -45,7 +45,7 @@ defineEmits(['file-change'])
     <input
       type="file"
       id="avatar"
-      accept="image/*"
+      accept="image/jpeg, image/png, image/webp"
       @change="$emit('file-change', $event)"
       class="hidden"
     />

@@ -4,10 +4,11 @@ import { Star, Quote } from "@lucide/vue";
 import { computed } from "vue";
 
 import { useDarkMode } from "@/composables/useDarkMode";
+import { getUserColor } from "@/constants/colors";
 
 const { isDarkMode } = useDarkMode();
 
-defineProps({
+const props = defineProps({
   uid: {
     type: String,
     required: true,
@@ -35,6 +36,10 @@ const defaultAvatar = computed(() => {
     ? "/img/avatars/default-dark.svg"
     : "/img/avatars/default-light.svg";
 });
+
+const userColor = computed(() => {
+  return getUserColor(props.color);
+});
 </script>
 
 <template>
@@ -44,13 +49,13 @@ const defaultAvatar = computed(() => {
         :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${uid}.jpg`"
         @error="$event.target.src = defaultAvatar"
         class="w-8 h-8 rounded-full border object-cover"
-        :style="{ borderColor: color }"
+        :style="{ borderColor: userColor.primary }"
       />
 
       <div
         v-if="hasComment"
         class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
-        :style="{ backgroundColor: color }"
+        :style="{ backgroundColor: userColor.primary }"
       >
         <Quote
           class="w-2 h-2 text-white"
@@ -63,8 +68,8 @@ const defaultAvatar = computed(() => {
         <Star
           class="w-3.5 h-3.5"
           :style="{
-            color: color,
-            fill: color,
+            color: userColor.primary,
+            fill: userColor.primary,
           }"
         />
         <span class="block text-sm font-bold text-gray-800 dark:text-white">{{
@@ -73,7 +78,7 @@ const defaultAvatar = computed(() => {
       </div>
       <span
         class="text-[10px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-200 block"
-        >{{ name.split(' ')[0] }}</span
+        >{{ name.split(" ")[0] }}</span
       >
     </div>
 

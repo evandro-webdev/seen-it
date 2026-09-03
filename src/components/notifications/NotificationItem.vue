@@ -4,6 +4,7 @@ import { ChevronRight } from "@lucide/vue";
 import { useDarkMode } from "@/composables/useDarkMode";
 import { formatRelativeTime } from "@/utils/formatters";
 import { useGroupsStore } from "@/stores/groups";
+import { getUserColor } from "@/constants/colors";
 
 const { isDarkMode } = useDarkMode();
 
@@ -20,6 +21,12 @@ const defaultAvatar = computed(() => {
   return isDarkMode.value
     ? "/img/avatars/default-dark.svg"
     : "/img/avatars/default-light.svg";
+});
+
+const userColor = computed(() => {
+  return getUserColor(
+    groupsStore.activeGroupMembers[props.notification.sender_id].color,
+  );
 });
 
 const actionDescription =
@@ -45,7 +52,7 @@ const actionDescription =
         :src="`https://grfzzenmfxpdswksztzh.supabase.co/storage/v1/object/public/avatars/${notification.sender_id}.jpg`"
         @error="$event.target.src = defaultAvatar"
         class="w-11 h-11 rounded-full object-cover border border-gray-100 dark:border-[#242C3C] shrink-0"
-        :style="{ borderColor: groupsStore.activeGroupMembers[notification.sender_id].color }"
+        :style="{ borderColor: userColor.primary }"
       />
 
       <div class="min-w-0 flex-1 flex flex-col gap-1.5">

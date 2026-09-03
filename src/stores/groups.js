@@ -142,7 +142,7 @@ export const useGroupsStore = defineStore("groups", () => {
       throw new Error("Dados inválidos. Tente novamente.");
     }
 
-    const { groupName, invitedMembers, color } = parseResult.data;
+    const { groupName, invitedMembers, theme } = parseResult.data;
 
     const invitedMembersIds = invitedMembers.map((m) => m.uid)
 
@@ -153,7 +153,7 @@ export const useGroupsStore = defineStore("groups", () => {
     const newGroupPayload = {
       name: groupName,
       members: allMembersIds,
-      color: color,
+      theme: theme,
       created_by: currentUserId,
       created_at: new Date(),
     };

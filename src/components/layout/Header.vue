@@ -1,11 +1,13 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 import { useGroupsStore } from "@/stores/groups.js";
 import { useProfileStore } from "@/stores/profile.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useNotificationsStore } from "@/stores/notifications.js";
 import { useToastStore } from "@/stores/toast.js";
+
+import { getGroupTheme } from "@/constants/colors.js";
 
 import { Menu, Bell, X, FolderHeart } from "@lucide/vue";
 
@@ -20,6 +22,10 @@ const toastStore = useToastStore();
 
 const isMenuOpen = ref(false);
 const menuButtonRef = ref(null);
+
+const groupTheme = computed(() => {
+  return getGroupTheme(groupsStore.activeGroup?.theme);
+});
 
 async function handleLogout() {
   isMenuOpen.value = false;
@@ -75,11 +81,11 @@ function handleCloseGroup() {
 
         <div
           v-if="groupsStore.activeGroup"
-          class="py-1 px-3 rounded-full border text-xs font-semibold flex items-center gap-1.5 "
+          class="py-1 px-3 rounded-full border text-xs font-semibold flex items-center gap-1.5"
           :style="{
-            backgroundColor: `${groupsStore.activeGroup.color.primary}1e`,
-            borderColor: `${groupsStore.activeGroup.color.primary}50`,
-            color: groupsStore.activeGroup.color.primary,
+            backgroundColor: groupTheme.primary + '1F',
+            borderColor: groupTheme.primary + '40',
+            color: groupTheme.primary,
           }"
         >
           <FolderHeart class="w-3.5 h-3.5" />

@@ -42,6 +42,8 @@ export const useProfileStore = defineStore("profile", () => {
     batch.delete(doc(db, "usernames", currentUsername));
     batch.set(usernameDocRef, { uid });
     await batch.commit();
+
+    return cleanUsername;
   }
 
   async function processAvatarUpload(uid, imageFile) {
@@ -74,16 +76,24 @@ export const useProfileStore = defineStore("profile", () => {
     return `${publicUrl}?t=${Date.now()}`;
   }
 
-  async function updateProfile({ name, username, color, imageFile }) {
+  async function updateProfile(payload) {
     const authStore = useAuthStore();
-    const uid = authStore.user.uid;
+    const uid = authStore.user?.uid;
 
-    if (!uid) return;
+    if (!uid) {
+      throw new Error("Você não está autenticado.");
+    }
 
-    const updates = {};
+    const parseResult = profileSchema.safeParse(payload);
 
-    updates.name = name;
-    updates.color = color;
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0]?.message;
+      throw new Error(firstError || "Dados de perfil inválidos.");
+    }
+
+    const { name, username, color, imageFile } = parseResult.data;
+
+    const updates = { name, color };
 
     if (username) {
       const updatedUsername = await processUsernameChange(

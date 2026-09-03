@@ -3,10 +3,10 @@ import { Check } from "@lucide/vue";
 
 const props = defineProps({
   modelValue: {
-    type: [String, Object],
+    type: String,
     required: true,
   },
-  options: {
+  colorOptions: {
     type: Array,
     required: true,
   },
@@ -23,16 +23,14 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 function isSelected(color) {
-  if (typeof color === "string") {
-    return props.modelValue === color;
-  }
-  return props.modelValue?.primary === color.primary;
+  return color.id === props.modelValue;
 }
 
 function getButtonStyle(color) {
-  if (typeof color === "string") {
-    return { backgroundColor: color };
+  if (color.dark) {
+    return { backgroundColor: color.primary };
   }
+
   return {
     backgroundImage: `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
   };
@@ -50,9 +48,9 @@ function getButtonStyle(color) {
 
     <div class="flex gap-2.5 flex-wrap">
       <button
-        v-for="(color, index) in options"
-        :key="typeof color === 'string' ? color : index"
-        @click="emit('update:modelValue', color)"
+        v-for="color in colorOptions"
+        :key="color.id"
+        @click="emit('update:modelValue', color.id)"
         type="button"
         class="w-8 h-8 rounded-full active:scale-95 flex items-center justify-center transition-transform"
         :style="getButtonStyle(color)"

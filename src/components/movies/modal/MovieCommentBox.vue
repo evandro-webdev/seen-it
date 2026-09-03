@@ -1,4 +1,5 @@
 <script setup>
+import { getUserColor } from "@/constants/colors";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -10,18 +11,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  userColor: {
+  color: {
     type: String,
     default: null,
   },
 });
 
-const userColorStyle = computed(() => {
-  if (!props.userColor) return {};
-  return {
-    borderLeftColor: props.userColor,
-    borderLeftWidth: "3px",
-  };
+const userColor = computed(() => {
+  return getUserColor(props.color);
 });
 </script>
 
@@ -29,9 +26,8 @@ const userColorStyle = computed(() => {
   <div
     v-if="comment"
     class="mt-3 p-3 rounded-xl border transition-all duration-200 overflow-hidden bg-gray-50/80 dark:bg-slate-800/40 border-gray-200/80 dark:border-gray-700/60"
-    :style="userColorStyle"
+    :style="{ borderLeftColor: userColor.primary, borderLeftWidth: '3px' }"
   >
-
     <div class="flex items-center gap-1.5 mb-1.5">
       <span
         class="w-1.5 h-1.5 rounded-full"
@@ -46,7 +42,7 @@ const userColorStyle = computed(() => {
     </div>
 
     <p
-      class="text-sm text-gray-700 dark:text-gray-200 leading-relaxed pl-3 "
+      class="text-sm text-gray-700 dark:text-gray-200 leading-relaxed pl-3"
       :style="{ borderColor: userColor ? `${userColor}40` : 'currentColor' }"
     >
       {{ comment }}

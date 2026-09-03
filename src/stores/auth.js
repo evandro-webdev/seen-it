@@ -12,6 +12,9 @@ import {
 import { useGroupsStore } from "./groups";
 import { generateUniqueUsername } from "@/utils/username";
 import { initOneSignal, logoutOneSignal } from "@/services/onesignal";
+import { loginSchema, registerSchema } from "@/schemas/auth.schema";
+
+import { getRandomUserColor } from "@/constants/colors";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -32,7 +35,7 @@ export const useAuthStore = defineStore("auth", () => {
           displayName: firebaseUser.displayName || "",
           email: firebaseUser.email,
           username: userData.username,
-          color: userData.color || "#1D4776",
+          color: userData.color,
           avatar_url: userData.avatar_url || null,
         };
       } else {
@@ -46,6 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
           uid: firebaseUser.uid,
           displayName: getFirstName(firebaseUser.displayName || ""),
           email: firebaseUser.email,
+          color: getRandomUserColor(),
         };
       } else {
         user.value = null;
@@ -55,7 +59,15 @@ export const useAuthStore = defineStore("auth", () => {
     }
   });
 
-  async function register(email, password, name) {
+  async function register(payload) {
+    const parseResult = registerSchema.safeParse(payload);
+
+    if (!parseResult.success) {
+      throw new Error("Dados de registro inválidos");
+    }
+
+    const { name, email, password } = parseResult.data;
+
     const firstName = getFirstName(name);
 
     const userCredential = await createUserWithEmailAndPassword(
@@ -76,13 +88,21 @@ export const useAuthStore = defineStore("auth", () => {
         name,
         email,
         username: autoUsername,
-        color: "#1D4776",
+        color: getRandomUserColor(),
         created_at: new Date(),
       });
     });
   }
 
-  async function login(email, password) {
+  async function login(payload) {
+    const parseResult = loginSchema.safeParse(payload);
+
+    if (!parseResult.success) {
+      throw new Error("Dados de login inválidos");
+    }
+
+    const { email, password } = parseResult.data;
+
     await signInWithEmailAndPassword(auth, email, password);
   }
 
