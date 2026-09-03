@@ -87,8 +87,7 @@ export const useProfileStore = defineStore("profile", () => {
     const parseResult = profileSchema.safeParse(payload);
 
     if (!parseResult.success) {
-      const firstError = parseResult.error.errors[0]?.message;
-      throw new Error(firstError || "Dados de perfil inválidos.");
+      throw new Error("Dados de perfil inválidos.");
     }
 
     const { name, username, color, imageFile } = parseResult.data;
