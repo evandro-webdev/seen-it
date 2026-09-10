@@ -47,33 +47,50 @@ export const useProfileStore = defineStore("profile", () => {
   }
 
   async function processAvatarUpload(uid, imageFile) {
-    const compressedFile = await new Promise((resolve, reject) => {
-      new Compressor(imageFile, {
-        quality: 0.6,
-        maxWidth: 400,
-        maxHeight: 400,
-        success(result) {
-          resolve(result);
-        },
-        error(err) {
-          reject(err);
-        },
+    if (!imageFile) return null;
+
+    try {
+      const compressedFile = await new Promise((resolve, reject) => {
+        new Compressor(imageFile, {
+          quality: 0.8,
+          maxWidth: 300,
+          maxHeight: 300,
+          fit: "cover",
+          mimeType: "image/jpeg",
+          convertSize: 500000,
+          success(result) {
+            resolve(result.size > imageFile.size ? imageFile : result);
+          },
+          error(err) {
+            reject(err);
+          },
+        });
       });
-    });
 
-    const fileName = `${uid}.jpg`;
+      const fileName = `${uid}.jpg`;
 
-    const { error } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, compressedFile, { upsert: true });
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, compressedFile, {
+          upsert: true,
+          contentType: "image/jpeg",
+          cacheControl: "3600",
+        });
 
-    if (error) throw error;
+      if (uploadError) throw uploadError;
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
-    return `${publicUrl}?t=${Date.now()}`;
+      if (!data?.publicUrl) throw new Error("URL pública não encontrada.");
+
+      return `${data.publicUrl}?t=${Date.now()}`;
+    } catch (error) {
+      console.error("Erro no processamento/upload do avatar:", error);
+
+      throw new Error(
+        "Não foi possível salvar a foto de perfil. Tente novamente em alguns minutos.",
+      );
+    }
   }
 
   async function updateProfile(payload) {

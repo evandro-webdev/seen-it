@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { USER_COLOR_IDS } from "@/constants/colors";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export const profileSchema = z.object({
@@ -26,7 +26,7 @@ export const profileSchema = z.object({
     .custom((file) => file instanceof File, { message: "Arquivo inválido." })
     .refine(
       (file) => file.size <= MAX_FILE_SIZE,
-      "A imagem deve ter no máximo 5MB.",
+      "A imagem deve ter no máximo 15MB.",
     )
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
