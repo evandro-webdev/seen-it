@@ -7,12 +7,12 @@ const toastStore = useToastStore();
 
 <template>
   <div
-    class="fixed bottom-18 right-4 left-4 sm:left-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-sm w-auto pointer-events-none"
+    class="fixed bottom-18 left-0 right-0 z-50 flex flex-col gap-2.5 px-4 pointer-events-none"
   >
     <TransitionGroup
       name="toast"
       tag="div"
-      class="flex flex-col gap-2.5"
+      class="flex flex-col gap-2.5 w-full"
     >
       <div
         v-for="toast in toastStore.toasts"
@@ -43,7 +43,7 @@ const toastStore = useToastStore();
 
         <button
           @click="toastStore.remove(toast.id)"
-          class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+          class="p-1 rounded-lg text-slate-400 active:bg-slate-100 dark:active:bg-slate-800 transition-colors shrink-0"
           aria-label="Fechar notificação"
         >
           <X class="w-4 h-4" />
@@ -60,10 +60,10 @@ const toastStore = useToastStore();
 }
 .toast-enter-from {
   opacity: 0;
-  transform: translateY(12px) scale(0.96);
+  transform: translateY(16px) scale(0.96);
 }
 .toast-leave-to {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(16px);
 }
 </style>

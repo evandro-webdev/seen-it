@@ -1,4 +1,7 @@
 <script setup>
+import { getUserColor } from "@/constants/colors.js";
+
+
 import MovieCard from "../cards/MovieCard.vue";
 
 defineProps({
@@ -36,7 +39,7 @@ const emit = defineEmits(["open-movie-modal"]);
         <span
           v-if="section.userColor"
           class="w-3 h-3 rounded-full shrink-0"
-          :style="{ backgroundColor: section.userColor }"
+          :style="{ backgroundColor: getUserColor(section.userColor).primary }"
         ></span>
 
         <h2 class="font-bold text-sm text-[#10355E] dark:text-[#B0D5FE]">
