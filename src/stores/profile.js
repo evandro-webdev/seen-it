@@ -13,6 +13,7 @@ import { useAuthStore } from "./auth";
 import { createClient } from "@supabase/supabase-js";
 import Compressor from "compressorjs";
 import { slugifyUsername } from "@/utils/username";
+import { profileSchema } from "@/schemas/profile.schema";
 
 const supabase = createClient(
   "https://grfzzenmfxpdswksztzh.supabase.co",

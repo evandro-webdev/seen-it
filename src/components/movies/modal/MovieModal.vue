@@ -201,9 +201,7 @@ function unlockScroll() {
                 groupsStore.activeGroupMembers[selectedReviewer]?.name
               "
               :comment="activeMovie.reviews[selectedReviewer].comment"
-              :color="
-                groupsStore.activeGroupMembers[selectedReviewer]?.color
-              "
+              :color="groupsStore.activeGroupMembers[selectedReviewer]?.color"
             />
           </div>
 
@@ -282,7 +280,15 @@ function unlockScroll() {
             class="flex items-center gap-3 w-full"
           >
             <SaveButton
+              :disabled="
+                movie.saved_by && movie.saved_by !== authStore.user?.uid
+              "
               :is-already-saved="isAlreadySaved"
+              :saved-by="
+                isAlreadySaved
+                  ? groupsStore.activeGroupMembers[movie.saved_by]
+                  : null
+              "
               :movie="movie"
             />
             <BaseButton

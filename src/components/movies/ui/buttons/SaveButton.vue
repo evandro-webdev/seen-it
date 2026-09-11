@@ -11,9 +11,18 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  savedBy: {
+    type: Object,
+    required: false,
+    default: null,
+  },
   movie: {
     type: Object,
     required: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -27,7 +36,7 @@ async function handleToggleSaved() {
   try {
     await savedMoviesStore.toggleSaved(props.movie);
   } catch (error) {
-    console.error("Erro ao salvar/remover filme: ".$error);
+    console.error("Erro ao salvar/remover filme: ", error);
   } finally {
     isLoading.value = false;
   }
@@ -42,7 +51,11 @@ const buttonIcon = computed(() => {
 });
 
 const buttonLabel = computed(() => {
-  return props.isAlreadySaved ? "Salvo" : "Salvar";
+  if (props.isAlreadySaved && props.savedBy?.name) {
+    const firstName = props.savedBy.name.split(" ")[0];
+    return `Salvo por ${firstName}`;
+  }
+  return "Salvar";
 });
 </script>
 
