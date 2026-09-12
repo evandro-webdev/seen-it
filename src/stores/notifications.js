@@ -96,64 +96,84 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
   async function dispatchWatchedMovieNotification(movie) {
     const membersIds = Object.keys(groupsStore.activeGroupMembers || {});
+    const recipients = membersIds.filter((id) => id !== authStore.user.uid);
 
-    const membersToNotificate = membersIds.filter(
-      (memberId) => memberId !== authStore.user.uid,
-    );
-
-    if (membersToNotificate.length === 0) return;
-
-    const promises = membersToNotificate.map((uid) => {
-      return addDoc(collection(db, "notifications"), {
-        user_id: uid,
-        sender_id: authStore.user.uid,
-        sender_name: authStore.user.displayName,
-        group_id: groupsStore.activeGroup.id,
-        movie_id: movie.id,
-        movie_title: movie.title,
-        type: "movie_rated",
-        is_read: false,
-        created_at: new Date(),
-      });
-    });
-
-    await Promise.all(promises);
+    if (recipients.length === 0) return;
 
     const title = "Confira minha nota!";
     const body = `${authStore.user.displayName} avaliou "${movie.title}".`;
 
-    await sendPushNotification(membersToNotificate, title, body, "movie_rated");
+    const payload = {
+      type: "movie_rated",
+      message: "avaliou o filme",
+      entity_name: movie.title,
+      entity_id: movie.id,
+      group_id: groupsStore.activeGroup.id,
+    };
+
+    await Promise.all([
+      persistNotifications(recipients, payload),
+      sendPushNotification(recipients, title, body, "movie_rated"),
+    ]);
   }
 
-  async function dispatchSavedMovieNotification(movieId, movieTitle) {
+  async function dispatchSavedMovieNotification(movie) {
     const membersIds = Object.keys(groupsStore.activeGroupMembers || {});
+    const recipients = membersIds.filter((id) => id !== authStore.user.uid);
 
-    const membersToNotificate = membersIds.filter(
-      (memberId) => authStore.user.uid !== memberId,
-    );
+    if (recipients.length === 0) return;
 
-    if (membersToNotificate.length === 0) return;
+    const title = "Vamos assistir?";
+    const body = `${authStore.user.displayName} salvou o filme "${movie.title}"`;
 
-    const promises = membersToNotificate.map((uid) => {
+    const payload = {
+      type: "movie_rated",
+      message: "salvou o filme",
+      entity_name: movie.title,
+      entity_id: movie.id,
+      group_id: groupsStore.activeGroup.id,
+    };
+
+    await Promise.all([
+      persistNotifications(recipients, payload),
+      sendPushNotification(recipients, title, body, "movie_saved"),
+    ]);
+  }
+
+  // FIX: atualmente só chega notificações quando um grupo está ativo, ou seja, a notificação não vai pra lugar nenhum se o grupo foi criado agora
+  async function dispatchCreatedGroupNotification(group, recipients) {
+    if (!recipients || recipients.length === 0) return;
+
+    const title = "Novo grupo criado!";
+    const body = `${authStore.user.displayName} criou o grupo "${group.name}"`;
+
+    const payload = {
+      type: "group_created",
+      message: "criou o grupo",
+      entity_name: group.name,
+      entity_id: group.id,
+      group_id: group.id,
+    };
+
+    await Promise.all([
+      persistNotifications(recipients, payload),
+      sendPushNotification(recipients, title, body, "group_created"),
+    ]);
+  }
+
+  async function persistNotifications(recipients, notificationData) {
+    const promises = recipients.map((uid) => {
       return addDoc(collection(db, "notifications"), {
         user_id: uid,
         sender_id: authStore.user.uid,
         sender_name: authStore.user.displayName,
-        group_id: groupsStore.activeGroup.id,
-        movie_id: movieId,
-        movie_title: movieTitle,
-        type: "movie_saved",
         is_read: false,
         created_at: new Date(),
+        ...notificationData,
       });
     });
 
     await Promise.all(promises);
-
-    const title = "Vamos assistir?";
-    const body = `${authStore.user.displayName} salvou o filme "${movieTitle}"`;
-
-    await sendPushNotification(membersToNotificate, title, body, "movie_saved");
   }
 
   async function markAsRead(notificationId) {
@@ -265,17 +285,18 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
   return {
     isNotificationsModalOpen,
-    listenToNotifications,
+    loading,
     notifications,
+    unreadCount,
+    listenToNotifications,
     openNotificationsModal,
     closeNotificationsModal,
     dispatchSavedMovieNotification,
     dispatchWatchedMovieNotification,
-    unreadCount,
+    dispatchCreatedGroupNotification,
     markAsRead,
     markAllAsRead,
     cleanOldNotifications,
     stopListening,
-    loading,
   };
 });

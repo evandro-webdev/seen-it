@@ -17,10 +17,12 @@ import {
   onSnapshot,
   arrayRemove,
 } from "../services/firebase";
-import { useAuthStore } from "./auth.js";
 import { ref } from "vue";
 import { slugifyUsername } from "@/utils/username";
 import { createGroupSchema } from "@/schemas/group.schema";
+
+import { useAuthStore } from "./auth.js";
+import { useNotificationsStore } from "./notifications";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
@@ -33,6 +35,7 @@ export const useGroupsStore = defineStore("groups", () => {
   let unsubscribeListener = null;
 
   const authStore = useAuthStore();
+  const notificationsStore = useNotificationsStore();
 
   function getInitialActiveGroup() {
     try {
@@ -144,7 +147,7 @@ export const useGroupsStore = defineStore("groups", () => {
 
     const { groupName, invitedMembers, theme } = parseResult.data;
 
-    const invitedMembersIds = invitedMembers.map((m) => m.uid)
+    const invitedMembersIds = invitedMembers.map((m) => m.uid);
 
     const allMembersIds = Array.from(
       new Set([currentUserId, ...invitedMembersIds]),
@@ -172,6 +175,11 @@ export const useGroupsStore = defineStore("groups", () => {
       id: groupRef.id,
       ...newGroupPayload,
     };
+
+    await notificationsStore.dispatchCreatedGroupNotification(
+      createdGroup,
+      invitedMembersIds,
+    );
 
     setActiveGroup(createdGroup);
 

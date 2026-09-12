@@ -110,10 +110,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
         total_saved: increment(1),
       });
 
-      await notificationsStore.dispatchSavedMovieNotification(
-        movie.id,
-        movie.title,
-      );
+      await notificationsStore.dispatchSavedMovieNotification(movie);
     }
 
     return movieDocRef;
