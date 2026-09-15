@@ -25,7 +25,12 @@ async function handleNotificationClick(notification) {
 
   notificationsStore.closeNotificationsModal();
 
-  await movieDetailStore.openMovie(notification.movie_id);
+  if (
+    notification.type === "movie_rated" ||
+    notification.type === "movie_saved"
+  ) {
+    await movieDetailStore.openMovie(notification.entity_id);
+  }
 }
 
 onClickOutside(notificationsModalRef, () => {

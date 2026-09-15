@@ -19,7 +19,7 @@ import { useAuthStore } from "./auth";
 
 export const useNotificationsStore = defineStore("notifications", () => {
   const isNotificationsModalOpen = ref(false);
-  const notifications = ref([]);
+  const allNotifications = ref([]);
   const loading = ref(false);
 
   const groupsStore = useGroupsStore();
@@ -27,40 +27,25 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
   let unsubscribe = null;
 
-  const unreadCount = computed(() => {
-    return notifications.value.filter((n) => !n.is_read).length;
-  });
-
-  function openNotificationsModal() {
-    isNotificationsModalOpen.value = true;
-  }
-
-  function closeNotificationsModal() {
-    isNotificationsModalOpen.value = false;
-  }
-
   function listenToNotifications() {
     stopListening();
 
     const uid = authStore.user?.uid;
-    const activeGroup = groupsStore.activeGroup;
-
-    if (!uid || !activeGroup?.id) return;
+    if (!uid) return;
 
     loading.value = true;
 
     const q = query(
       collection(db, "notifications"),
       where("user_id", "==", uid),
-      where("group_id", "==", activeGroup.id),
       orderBy("created_at", "desc"),
-      limit(25),
+      limit(50),
     );
 
     unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        notifications.value = snapshot.docs.map((doc) => ({
+        allNotifications.value = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -73,10 +58,36 @@ export const useNotificationsStore = defineStore("notifications", () => {
     );
   }
 
+  const activeNotifications = computed(() => {
+    const activeGroupId = groupsStore.activeGroup?.id;
+
+    return allNotifications.value.filter((n) => {
+      if (!n.group_id || n.type === "group_created") return true;
+      return n.group_id === activeGroupId;
+    });
+  });
+
+  const unreadCount = computed(() => {
+    return allNotifications.value.filter((n) => !n.is_read).length;
+  });
+
+  // FIX: O array não é atualizado quando as notificações são lidas.
+  const unreadGroupsMap = computed(() => {
+    const map = {};
+
+    allNotifications.value.forEach((n) => {
+      if (!n.isRead && n.group_id) {
+        map[n.group_id] = true;
+      }
+    });
+
+    return map;
+  });
+
   watch(
-    () => groupsStore.activeGroup?.id,
-    (newGroupId) => {
-      if (newGroupId) {
+    () => authStore.user?.uid,
+    (uid) => {
+      if (uid) {
         listenToNotifications();
       } else {
         stopListening();
@@ -90,7 +101,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
       unsubscribe();
       unsubscribe = null;
     }
-    notifications.value = [];
+    allNotifications.value = [];
     loading.value = false;
   }
 
@@ -140,7 +151,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
     ]);
   }
 
-  // FIX: atualmente só chega notificações quando um grupo está ativo, ou seja, a notificação não vai pra lugar nenhum se o grupo foi criado agora
   async function dispatchCreatedGroupNotification(group, recipients) {
     if (!recipients || recipients.length === 0) return;
 
@@ -191,7 +201,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     if (!activeGroupId) return;
 
-    const unreadNotifications = notifications.value.filter(
+    const unreadNotifications = allNotifications.value.filter(
       (n) => !n.is_read && n.group_id === activeGroupId,
     );
 
@@ -283,11 +293,20 @@ export const useNotificationsStore = defineStore("notifications", () => {
     }
   }
 
+  function openNotificationsModal() {
+    isNotificationsModalOpen.value = true;
+  }
+
+  function closeNotificationsModal() {
+    isNotificationsModalOpen.value = false;
+  }
+
   return {
     isNotificationsModalOpen,
     loading,
-    notifications,
+    notifications: activeNotifications,
     unreadCount,
+    unreadGroupsMap,
     listenToNotifications,
     openNotificationsModal,
     closeNotificationsModal,

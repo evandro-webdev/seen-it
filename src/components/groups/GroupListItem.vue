@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import { useToastStore } from "@/stores/toast";
+import { useNotificationsStore } from "@/stores/notifications";
 
 import { Bookmark, Check, Eye, MoreVertical, UsersRound } from "@lucide/vue";
 import { getGroupTheme } from "@/constants/colors";
@@ -16,12 +17,17 @@ const props = defineProps({
 const emit = defineEmits(["openDetails"]);
 const groupsStore = useGroupsStore();
 const toastStore = useToastStore();
+const notificationsStore = useNotificationsStore();
 
 const groupTheme = computed(() => {
   return getGroupTheme(props.group.theme);
 });
 
 const isActive = computed(() => groupsStore.activeGroup?.id === props.group.id);
+
+const hasUnreadNotifications = computed(() => {
+  return !!notificationsStore.unreadGroupsMap[props.group.id];
+});
 
 function handleSelectGroup() {
   groupsStore.setActiveGroup(props.group);
@@ -38,7 +44,7 @@ function handleOpenMenu(event) {
 <template>
   <div
     @click="handleSelectGroup"
-    class="px-3 py-3.5 rounded-2xl border transition-all cursor-pointer flex justify-between items-center relative"
+    class="px-3 py-3.5 rounded-2xl border transition-all cursor-pointer flex justify-between items-center relative active:scale-[0.99]"
     :class="[
       isActive
         ? 'border-blue-500/50 bg-blue-50/40 dark:bg-blue-950/20 dark:border-blue-500/40'
@@ -47,7 +53,7 @@ function handleOpenMenu(event) {
   >
     <div class="flex items-center gap-3 min-w-0">
       <div
-        class="p-3 rounded-2xl shrink-0 flex items-center justify-center text-white"
+        class="p-3 rounded-2xl shrink-0 flex items-center justify-center text-white relative"
         :style="{
           backgroundImage: `linear-gradient(135deg, ${groupTheme.primary}, ${groupTheme.secondary})`,
         }"
@@ -62,6 +68,19 @@ function handleOpenMenu(event) {
           >
             {{ group.name }}
           </h3>
+
+          <span
+            v-if="hasUnreadNotifications"
+            class="relative flex h-2.5 w-2.5 shrink-0"
+            title="Novas notificações"
+          >
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
+            />
+            <span
+              class="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"
+            />
+          </span>
         </div>
 
         <p class="text-xs text-gray-500 dark:text-[#ABB3C3]">
@@ -95,7 +114,7 @@ function handleOpenMenu(event) {
       <button
         type="button"
         @click="handleOpenMenu"
-        class="p-1.5 rounded-xl text-gray-400 dark:text-[#A4ADC5]"
+        class="p-1.5 rounded-xl text-gray-400 dark:text-[#A4ADC5] active:bg-gray-200/50 dark:active:bg-gray-800/50 transition-colors"
         title="Opções do grupo"
       >
         <MoreVertical class="w-5 h-5" />
