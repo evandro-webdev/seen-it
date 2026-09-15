@@ -68,15 +68,14 @@ export const useNotificationsStore = defineStore("notifications", () => {
   });
 
   const unreadCount = computed(() => {
-    return allNotifications.value.filter((n) => !n.is_read).length;
+    return activeNotifications.value.filter((n) => !n.is_read).length;
   });
 
-  // FIX: O array não é atualizado quando as notificações são lidas.
   const unreadGroupsMap = computed(() => {
     const map = {};
 
     allNotifications.value.forEach((n) => {
-      if (!n.isRead && n.group_id) {
+      if (!n.is_read && n.group_id) {
         map[n.group_id] = true;
       }
     });
@@ -197,12 +196,8 @@ export const useNotificationsStore = defineStore("notifications", () => {
   }
 
   async function markAllAsRead() {
-    const activeGroupId = groupsStore.activeGroup?.id;
-
-    if (!activeGroupId) return;
-
-    const unreadNotifications = allNotifications.value.filter(
-      (n) => !n.is_read && n.group_id === activeGroupId,
+    const unreadNotifications = activeNotifications.value.filter(
+      (n) => !n.is_read
     );
 
     if (unreadNotifications.length === 0) return;
