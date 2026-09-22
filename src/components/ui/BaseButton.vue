@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from "vue";
+import { computed, useSlots } from "vue";
+import { Loader2 } from "@lucide/vue";
 
 const props = defineProps({
   label: {
@@ -9,6 +10,10 @@ const props = defineProps({
   icon: {
     type: [Object, Function],
     default: null,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
   },
   variant: {
     type: String,
@@ -34,6 +39,12 @@ const props = defineProps({
 });
 
 defineEmits(["click"]);
+
+const slots = useSlots();
+
+const hasIcon = computed(() =>
+  Boolean(props.icon || props.loading || slots.icon),
+);
 
 const variantClasses = computed(() => {
   switch (props.variant) {
@@ -82,19 +93,36 @@ const iconSizeClasses = computed(() => {
 <template>
   <button
     type="button"
-    :disabled="disabled"
+    :disabled="disabled || loading"
     @click="$emit('click', $event)"
-    class="inline-flex justify-center items-center gap-2 font-medium whitespace-nowrap transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed select-none"
-    :class="[variantClasses, sizeClasses, block ? 'w-full' : '']"
+    class="font-medium whitespace-nowrap transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed select-none"
+    :class="[
+      variantClasses,
+      sizeClasses,
+      block ? 'w-full' : '',
+      { 'inline-flex justify-center items-center gap-2': hasIcon && label },
+    ]"
   >
-    <slot name="icon">
-      <component
-        :is="icon"
-        v-if="icon"
-        :class="iconSizeClasses"
-      />
-    </slot>
+    <Loader2
+      v-if="loading"
+      class="animate-spin"
+      :class="iconSizeClasses"
+    />
 
-    <span class="font-medium whitespace-nowrap">{{ label }}</span>
+    <template v-else>
+      <slot name="icon">
+        <component
+          v-if="icon"
+          :is="icon"
+          :class="iconSizeClasses"
+        />
+      </slot>
+    </template>
+
+    <span
+      v-if="label"
+      class="font-medium whitespace-nowrap"
+      >{{ label }}</span
+    >
   </button>
 </template>
