@@ -8,6 +8,7 @@ import { useSavedMoviesStore } from "./savedMovies.js";
 export const useMovieDetailsStore = defineStore("movieDetails", () => {
   const selectedMovie = ref(null);
   const isLoading = ref(false);
+  const isModalOpen = ref(false);
 
   async function openMovie(id) {
     isLoading.value = true;
@@ -50,14 +51,22 @@ export const useMovieDetailsStore = defineStore("movieDetails", () => {
     }
   }
 
-  function closeMovie() {
+  async function openModal(id) {
+    await openMovie(id);
+    isModalOpen.value = true;
+  }
+
+  function closeModal() {
     selectedMovie.value = null;
+    isModalOpen.value = false;
   }
 
   return {
     selectedMovie,
     isLoading,
+    isModalOpen,
     openMovie,
-    closeMovie,
+    openModal,
+    closeModal,
   };
 });
