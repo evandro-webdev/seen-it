@@ -1,23 +1,19 @@
 <script setup>
-defineProps({
-  genres: {
-    type: Array,
-    default: () => [],
-  },
-  selectedGenreId: {
-    type: [Number, null],
-    default: null,
-  },
-});
+import { computed } from "vue";
 
-const emit = defineEmits(["select-genre"]);
+import { useGenreMoviesStore } from "@/stores/genreMovies";
+
+const genreMoviesStore = useGenreMoviesStore();
+
+const genres = computed(() => genreMoviesStore.genres);
+const selectedGenreId = computed(() => genreMoviesStore.selectedGenreId);
 </script>
 
 <template>
   <div class="w-full overflow-x-auto no-scrollbar py-1">
     <div class="flex items-center gap-2 w-max">
       <button
-        @click="emit('select-genre', null)"
+        @click="genreMoviesStore.selectGenre(null)"
         type="button"
         class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 whitespace-nowrap border"
         :class="
@@ -32,7 +28,7 @@ const emit = defineEmits(["select-genre"]);
       <button
         v-for="genre in genres"
         :key="genre.id"
-        @click="emit('select-genre', genre.id)"
+        @click="genreMoviesStore.selectGenre(genre.id)"
         type="button"
         class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 whitespace-nowrap border"
         :class="
