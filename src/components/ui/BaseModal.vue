@@ -48,23 +48,25 @@ function handleAfterLeave() {
 </script>
 
 <template>
-  <Transition
-    name="modal"
-    appear
-    @enter="lockScroll"
-    @after-leave="handleAfterLeave"
-  >
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-end"
+  <Teleport to="body">
+    <Transition
+      name="modal"
+      appear
+      @enter="lockScroll"
+      @after-leave="handleAfterLeave"
     >
       <div
-        ref="modalContentRef"
-        class="w-full py-6 px-4 bg-white dark:bg-[#121825] rounded-t-2xl overflow-y-auto space-y-6 modal-content"
-        :class="maxHeight"
+        v-if="isOpen"
+        class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-end"
       >
-        <slot />
+        <div
+          ref="modalContentRef"
+          class="w-full py-6 px-4 bg-white dark:bg-[#121825] rounded-t-2xl overflow-y-auto space-y-6 modal-content"
+          :class="maxHeight"
+        >
+          <slot />
+        </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>

@@ -52,73 +52,77 @@ function unlockScroll() {
 </script>
 
 <template>
-  <Transition
-    name="fade-tab"
-    mode="out-in"
-    @enter="lockScroll"
-    @after-leave="unlockScroll"
-  >
-    <div
-      v-if="notificationsStore.isNotificationsModalOpen"
-      class="fixed inset-0 z-40 px-4 bg-black/40 backdrop-blur-sm flex justify-center items-center"
+  <Teleport to="body">
+    <Transition
+      name="fade-tab"
+      mode="out-in"
+      @enter="lockScroll"
+      @after-leave="unlockScroll"
     >
       <div
-        ref="notificationsModalRef"
-        class="w-full max-h-[70vh] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
+        v-if="notificationsStore.isNotificationsModalOpen"
+        class="fixed inset-0 z-40 px-4 bg-black/40 backdrop-blur-sm flex justify-center items-center"
       >
         <div
-          class="flex justify-between items-center pb-5 border-b border-gray-100 dark:border-[#1e293b]"
+          ref="notificationsModalRef"
+          class="w-full max-h-[70vh] flex flex-col p-6 bg-white dark:bg-[#121825] rounded-2xl overflow-hidden modal-content"
         >
-          <div class="flex items-center gap-2">
-            <div class="p-2 rounded-full bg-blue-50 dark:bg-[#162845]">
-              <Bell class="text-[#0088FF]" />
-            </div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Notificações
-            </h2>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              v-if="notificationsStore.unreadCount > 0"
-              @click="notificationsStore.markAllAsRead"
-              type="button"
-              class="px-3 py-1.5 rounded-full text-xs font-medium text-[#0088FF] flex items-center gap-1.5"
-              title="Marcar todas como lidas"
-            >
-              <CheckCheck class="w-4 h-4" />
-              <span class="hidden sm:inline">Marcar lidas</span>
-            </button>
-
-            <button
-              @click="handleCloseClick"
-              type="button"
-              class="p-1.5 rounded-full bg-gray-100 dark:bg-[#222838] active:scale-98"
-            >
-              <X class="text-gray-600 dark:text-[#A7B0C9]" />
-            </button>
-          </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 standard-scrollbar">
           <div
-            v-if="notificationsStore.notifications.length === 0"
-            class="px-2.5 py-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]"
+            class="flex justify-between items-center pb-5 border-b border-gray-100 dark:border-[#1e293b]"
           >
-            <p class="text-sm/5 text-gray-500 dark:text-[#ABB3C3]">
-              Nenhuma notificação no momento
-            </p>
+            <div class="flex items-center gap-2">
+              <div class="p-2 rounded-full bg-blue-50 dark:bg-[#162845]">
+                <Bell class="text-[#0088FF]" />
+              </div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                Notificações
+              </h2>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                v-if="notificationsStore.unreadCount > 0"
+                @click="notificationsStore.markAllAsRead"
+                type="button"
+                class="px-3 py-1.5 rounded-full text-xs font-medium text-[#0088FF] flex items-center gap-1.5"
+                title="Marcar todas como lidas"
+              >
+                <CheckCheck class="w-4 h-4" />
+                <span class="hidden sm:inline">Marcar lidas</span>
+              </button>
+
+              <button
+                @click="handleCloseClick"
+                type="button"
+                class="p-1.5 rounded-full bg-gray-100 dark:bg-[#222838] active:scale-98"
+              >
+                <X class="text-gray-600 dark:text-[#A7B0C9]" />
+              </button>
+            </div>
           </div>
 
-          <div class="space-y-2.5 mr-0.5">
-            <NotificationItem
-              v-for="notification in notificationsStore.notifications"
-              @click="handleNotificationClick(notification)"
-              :notification="notification"
-            />
+          <div
+            class="flex-1 overflow-y-auto py-5 -mr-3 pr-3 standard-scrollbar"
+          >
+            <div
+              v-if="notificationsStore.notifications.length === 0"
+              class="px-2.5 py-4 rounded-xl border border-gray-100 dark:border-[#242C3C] bg-gray-50/50 dark:bg-[#181F2F]"
+            >
+              <p class="text-sm/5 text-gray-500 dark:text-[#ABB3C3]">
+                Nenhuma notificação no momento
+              </p>
+            </div>
+
+            <div class="space-y-2.5 mr-0.5">
+              <NotificationItem
+                v-for="notification in notificationsStore.notifications"
+                @click="handleNotificationClick(notification)"
+                :notification="notification"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>

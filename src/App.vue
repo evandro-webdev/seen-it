@@ -2,7 +2,6 @@
 import { watch } from "vue";
 import { useAuthStore } from "./stores/auth.js";
 import { useGroupsStore } from "./stores/groups.js";
-import { useMovieDetailsStore } from "./stores/movieDetails.js";
 import { useNotificationsStore } from "./stores/notifications.js";
 import { useWatchedMoviesStore } from "./stores/watchedMovies.js";
 import { useSavedMoviesStore } from "./stores/savedMovies.js";
@@ -17,7 +16,6 @@ import ToastContainer from "./components/ui/ToastContainer.vue";
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
-const movieDetailsStore = useMovieDetailsStore();
 const notificationsStore = useNotificationsStore();
 const watchedMoviesStore = useWatchedMoviesStore();
 const savedMoviesStore = useSavedMoviesStore();
@@ -40,33 +38,26 @@ watch(
       groupsStore.groups = [];
       notificationsStore.stopListening();
     }
-  }
+  },
 );
-
 </script>
 
 <template>
   <Header />
 
   <main class="w-full max-w-7xl mx-auto flex-1 pb-20 px-4">
-    <router-view v-slot="{ Component }">
+    <RouterView v-slot="{ Component }">
       <Transition
         name="fade-tab"
         mode="out-in"
       >
-        <component
-          :is="Component"
-          @open-movie-modal="movieDetailsStore.openMovie($event, $route.name)"
-        />
+        <component :is="Component" />
       </Transition>
-    </router-view>
+    </RouterView>
   </main>
 
-  <MovieModal
-    :movie="movieDetailsStore.selectedMovie"
-    @close="movieDetailsStore.closeMovie"
-  />
-  <GroupsModal :groups="groupsStore.groups" />
+  <MovieModal />
+  <GroupsModal />
   <ProfileModal />
   <NotificationsModal />
   <ToastContainer />

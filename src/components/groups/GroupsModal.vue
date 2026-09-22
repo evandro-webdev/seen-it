@@ -9,14 +9,9 @@ import GroupCreateForm from "./GroupCreateForm.vue";
 import GroupDetails from "./GroupDetails.vue";
 import GroupList from "./GroupList.vue";
 
-defineProps({
-  groups: {
-    type: Array,
-    required: true,
-  },
-});
-
 const groupsStore = useGroupsStore();
+
+const groups = computed(() => groupsStore.groups);
 
 const currentView = ref("list");
 const selectedGroupForDetails = ref(null);
