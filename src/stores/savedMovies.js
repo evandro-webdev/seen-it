@@ -10,9 +10,11 @@ import {
   updateDoc,
   increment,
 } from "@/services/firebase.js";
+
 import { useGroupsStore } from "./groups";
 import { useNotificationsStore } from "./notifications";
 import { useAuthStore } from "./auth";
+import { useMovieDetailsStore } from "./movieDetails";
 
 export const useSavedMoviesStore = defineStore("savedMovies", () => {
   const savedMovies = ref([]);
@@ -145,12 +147,23 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     return savedMoviesIds.value.includes(String(movieId));
   }
 
+  function pickRandomMovie() {
+    if (!savedMovies.value.length) return;
+
+    const randomIndex = Math.floor(Math.random() * savedMovies.value.length);
+    const randomMovie = savedMovies.value[randomIndex];
+
+    const movieDetailsStore = useMovieDetailsStore();
+    movieDetailsStore.openModal(randomMovie.id);
+  }
+
   return {
     savedMovies,
     savedMoviesIds,
+    isLoading,
     setupSavedMoviesListener,
     isAlreadySaved,
     toggleSaved,
-    isLoading,
+    pickRandomMovie,
   };
 });
