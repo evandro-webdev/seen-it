@@ -5,6 +5,7 @@ import { getGenres, getMoviesByGenre } from "@/services/tmdb.js";
 export const useGenreMoviesStore = defineStore("genreMovies", () => {
   const genres = ref([]);
   const selectedGenreId = ref(null);
+  const genreTitle = ref("");
   const genreMovies = ref([]);
 
   const currentPage = ref(1);
@@ -31,14 +32,12 @@ export const useGenreMoviesStore = defineStore("genreMovies", () => {
 
   async function selectGenre(genreId) {
     if (selectedGenreId.value === genreId) {
-      selectedGenreId.value = null;
-      genreMovies.value = [];
-      currentPage.value = 1;
-      totalPages.value = 1;
+      clearGenre();
       return;
     }
 
     selectedGenreId.value = genreId;
+    genreTitle.value = `Filmes de ${genres.value.find((g) => g.id === genreId)?.name}`;
     currentPage.value = 1;
     isLoadingGenreMovies.value = true;
 
@@ -79,9 +78,17 @@ export const useGenreMoviesStore = defineStore("genreMovies", () => {
     }
   }
 
+  function clearGenre() {
+    selectedGenreId.value = null;
+    genreMovies.value = [];
+    currentPage.value = 1;
+    totalPages.value = 1;
+  }
+
   return {
     genres,
     selectedGenreId,
+    genreTitle,
     genreMovies,
     isLoadingGenres,
     isLoadingGenreMovies,

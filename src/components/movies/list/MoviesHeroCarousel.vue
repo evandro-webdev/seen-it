@@ -1,20 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
+
 import MoviesHeroCarouselSkeleton from "./MoviesHeroCarouselSkeleton.vue";
 
-const props = defineProps({
-  movies: {
-    type: Array,
-    required: true,
-    default: () => [],
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-});
+const movieDetailsStore = useMovieDetailsStore();
+const discoverMoviesStore = useDiscoverMoviesStore();
 
-defineEmits(["open-movie-modal"]);
+const movies = computed(() => discoverMoviesStore.heroMovies)
 
 const currentIndex = ref(0);
 let timer = null;
@@ -23,14 +17,14 @@ let touchStartX = 0;
 let touchEndX = 0;
 
 function nextSlide() {
-  if (props.movies.length === 0) return;
-  currentIndex.value = (currentIndex.value + 1) % props.movies.length;
+  if (movies.value.length === 0) return;
+  currentIndex.value = (currentIndex.value + 1) % movies.value.length;
 }
 
 function prevSlide() {
-  if (props.movies.length === 0) return;
+  if (movies.value.length === 0) return;
   currentIndex.value =
-    (currentIndex.value - 1 + props.movies.length) % props.movies.length;
+    (currentIndex.value - 1 + movies.value.length) % movies.value.length;
 }
 
 function goToSlide(index) {
@@ -77,7 +71,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <MoviesHeroCarouselSkeleton v-if="loading" />
+  <MoviesHeroCarouselSkeleton v-if="discoverMoviesStore.isLoading" />
 
   <div
     v-else-if="movies.length > 0"
@@ -88,7 +82,7 @@ onUnmounted(() => {
     <transition-group name="fade">
       <div
         v-for="(movie, index) in movies"
-        @click="$emit('open-movie-modal', movie.id)"
+        @click="movieDetailsStore.openModal(movie.id)"
         v-show="index === currentIndex"
         :key="movie.id"
         class="absolute inset-0 p-5 pb-9 rounded-2xl bg-cover bg-center flex items-end"

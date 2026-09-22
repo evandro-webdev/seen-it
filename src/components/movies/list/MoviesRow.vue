@@ -1,8 +1,14 @@
 <script setup>
-import MovieCardSkeleton from "../cards/MovieCardSkeleton.vue";
-import MovieCard from "../cards/MovieCard.vue";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
 
-defineProps({
+import MovieCard from "../cards/MovieCard.vue";
+import MovieCardSkeleton from "../cards/MovieCardSkeleton.vue";
+
+const props = defineProps({
+  icon: {
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -11,28 +17,27 @@ defineProps({
     type: Array,
     required: true,
   },
-  icon: {
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
+  category: {
+    type: String,
+    default: "",
   },
   upcoming: {
     type: Boolean,
     default: false,
   },
-  category: {
-    type: String,
-    default: "",
-  },
 });
 
-const emit = defineEmits(["open-movie-modal", "see-all"]);
+const movieDetailsStore = useMovieDetailsStore();
+const discoverMoviesStore = useDiscoverMoviesStore();
+
+function handleSeeAllMovies() {
+  discoverMoviesStore.selectCategory(props.category, props.title);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 </script>
 
 <template>
-  <div v-if="loading || movies.length > 0">
+  <div v-if="discoverMoviesStore.isLoading || movies.length > 0">
     <div class="flex justify-between items-center mb-4">
       <div class="flex gap-1 items-center">
         <component
@@ -45,7 +50,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
         </h2>
       </div>
       <button
-        @click="emit('see-all', category)"
+        @click="handleSeeAllMovies"
         class="text-xs font-semibold text-[#0088FF]"
       >
         Ver todos
@@ -55,7 +60,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
     <div
       class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory"
     >
-      <template v-if="loading">
+      <template v-if="discoverMoviesStore.isLoading">
         <MovieCardSkeleton
           v-for="n in 4"
           :key="'skeleton-' + n"
@@ -69,7 +74,7 @@ const emit = defineEmits(["open-movie-modal", "see-all"]);
           :key="movie.id"
           :movie="movie"
           class="flex-shrink-0"
-          @click="emit('open-movie-modal', movie.id)"
+          @click="movieDetailsStore.openModal(movie.id)"
           fixed-width
           :releaseDate="upcoming ? movie.release_date : null"
         />

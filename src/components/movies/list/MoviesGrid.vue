@@ -2,6 +2,7 @@
 import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 import MovieCard from "../cards/MovieCard.vue";
 import { ArrowLeft } from "@lucide/vue";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 
 defineProps({
   title: {
@@ -26,7 +27,9 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["open-movie-modal", "back"]);
+const emit = defineEmits(["back"]);
+
+const movieDetailsStore = useMovieDetailsStore();
 </script>
 
 <template>
@@ -55,7 +58,7 @@ const emit = defineEmits(["open-movie-modal", "back"]);
           v-for="movie in movies"
           :key="movie.id"
           :movie="movie"
-          @click="emit('open-movie-modal', movie.id)"
+          @click="movieDetailsStore.openModal(movie.id)"
         />
       </div>
 

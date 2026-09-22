@@ -1,34 +1,31 @@
 <script setup>
-import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
+import { computed } from "vue";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { useSearchMoviesStore } from "@/stores/searchMovies.js";
+
 import MovieCardDetailed from "../cards/MovieCardDetailed.vue";
 import MovieSearchEmpty from "../ui/messages/MovieSearchEmpty.vue";
+import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 
 defineProps({
-  searchResults: {
-    type: Array,
-    required: true,
-  },
-  isLoading: {
-    type: Boolean,
-    default: false,
-  },
-  isLoadingMore: {
-    type: Boolean,
-    default: false,
-  },
   searchQuery: {
     type: String,
     default: "",
   },
 });
 
-const emit = defineEmits(["open-movie-modal", "clear-search"]);
+const emit = defineEmits(["clear-search"]);
+
+const movieDetailsStore = useMovieDetailsStore();
+const searchMoviesStore = useSearchMoviesStore();
+
+const searchResults = computed(() => searchMoviesStore.searchResults);
 </script>
 
 <template>
   <div class="space-y-4">
     <LoadingSpinner
-      v-if="isLoading"
+      v-if="searchMoviesStore.isLoading"
       full-screen
     />
 
@@ -44,11 +41,11 @@ const emit = defineEmits(["open-movie-modal", "clear-search"]);
         v-for="movie in searchResults"
         :key="movie.id"
         :movie="movie"
-        @click="emit('open-movie-modal', movie.id)"
+        @click="movieDetailsStore.openModal(movie.id)"
       />
 
       <LoadingSpinner
-        v-if="isLoadingMore"
+        v-if="searchMoviesStore.isLoadingMore"
         size="sm"
       />
     </template>
