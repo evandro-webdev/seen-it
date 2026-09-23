@@ -1,17 +1,13 @@
 <script setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useGroupsStore } from "@/stores/groups";
 
-import {
-  SlidersHorizontal,
-  Grid2x2,
-  Grid3x3,
-  Layers,
-} from "@lucide/vue";
+import { SlidersHorizontal, Layers } from "@lucide/vue";
 
 import SearchBar from "../SearchBar.vue";
 import BaseSelect from "@/components/forms/BaseSelect.vue";
 import PickRandomMovieButton from "./PickRandomMovieButton.vue";
+import CollectionGridToggle from "./CollectionGridToggle.vue";
 
 const props = defineProps({
   type: { type: String, default: "default" },
@@ -26,10 +22,18 @@ const cols = defineModel("cols", { type: Number, default: 2 });
 
 const groupsStore = useGroupsStore();
 
+watch(
+  () => groupsStore.activeGroup,
+  () => {
+    groupBy.value = "none";
+    sortBy.value = "rating_desc";
+  },
+);
+
 const SORT_OPTIONS = [
   { value: "rating_desc", label: "Maior nota" },
   { value: "rating_asc", label: "Menor nota" },
-  { value: "date_desc", label: "Mais recentes" },
+  { value: "date_desc", label: "Recentes" },
 ];
 
 const groupByOptions = computed(() => {
@@ -59,8 +63,7 @@ const groupByOptions = computed(() => {
   <div class="py-2 lg:py-6 space-y-3">
     <div class="flex items-center gap-2">
       <SearchBar v-model:search-query="searchQuery" />
-
-      <PickRandomMovieButton v-if="type === 'saved' && totalCount > 0"/>
+      <PickRandomMovieButton v-if="type === 'saved' && totalCount > 0" />
     </div>
 
     <div
@@ -72,7 +75,7 @@ const groupByOptions = computed(() => {
       >
         <div
           v-if="type === 'watched'"
-          class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] px-2 py-1 rounded-lg shrink-0"
+          class="px-2 py-1 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] flex items-center gap-1.5 shrink-0"
         >
           <SlidersHorizontal class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
           <BaseSelect
@@ -83,7 +86,7 @@ const groupByOptions = computed(() => {
 
         <div
           v-if="groupsStore.activeGroup || type === 'watched'"
-          class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] px-2 py-1 rounded-lg shrink-0"
+          class="px-2 py-1 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] flex items-center gap-1.5 shrink-0"
         >
           <Layers class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
           <BaseSelect
@@ -94,36 +97,7 @@ const groupByOptions = computed(() => {
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <div
-          class="flex items-center bg-gray-100 dark:bg-[#161f30] p-0.5 rounded-lg sm:hidden"
-        >
-          <button
-            @click="cols = 2"
-            type="button"
-            :class="[
-              'p-1 rounded-md transition-all cursor-pointer',
-              cols === 2
-                ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
-                : 'text-gray-400',
-            ]"
-            title="2 Colunas"
-          >
-            <Grid2x2 class="w-3.5 h-3.5" />
-          </button>
-          <button
-            @click="cols = 3"
-            type="button"
-            :class="[
-              'p-1 rounded-md transition-all cursor-pointer',
-              cols === 3
-                ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
-                : 'text-gray-400',
-            ]"
-            title="3 Colunas"
-          >
-            <Grid3x3 class="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <CollectionGridToggle v-model:cols="cols" />
 
         <span
           class="text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap"

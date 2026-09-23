@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { removeAccents } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useGroupsStore } from "@/stores/groups.js";
@@ -18,10 +18,6 @@ const props = defineProps({
   movies: {
     type: Array,
     required: true,
-  },
-  customSections: {
-    type: Array,
-    default: () => [],
   },
   type: {
     type: String,
@@ -46,18 +42,6 @@ const searchQuery = ref("");
 const savedCols = localStorage.getItem("app_grid_cols");
 const gridCols = ref(savedCols ? Number(savedCols) : 2);
 
-watch(
-  () => groupsStore.activeGroup,
-  () => {
-    groupBy.value = "none";
-    sortBy.value = "rating_desc";
-  },
-);
-
-watch(gridCols, (newVal) => {
-  localStorage.setItem("app_grid_cols", newVal.toString());
-});
-
 const gridClass = computed(() => {
   return gridCols.value === 3
     ? "grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-4"
@@ -74,7 +58,7 @@ const filteredMovies = computed(() => {
 });
 
 const pendingMovies = computed(() => {
-  if (props.type !== "watched" || !authStore.user?.uid) return [];
+  if (props.type !== "watched") return [];
 
   const uid = authStore.user.uid;
   return filteredMovies.value.filter((movie) => {
@@ -83,8 +67,7 @@ const pendingMovies = computed(() => {
 });
 
 const ratedMovies = computed(() => {
-  if (props.type !== "watched" || !authStore.user?.uid)
-    return filteredMovies.value;
+  if (props.type !== "watched") return filteredMovies.value;
 
   const uid = authStore.user.uid;
   return filteredMovies.value.filter(
@@ -118,7 +101,6 @@ function clearSearch() {
 
     <template v-else>
       <CollectionToolbar
-        v-model:search-query="searchQuery"
         v-model:sort-by="sortBy"
         v-model:group-by="groupBy"
         v-model:cols="gridCols"
