@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
+
 import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
@@ -9,11 +10,7 @@ const currentSort = ref("rating_desc");
 const currentGroupBy = ref("none");
 
 function getMovieTimestamp(movie) {
-  const rawDate = movie.created_at || movie.watched_at || movie.added_at;
-  if (!rawDate) return 0;
-  if (typeof rawDate.toDate === "function") return rawDate.toDate().getTime();
-  if (rawDate.seconds) return rawDate.seconds * 1000;
-  return new Date(rawDate).getTime() || 0;
+  return new Date(movie.created_at).getTime();
 }
 
 const sortedMovies = computed(() => {
@@ -32,11 +29,10 @@ const sortedMovies = computed(() => {
 
 <template>
   <MoviesCollection
+    type="watched"
     :movies="sortedMovies"
     :is-loading="watchedMoviesStore.isLoading"
-    type="watched"
     v-model:sort-by="currentSort"
     v-model:group-by="currentGroupBy"
-    @open-movie-modal="$emit('open-movie-modal', $event)"
   />
 </template>

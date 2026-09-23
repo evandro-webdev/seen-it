@@ -1,7 +1,7 @@
 <script setup>
 import { Search } from "@lucide/vue";
 
-const searchQuery = defineModel();
+const searchQuery = defineModel("searchQuery", { type: String, default: "" });
 </script>
 
 <template>

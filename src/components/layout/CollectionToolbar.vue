@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useGroupsStore } from "@/stores/groups";
+import { useSavedMoviesStore } from "@/stores/savedMovies";
 import {
   SlidersHorizontal,
   Dices,
@@ -8,71 +9,39 @@ import {
   Grid3x3,
   Layers,
 } from "@lucide/vue";
-
 import SearchBar from "@/components/layout/SearchBar.vue";
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: "",
-  },
-  type: {
-    type: String,
-    default: "default",
-  },
-  totalCount: {
-    type: Number,
-    default: 0,
-  },
-  isLoading: {
-    type: Boolean,
-    default: false,
-  },
-  sortBy: {
-    type: String,
-    default: "rating_desc",
-  },
-  groupBy: {
-    type: String,
-    default: "none",
-  },
-  cols: {
-    type: Number,
-    default: 2,
-  },
+defineProps({
+  type: { type: String, default: "default" },
+  totalCount: { type: Number, default: 0 },
+  isLoading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits([
-  "update:modelValue",
-  "pick-random",
-  "update:sortBy",
-  "update:groupBy",
-  "update:cols",
-]);
+const searchQuery = defineModel("searchQuery", { type: String, default: "" });
+const sortBy = defineModel("sortBy", { type: String, default: "rating_desc" });
+const groupBy = defineModel("groupBy", { type: String, default: "none" });
+const cols = defineModel("cols", { type: Number, default: 2 });
 
 const groupsStore = useGroupsStore();
-
+const savedMoviesStore = useSavedMoviesStore();
 const isRolling = ref(false);
 
 function handlePickRandom() {
   if (isRolling.value) return;
-
   isRolling.value = true;
-  emit("pick-random");
+
+  savedMoviesStore.pickRandomMovie();
 
   setTimeout(() => {
     isRolling.value = false;
-  }, 800);
+  }, 600);
 }
 </script>
 
 <template>
   <div class="py-2 lg:py-6 space-y-3">
     <div class="flex items-center gap-2">
-      <SearchBar
-        :model-value="modelValue"
-        @update:model-value="emit('update:modelValue', $event)"
-      />
+      <SearchBar v-model:search-query="searchQuery" />
 
       <button
         v-if="type === 'saved' && totalCount > 0"
@@ -91,7 +60,7 @@ function handlePickRandom() {
     </div>
 
     <div
-      v-if="!isLoading && (totalCount > 0 || modelValue)"
+      v-if="!isLoading && (totalCount > 0 || searchQuery)"
       class="mt-2 flex items-center justify-between gap-2 text-xs"
     >
       <div
@@ -104,8 +73,7 @@ function handlePickRandom() {
           <SlidersHorizontal class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
           <select
             id="sort-select"
-            :value="sortBy"
-            @change="emit('update:sortBy', $event.target.value)"
+            v-model="sortBy"
             class="bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer p-0 text-xs text-ellipsis overflow-hidden whitespace-nowrap max-w-[105px] sm:max-w-none"
           >
             <option
@@ -136,8 +104,7 @@ function handlePickRandom() {
           <Layers class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
           <select
             id="group-select"
-            :value="groupBy"
-            @change="emit('update:groupBy', $event.target.value)"
+            v-model="groupBy"
             class="max-w-[100px] sm:max-w-none p-0 text-xs text-ellipsis bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer overflow-hidden whitespace-nowrap"
           >
             <option
@@ -180,14 +147,6 @@ function handlePickRandom() {
             </option>
 
             <option
-              v-if="type === 'watched'"
-              value="5years"
-              class="dark:bg-[#121825]"
-            >
-              Por 5 anos
-            </option>
-
-            <option
               v-if="type === 'saved'"
               value="runtime"
               class="dark:bg-[#121825]"
@@ -203,7 +162,7 @@ function handlePickRandom() {
           class="flex items-center bg-gray-100 dark:bg-[#161f30] p-0.5 rounded-lg sm:hidden"
         >
           <button
-            @click="emit('update:cols', 2)"
+            @click="cols = 2"
             type="button"
             :class="[
               'p-1 rounded-md transition-all cursor-pointer',
@@ -216,7 +175,7 @@ function handlePickRandom() {
             <Grid2x2 class="w-3.5 h-3.5" />
           </button>
           <button
-            @click="emit('update:cols', 3)"
+            @click="cols = 3"
             type="button"
             :class="[
               'p-1 rounded-md transition-all cursor-pointer',

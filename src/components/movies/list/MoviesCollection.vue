@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { removeAccents } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useGroupsStore } from "@/stores/groups.js";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 import { useMovieGrouping } from "@/composables/useMovieGrouping.js";
 
 import MovieCard from "../cards/MovieCard.vue";
@@ -31,42 +32,31 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  sortBy: {
-    type: String,
-    default: "rating_desc",
-  },
-  groupBy: {
-    type: String,
-    default: "none",
-  },
 });
 
-const emit = defineEmits([
-  "open-movie-modal",
-  "pick-random",
-  "update:sortBy",
-  "update:groupBy",
-]);
+const sortBy = defineModel("sortBy", { default: "rating_desc" });
+const groupBy = defineModel("groupBy", { default: "none" });
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
+const movieDetailsStore = useMovieDetailsStore();
 
 const searchQuery = ref("");
 
 const savedCols = localStorage.getItem("app_grid_cols");
 const gridCols = ref(savedCols ? Number(savedCols) : 2);
 
-watch(gridCols, (newVal) => {
-  localStorage.setItem("app_grid_cols", newVal.toString());
-});
-
 watch(
   () => groupsStore.activeGroup,
   () => {
-    emit("update:groupBy", "none");
-    emit("update:sortBy", "rating_desc");
+    groupBy.value = "none";
+    sortBy.value = "rating_desc";
   },
 );
+
+watch(gridCols, (newVal) => {
+  localStorage.setItem("app_grid_cols", newVal.toString());
+});
 
 const gridClass = computed(() => {
   return gridCols.value === 3
@@ -77,6 +67,7 @@ const gridClass = computed(() => {
 const filteredMovies = computed(() => {
   if (!searchQuery.value.trim()) return props.movies;
   const query = removeAccents(searchQuery.value.trim().toLowerCase());
+
   return props.movies.filter((movie) =>
     removeAccents(movie.title.toLowerCase()).includes(query),
   );
@@ -127,16 +118,13 @@ function clearSearch() {
 
     <template v-else>
       <CollectionToolbar
-        v-model="searchQuery"
+        v-model:search-query="searchQuery"
+        v-model:sort-by="sortBy"
+        v-model:group-by="groupBy"
+        v-model:cols="gridCols"
         :type="type"
         :total-count="filteredMovies.length"
         :is-loading="isLoading"
-        :sort-by="sortBy"
-        :group-by="groupBy"
-        v-model:cols="gridCols"
-        @update:sort-by="emit('update:sortBy', $event)"
-        @update:group-by="emit('update:groupBy', $event)"
-        @pick-random="$emit('pick-random')"
       />
 
       <div class="h-[100%] py-2 flex flex-col flex-1">
@@ -166,9 +154,9 @@ function clearSearch() {
             <div :class="gridClass">
               <MovieCard
                 v-for="movie in pendingMovies"
+                @click="movieDetailsStore.openModal(movie.id)"
                 :key="movie.id"
                 :movie="movie"
-                @click="$emit('open-movie-modal', movie.id)"
               />
             </div>
           </section>
@@ -182,7 +170,6 @@ function clearSearch() {
             :active-group-sections="activeGroupSections"
             :grid-class="gridClass"
             :type="type"
-            @open-movie-modal="$emit('open-movie-modal', $event)"
           />
 
           <section
@@ -191,9 +178,9 @@ function clearSearch() {
           >
             <MovieCard
               v-for="movie in ratedMovies"
+              @click="movieDetailsStore.openModal(movie.id)"
               :key="movie.id"
               :movie="movie"
-              @click="$emit('open-movie-modal', movie.id)"
               show-user-color
             />
           </section>
