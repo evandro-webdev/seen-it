@@ -101,6 +101,7 @@ function clearSearch() {
 
     <template v-else>
       <CollectionToolbar
+        v-model:search-query="searchQuery"
         v-model:sort-by="sortBy"
         v-model:group-by="groupBy"
         v-model:cols="gridCols"
