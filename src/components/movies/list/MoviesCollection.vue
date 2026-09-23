@@ -67,7 +67,7 @@ const pendingMovies = computed(() => {
   });
 });
 
-const ratedMovies = computed(() => {
+const displayMovies = computed(() => {
   if (props.type !== "watched") return filteredMovies.value;
 
   const uid = authStore.user.uid;
@@ -77,7 +77,7 @@ const ratedMovies = computed(() => {
 });
 
 const { activeGroupSections } = useMovieGrouping(
-  ratedMovies,
+  displayMovies,
   computed(() => props.groupBy),
   {
     activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
@@ -127,7 +127,7 @@ function clearSearch() {
 
           <MoviesGroupedSection
             v-if="
-              ratedMovies.length > 0 &&
+              displayMovies.length > 0 &&
               groupBy !== 'none' &&
               activeGroupSections.length > 0
             "
@@ -137,11 +137,11 @@ function clearSearch() {
           />
 
           <section
-            v-else-if="ratedMovies.length > 0"
+            v-else-if="displayMovies.length > 0"
             :class="gridClass"
           >
             <MovieCard
-              v-for="movie in ratedMovies"
+              v-for="movie in displayMovies"
               @click="movieDetailsStore.openModal(movie.id)"
               :key="movie.id"
               :movie="movie"
