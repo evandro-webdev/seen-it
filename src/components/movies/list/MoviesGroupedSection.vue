@@ -1,6 +1,6 @@
 <script setup>
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 import { getUserColor } from "@/constants/colors.js";
-
 
 import MovieCard from "../cards/MovieCard.vue";
 
@@ -23,7 +23,8 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["open-movie-modal"]);
+const movieDetailsStore = useMovieDetailsStore();
+
 </script>
 
 <template>
@@ -53,9 +54,9 @@ const emit = defineEmits(["open-movie-modal"]);
       <div :class="gridClass">
         <MovieCard
           v-for="movie in section.movies"
+          @click="movieDetailsStore.openModal(movie.id)"
           :key="movie.id"
           :movie="movie"
-          @click="$emit('open-movie-modal', movie.id)"
           :show-user-color="type === 'saved' || groupBy === 'members'"
         />
       </div>
