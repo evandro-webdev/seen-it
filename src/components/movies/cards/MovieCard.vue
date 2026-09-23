@@ -77,6 +77,7 @@ function formatDate(dateString) {
     >
       <img
         v-if="posterUrl && !imageError"
+        :src="posterUrl"
         :alt="movie.title"
         loading="lazy"
         @error="handleImageError"
