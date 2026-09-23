@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useGroupsStore } from "@/stores/groups";
 import { useSavedMoviesStore } from "@/stores/savedMovies";
 import {
@@ -10,8 +10,9 @@ import {
   Layers,
 } from "@lucide/vue";
 import SearchBar from "@/components/layout/SearchBar.vue";
+import BaseSelect from "../forms/BaseSelect.vue";
 
-defineProps({
+const props = defineProps({
   type: { type: String, default: "default" },
   totalCount: { type: Number, default: 0 },
   isLoading: { type: Boolean, default: false },
@@ -24,7 +25,36 @@ const cols = defineModel("cols", { type: Number, default: 2 });
 
 const groupsStore = useGroupsStore();
 const savedMoviesStore = useSavedMoviesStore();
+
 const isRolling = ref(false);
+
+const SORT_OPTIONS = [
+  { value: "rating_desc", label: "Maior nota" },
+  { value: "rating_asc", label: "Menor nota" },
+  { value: "date_desc", label: "Mais recentes" },
+];
+
+const groupByOptions = computed(() => {
+  const options = [{ value: "none", label: "Nenhum" }];
+
+  if (groupsStore.activeGroup) {
+    options.push({ value: "members", label: "Membro" });
+  }
+
+  if (props.type === "watched") {
+    options.push(
+      { value: "cast", label: "Elenco" },
+      { value: "director", label: "Diretor" },
+      { value: "decade", label: "Década" },
+    );
+  }
+
+  if (props.type === "saved") {
+    options.push({ value: "runtime", label: "Duração" });
+  }
+
+  return options;
+});
 
 function handlePickRandom() {
   if (isRolling.value) return;
@@ -71,30 +101,10 @@ function handlePickRandom() {
           class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] px-2 py-1 rounded-lg shrink-0"
         >
           <SlidersHorizontal class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
-          <select
-            id="sort-select"
+          <BaseSelect
             v-model="sortBy"
-            class="bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer p-0 text-xs text-ellipsis overflow-hidden whitespace-nowrap max-w-[105px] sm:max-w-none"
-          >
-            <option
-              value="rating_desc"
-              class="dark:bg-[#121825]"
-            >
-              Maior nota
-            </option>
-            <option
-              value="rating_asc"
-              class="dark:bg-[#121825]"
-            >
-              Menor nota
-            </option>
-            <option
-              value="date_desc"
-              class="dark:bg-[#121825]"
-            >
-              Mais recentes
-            </option>
-          </select>
+            :options="SORT_OPTIONS"
+          />
         </div>
 
         <div
@@ -102,58 +112,10 @@ function handlePickRandom() {
           class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 bg-gray-100/80 dark:bg-[#161f30] px-2 py-1 rounded-lg shrink-0"
         >
           <Layers class="w-3.5 h-3.5 text-[#0088FF] shrink-0" />
-          <select
-            id="group-select"
+          <BaseSelect
             v-model="groupBy"
-            class="max-w-[100px] sm:max-w-none p-0 text-xs text-ellipsis bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer overflow-hidden whitespace-nowrap"
-          >
-            <option
-              value="none"
-              class="dark:bg-[#121825]"
-            >
-              Nenhum
-            </option>
-
-            <option
-              v-if="groupsStore.activeGroup"
-              value="members"
-              class="dark:bg-[#121825]"
-            >
-              Por membro
-            </option>
-
-            <option
-              v-if="type === 'watched'"
-              value="actors"
-              class="dark:bg-[#121825]"
-            >
-              Por elenco
-            </option>
-
-            <option
-              v-if="type === 'watched'"
-              value="directors"
-              class="dark:bg-[#121825]"
-            >
-              Por diretor
-            </option>
-
-            <option
-              v-if="type === 'watched'"
-              value="decades"
-              class="dark:bg-[#121825]"
-            >
-              Por década
-            </option>
-
-            <option
-              v-if="type === 'saved'"
-              value="runtime"
-              class="dark:bg-[#121825]"
-            >
-              Por duração
-            </option>
-          </select>
+            :options="groupByOptions"
+          />
         </div>
       </div>
 

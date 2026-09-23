@@ -109,7 +109,7 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
   });
 
   const actorSections = computed(() => {
-    if (groupBy.value !== "actors") return [];
+    if (groupBy.value !== "cast") return [];
 
     const actorMaps = {};
 
@@ -145,18 +145,18 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
 
       if (!combinedGroups[movieSignature]) {
         combinedGroups[movieSignature] = {
-          actors: [],
+          cast: [],
           movies: actor.movies,
         };
       }
 
-      combinedGroups[movieSignature].actors.push(actor.name);
+      combinedGroups[movieSignature].cast.push(actor.name);
     });
 
     return Object.values(combinedGroups)
       .sort((a, b) => b.movies.length - a.movies.length)
       .map((group) => {
-        const actorsNames = group.actors;
+        const actorsNames = group.cast;
         let titleText = "";
 
         if (actorsNames.length === 1) {
@@ -177,7 +177,7 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
   });
 
   const directorSections = computed(() => {
-    if (groupBy.value !== "directors") return [];
+    if (groupBy.value !== "director") return [];
 
     const directorMaps = {};
 
@@ -216,7 +216,7 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
       return groupMoviesByYearStep(movies.value, 5);
     }
 
-    if (groupBy.value === "decades") {
+    if (groupBy.value === "decade") {
       return groupMoviesByYearStep(movies.value, 10);
     }
 
@@ -226,9 +226,9 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
   const activeGroupSections = computed(() => {
     if (groupBy.value === "members") return memberSections.value;
     if (groupBy.value === "runtime") return runtimeSections.value;
-    if (groupBy.value === "actors") return actorSections.value;
-    if (groupBy.value === "directors") return directorSections.value;
-    if (groupBy.value === "5years" || groupBy.value === "decades")
+    if (groupBy.value === "cast") return actorSections.value;
+    if (groupBy.value === "director") return directorSections.value;
+    if (groupBy.value === "5years" || groupBy.value === "decade")
       return yearSections.value;
     return [];
   });
