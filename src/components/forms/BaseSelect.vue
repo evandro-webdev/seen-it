@@ -11,6 +11,7 @@ const modelValue = defineModel({ type: String, default: "" });
 
 <template>
   <select
+    v-model="modelValue"
     class="bg-transparent font-medium border-none focus:outline-none focus:ring-0 cursor-pointer p-0 text-xs text-ellipsis overflow-hidden whitespace-nowrap max-w-[105px] sm:max-w-none"
   >
     <option
