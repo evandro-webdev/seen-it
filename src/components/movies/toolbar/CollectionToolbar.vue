@@ -1,11 +1,9 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useGroupsStore } from "@/stores/groups";
-import { useSavedMoviesStore } from "@/stores/savedMovies";
 
 import {
   SlidersHorizontal,
-  Dices,
   Grid2x2,
   Grid3x3,
   Layers,
@@ -13,6 +11,7 @@ import {
 
 import SearchBar from "../SearchBar.vue";
 import BaseSelect from "@/components/forms/BaseSelect.vue";
+import PickRandomMovieButton from "./PickRandomMovieButton.vue";
 
 const props = defineProps({
   type: { type: String, default: "default" },
@@ -26,9 +25,6 @@ const groupBy = defineModel("groupBy", { type: String, default: "none" });
 const cols = defineModel("cols", { type: Number, default: 2 });
 
 const groupsStore = useGroupsStore();
-const savedMoviesStore = useSavedMoviesStore();
-
-const isRolling = ref(false);
 
 const SORT_OPTIONS = [
   { value: "rating_desc", label: "Maior nota" },
@@ -57,17 +53,6 @@ const groupByOptions = computed(() => {
 
   return options;
 });
-
-function handlePickRandom() {
-  if (isRolling.value) return;
-  isRolling.value = true;
-
-  savedMoviesStore.pickRandomMovie();
-
-  setTimeout(() => {
-    isRolling.value = false;
-  }, 600);
-}
 </script>
 
 <template>
@@ -75,20 +60,7 @@ function handlePickRandom() {
     <div class="flex items-center gap-2">
       <SearchBar v-model:search-query="searchQuery" />
 
-      <button
-        v-if="type === 'saved' && totalCount > 0"
-        @click="handlePickRandom"
-        type="button"
-        title="Escolher filme aleatório"
-        aria-label="Escolher filme aleatório"
-        :disabled="isRolling"
-        class="h-[54px] w-[54px] rounded-2xl bg-[#0062b8] text-white flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-80"
-      >
-        <Dices
-          class="w-6 h-6 transition-transform duration-500"
-          :class="{ 'animate-spin': isRolling }"
-        />
-      </button>
+      <PickRandomMovieButton v-if="type === 'saved' && totalCount > 0"/>
     </div>
 
     <div
