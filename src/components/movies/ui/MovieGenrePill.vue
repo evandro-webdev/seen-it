@@ -10,7 +10,7 @@ const selectedGenreId = computed(() => genreMoviesStore.selectedGenreId);
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto no-scrollbar py-1">
+  <div class="w-full overflow-x-auto no-scrollbar">
     <div class="flex items-center gap-2 w-max">
       <button
         @click="genreMoviesStore.selectGenre(null)"

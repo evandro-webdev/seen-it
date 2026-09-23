@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { useGroupsStore } from "@/stores/groups";
 import { useSavedMoviesStore } from "@/stores/savedMovies";
+
 import {
   SlidersHorizontal,
   Dices,
@@ -9,8 +10,9 @@ import {
   Grid3x3,
   Layers,
 } from "@lucide/vue";
-import SearchBar from "@/components/layout/SearchBar.vue";
-import BaseSelect from "../forms/BaseSelect.vue";
+
+import SearchBar from "../SearchBar.vue";
+import BaseSelect from "@/components/forms/BaseSelect.vue";
 
 const props = defineProps({
   type: { type: String, default: "default" },

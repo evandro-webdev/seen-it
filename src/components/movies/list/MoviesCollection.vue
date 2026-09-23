@@ -11,8 +11,8 @@ import AuthForm from "@/components/auth/AuthForm.vue";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
 import MovieSearchEmpty from "../ui/messages/MovieSearchEmpty.vue";
 import MoviesTrackedEmpty from "../ui/messages/MoviesTrackedEmpty.vue";
-import CollectionToolbar from "@/components/layout/CollectionToolbar.vue";
 import MoviesGroupedSection from "./MoviesGroupedSection.vue";
+import CollectionToolbar from "../toolbar/CollectionToolbar.vue";
 
 const props = defineProps({
   movies: {

@@ -3,8 +3,8 @@ import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
 
 import { Flame, Clapperboard, Award } from "@lucide/vue";
 
-import MoviesHeroCarousel from "./list/MoviesHeroCarousel.vue";
-import MoviesRow from "./list/MoviesRow.vue";
+import MoviesHeroCarousel from "./MoviesHeroCarousel.vue";
+import MoviesRow from "../list/MoviesRow.vue";
 
 const discoverMoviesStore = useDiscoverMoviesStore();
 </script>

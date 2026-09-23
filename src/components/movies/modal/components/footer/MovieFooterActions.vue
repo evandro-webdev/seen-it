@@ -4,8 +4,9 @@ import { useMovieDetailsStore } from "@/stores/movieDetails";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies";
 
 import { Sparkles, ArrowLeft, Check, X, SquarePen } from "@lucide/vue";
+
 import BaseButton from "@/components/ui/BaseButton.vue";
-import SaveButton from "@/components/movies/ui/buttons/SaveButton.vue";
+import SaveButton from "./SaveButton.vue";
 
 const props = defineProps({
   isSubmitting: {

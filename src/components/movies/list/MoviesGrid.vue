@@ -33,7 +33,7 @@ const movieDetailsStore = useMovieDetailsStore();
 </script>
 
 <template>
-  <div class="pt-2 space-y-4">
+  <div class="space-y-4">
     <div class="flex items-center gap-2">
       <button
         v-if="showBackButton"

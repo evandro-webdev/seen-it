@@ -5,12 +5,12 @@ import { useSearchMoviesStore } from "@/stores/searchMovies.js";
 import { useGenreMoviesStore } from "@/stores/genreMovies.js";
 import { useOnline } from "@vueuse/core";
 
-import SearchBar from "@/components/layout/SearchBar.vue";
+import SearchBar from "@/components/movies/SearchBar.vue";
 import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
-import NotInternetConnection from "@/components/movies/ui/messages/NotInternetConnection.vue";
-import DiscoverHomeSection from "@/components/movies/DiscoverHomeSection.vue";
-import MoviesSearchResults from "@/components/movies/list/MoviesSearchResults.vue";
+import DiscoverHomeSection from "@/components/movies/discover/DiscoverHomeSection.vue";
+import MoviesSearchResults from "@/components/movies/discover/MoviesSearchResults.vue";
 import MoviesGrid from "@/components/movies/list/MoviesGrid.vue";
+import NotInternetConnection from "@/components/movies/ui/messages/NotInternetConnection.vue";
 
 const discoverMoviesStore = useDiscoverMoviesStore();
 const searchMoviesStore = useSearchMoviesStore();
