@@ -13,6 +13,7 @@ import MovieSearchEmpty from "../ui/messages/MovieSearchEmpty.vue";
 import MoviesTrackedEmpty from "../ui/messages/MoviesTrackedEmpty.vue";
 import MoviesGroupedSection from "./MoviesGroupedSection.vue";
 import CollectionToolbar from "../toolbar/CollectionToolbar.vue";
+import MoviesPendingSection from "./MoviesPendingSection.vue";
 
 const props = defineProps({
   movies: {
@@ -119,30 +120,10 @@ function clearSearch() {
         </div>
 
         <template v-else>
-          <section
+          <MoviesPendingSection
             v-if="type === 'watched' && pendingMovies.length > 0"
-            class="mb-6 pb-6 space-y-3 border-b border-gray-100 dark:border-gray-800/60"
-          >
-            <div class="flex items-center gap-2">
-              <span
-                class="w-2.5 h-2.5 rounded-full bg-[#10355E] dark:bg-[#B0D5FE] animate-pulse"
-              ></span>
-              <h2
-                class="text-base font-semibold text-[#10355E] dark:text-[#B0D5FE]"
-              >
-                {{ authStore.user?.displayName }}, você ainda não avaliou:
-              </h2>
-            </div>
-
-            <div :class="gridClass">
-              <MovieCard
-                v-for="movie in pendingMovies"
-                @click="movieDetailsStore.openModal(movie.id)"
-                :key="movie.id"
-                :movie="movie"
-              />
-            </div>
-          </section>
+            :movies="pendingMovies"
+          />
 
           <MoviesGroupedSection
             v-if="
