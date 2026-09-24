@@ -6,7 +6,7 @@ import { useGenreMoviesStore } from "@/stores/genreMovies.js";
 import { useOnline } from "@vueuse/core";
 
 import SearchBar from "@/components/movies/SearchBar.vue";
-import MovieGenrePill from "@/components/movies/ui/MovieGenrePill.vue";
+import MoviesGenres from "@/components/movies/discover/MoviesGenres.vue";
 import DiscoverHomeSection from "@/components/movies/discover/DiscoverHomeSection.vue";
 import MoviesSearchResults from "@/components/movies/discover/MoviesSearchResults.vue";
 import MoviesGrid from "@/components/movies/list/MoviesGrid.vue";
@@ -101,7 +101,7 @@ function clearSearch() {
         </span>
       </div>
 
-      <MovieGenrePill
+      <MoviesGenres
         v-if="
           !searchMoviesStore.isSearching &&
           !genreMoviesStore.isLoading &&

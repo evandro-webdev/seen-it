@@ -95,6 +95,7 @@ export const useGenreMoviesStore = defineStore("genreMovies", () => {
     isLoadingMoreGenreMovies,
     loadGenres,
     selectGenre,
+    clearGenre,
     loadMoreGenreMovies,
   };
 });
