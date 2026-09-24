@@ -1,6 +1,8 @@
 <script setup>
 import { computed, watch } from "vue";
+import { storeToRefs } from "pinia";
 import { useGroupsStore } from "@/stores/groups";
+import { useCollectionFilter } from "@/stores/collectionFilter.js";
 
 import { SlidersHorizontal, Layers } from "@lucide/vue";
 
@@ -10,23 +12,26 @@ import PickRandomMovieButton from "./PickRandomMovieButton.vue";
 import CollectionGridToggle from "./CollectionGridToggle.vue";
 
 const props = defineProps({
-  type: { type: String, default: "default" },
+  type: {
+    type: String,
+    required: true,
+    validator: (value) => ["saved", "watched"].includes(value),
+  },
   totalCount: { type: Number, default: 0 },
   isLoading: { type: Boolean, default: false },
 });
 
 const searchQuery = defineModel("searchQuery", { type: String, default: "" });
-const sortBy = defineModel("sortBy", { type: String, default: "rating_desc" });
-const groupBy = defineModel("groupBy", { type: String, default: "none" });
-const cols = defineModel("cols", { type: Number, default: 2 });
 
 const groupsStore = useGroupsStore();
+const filterStore = useCollectionFilter();
+
+const { sortBy, groupBy } = storeToRefs(filterStore);
 
 watch(
   () => groupsStore.activeGroup,
   () => {
-    groupBy.value = "none";
-    sortBy.value = "rating_desc";
+    filterStore.resetFilters();
   },
 );
 
@@ -97,7 +102,7 @@ const groupByOptions = computed(() => {
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <CollectionGridToggle v-model:cols="cols" />
+        <CollectionGridToggle />
 
         <span
           class="text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap"

@@ -1,13 +1,12 @@
 <script setup>
-import { watch } from "vue";
+import { useCollectionFilter } from "@/stores/collectionFilter";
+import { storeToRefs } from "pinia";
 
 import { Grid2x2, Grid3x3 } from "@lucide/vue";
 
-const cols = defineModel("cols", { type: Number, default: 2 });
+const filterStore = useCollectionFilter();
 
-watch(cols, (newVal) => {
-  localStorage.setItem("app_grid_cols", newVal.toString());
-});
+const { gridCols } = storeToRefs(filterStore);
 </script>
 
 <template>
@@ -15,11 +14,11 @@ watch(cols, (newVal) => {
     class="flex items-center bg-gray-100 dark:bg-[#161f30] p-0.5 rounded-lg sm:hidden"
   >
     <button
-      @click="cols = 2"
+      @click="gridCols = 2"
       type="button"
       :class="[
         'p-1 rounded-md transition-all cursor-pointer',
-        cols === 2
+        gridCols === 2
           ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
           : 'text-gray-400',
       ]"
@@ -28,11 +27,11 @@ watch(cols, (newVal) => {
       <Grid2x2 class="w-3.5 h-3.5" />
     </button>
     <button
-      @click="cols = 3"
+      @click="gridCols = 3"
       type="button"
       :class="[
         'p-1 rounded-md transition-all cursor-pointer',
-        cols === 3
+        gridCols === 3
           ? 'bg-white dark:bg-[#202c42] text-[#0088FF] shadow-xs'
           : 'text-gray-400',
       ]"

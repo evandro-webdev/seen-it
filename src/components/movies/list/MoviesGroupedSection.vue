@@ -1,5 +1,7 @@
 <script setup>
+import { storeToRefs } from "pinia";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { useCollectionFilter } from "@/stores/collectionFilter.js";
 import { getUserColor } from "@/constants/colors.js";
 
 import MovieCard from "../cards/MovieCard.vue";
@@ -14,17 +16,16 @@ defineProps({
     required: true,
     validator: (value) => ["saved", "watched"].includes(value),
   },
-  groupBy: {
-    type: String,
-    default: "none",
-  },
   gridClass: {
     type: String,
+    required: true,
   },
 });
 
 const movieDetailsStore = useMovieDetailsStore();
+const filterStore = useCollectionFilter();
 
+const { groupBy } = storeToRefs(filterStore);
 </script>
 
 <template>

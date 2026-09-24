@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 import { removeAccents } from "@/utils/formatters.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useGroupsStore } from "@/stores/groups.js";
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
+import { useCollectionFilter } from "@/stores/collectionFilter.js";
 import { useMovieGrouping } from "@/composables/useMovieGrouping.js";
 
 import MovieCard from "../cards/MovieCard.vue";
@@ -31,17 +33,14 @@ const props = defineProps({
   },
 });
 
-const sortBy = defineModel("sortBy", { default: "rating_desc" });
-const groupBy = defineModel("groupBy", { default: "none" });
-
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
 const movieDetailsStore = useMovieDetailsStore();
+const filterStore = useCollectionFilter();
+
+const { groupBy, gridCols } = storeToRefs(filterStore);
 
 const searchQuery = ref("");
-
-const savedCols = localStorage.getItem("app_grid_cols");
-const gridCols = ref(savedCols ? Number(savedCols) : 2);
 
 const gridClass = computed(() => {
   return gridCols.value === 3
@@ -78,7 +77,7 @@ const displayMovies = computed(() => {
 
 const { activeGroupSections } = useMovieGrouping(
   displayMovies,
-  computed(() => props.groupBy),
+  groupBy,
   {
     activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
     currentUid: computed(() => authStore.user?.uid),
@@ -103,9 +102,6 @@ function clearSearch() {
     <template v-else>
       <CollectionToolbar
         v-model:search-query="searchQuery"
-        v-model:sort-by="sortBy"
-        v-model:group-by="groupBy"
-        v-model:cols="gridCols"
         :type="type"
         :total-count="filteredMovies.length"
         :is-loading="isLoading"
@@ -123,6 +119,7 @@ function clearSearch() {
           <MoviesPendingSection
             v-if="type === 'watched' && pendingMovies.length > 0"
             :movies="pendingMovies"
+            :grid-class="gridClass"
           />
 
           <MoviesGroupedSection

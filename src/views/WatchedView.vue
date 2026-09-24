@@ -1,13 +1,15 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { useWatchedMoviesStore } from "@/stores/watchedMovies.js";
+import { useCollectionFilter } from "@/stores/collectionFilter";
 
 import MoviesCollection from "@/components/movies/list/MoviesCollection.vue";
 
 const watchedMoviesStore = useWatchedMoviesStore();
+const filterStore = useCollectionFilter();
 
-const currentSort = ref("rating_desc");
-const currentGroupBy = ref("none");
+const { sortBy } = storeToRefs(filterStore);
 
 function getMovieTimestamp(movie) {
   return new Date(movie.created_at).getTime();
@@ -16,23 +18,25 @@ function getMovieTimestamp(movie) {
 const sortedMovies = computed(() => {
   const list = [...watchedMoviesStore.watchedMovies];
   return list.sort((a, b) => {
-    if (currentSort.value === "rating_desc")
+    if (sortBy.value === "rating_desc")
       return b.average_rating - a.average_rating;
-    if (currentSort.value === "rating_asc")
+    if (sortBy.value === "rating_asc")
       return a.average_rating - b.average_rating;
-    if (currentSort.value === "date_desc")
+    if (sortBy.value === "date_desc")
       return getMovieTimestamp(b) - getMovieTimestamp(a);
     return 0;
   });
+});
+
+onMounted(() => {
+  filterStore.resetFilters();
 });
 </script>
 
 <template>
   <MoviesCollection
-    type="watched"
     :movies="sortedMovies"
     :is-loading="watchedMoviesStore.isLoading"
-    v-model:sort-by="currentSort"
-    v-model:group-by="currentGroupBy"
+    type="watched"
   />
 </template>
