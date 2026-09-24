@@ -8,6 +8,10 @@ defineProps({
     type: Array,
     required: true,
   },
+  gridClass: {
+    type: String,
+    required: true,
+  },
 });
 
 const authStore = useAuthStore();
@@ -28,7 +32,7 @@ const authStore = useAuthStore();
 
     <div :class="gridClass">
       <MovieCard
-        v-for="movie in pendingMovies"
+        v-for="movie in movies"
         @click="movieDetailsStore.openModal(movie.id)"
         :key="movie.id"
         :movie="movie"
