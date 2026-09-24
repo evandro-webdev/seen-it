@@ -1,6 +1,7 @@
 <script setup>
 import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 import { useDiscoverMoviesStore } from "@/stores/discoverMovies.js";
+import { useScrollMask } from "@/composables/useScrollMask.js";
 
 import MovieCard from "../cards/MovieCard.vue";
 import MovieCardSkeleton from "../cards/MovieCardSkeleton.vue";
@@ -30,6 +31,9 @@ const props = defineProps({
 const movieDetailsStore = useMovieDetailsStore();
 const discoverMoviesStore = useDiscoverMoviesStore();
 
+const { scrollContainer, showRightGradient, checkScrollPosition } =
+  useScrollMask(() => props.movies);
+
 function handleSeeAllMovies() {
   discoverMoviesStore.selectCategory(props.category, props.title);
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -58,7 +62,10 @@ function handleSeeAllMovies() {
     </div>
 
     <div
-      class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory"
+      ref="scrollContainer"
+      @scroll="checkScrollPosition"
+      class="-mr-4 pr-4 flex gap-x-3 overflow-x-auto scrollbar-none snap-x snap-mandatory transition-all duration-300"
+      :class="[showRightGradient ? 'mask-right' : '']"
     >
       <template v-if="discoverMoviesStore.isLoading">
         <MovieCardSkeleton
@@ -82,3 +89,9 @@ function handleSeeAllMovies() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.mask-right {
+  mask-image: linear-gradient(to left, transparent 0%, black 24px);
+}
+</style>

@@ -1,31 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
 import { useGenreMoviesStore } from "@/stores/genreMovies";
+import { useScrollMask } from "@/composables/useScrollMask";
 
 const genreMoviesStore = useGenreMoviesStore();
 
-const scrollContainer = ref(null);
-const showLeftGradient = ref(false);
-const showRightGradient = ref(false);
-
-function checkScrollPosition() {
-  const el = scrollContainer.value;
-  if (!el) return;
-
-  const { scrollLeft, scrollWidth, clientWidth } = el;
-
-  showLeftGradient.value = scrollLeft > 2;
-  showRightGradient.value = scrollLeft + clientWidth < scrollWidth - 2;
-}
-
-onMounted(() => {
-  checkScrollPosition();
-  window.addEventListener("resize", checkScrollPosition);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", checkScrollPosition);
-});
+const {
+  scrollContainer,
+  showLeftGradient,
+  showRightGradient,
+  checkScrollPosition,
+} = useScrollMask(() => genreMoviesStore.genres);
 </script>
 
 <template>
