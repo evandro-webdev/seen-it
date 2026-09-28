@@ -1,12 +1,9 @@
 <script setup>
 import { ref, computed } from "vue";
-
 import { useGroupsStore } from "@/stores/groups.js";
-import { useProfileStore } from "@/stores/profile.js";
 import { useAuthStore } from "@/stores/auth.js";
 import { useNotificationsStore } from "@/stores/notifications.js";
 import { useToastStore } from "@/stores/toast.js";
-
 import { getGroupTheme } from "@/constants/colors.js";
 
 import { Menu, Bell, X, FolderHeart } from "@lucide/vue";
@@ -16,7 +13,6 @@ import ToggleThemeButton from "@/components/ui/ToggleThemeButton.vue";
 
 const authStore = useAuthStore();
 const groupsStore = useGroupsStore();
-const profileStore = useProfileStore();
 const notificationsStore = useNotificationsStore();
 const toastStore = useToastStore();
 
@@ -26,27 +22,6 @@ const menuButtonRef = ref(null);
 const groupTheme = computed(() => {
   return getGroupTheme(groupsStore.activeGroup?.theme);
 });
-
-async function handleLogout() {
-  isMenuOpen.value = false;
-
-  try {
-    await authStore.logout();
-    toastStore.success("Você saiu da sua conta.");
-  } catch (error) {
-    console.error("Erro ao fazer logout:", error);
-  }
-}
-
-function openGroupsModal() {
-  isMenuOpen.value = false;
-  groupsStore.openGroupsModal();
-}
-
-function openProfileModal() {
-  isMenuOpen.value = false;
-  profileStore.openProfileModal();
-}
 
 async function openNotificationsModal() {
   notificationsStore.openNotificationsModal();
@@ -131,12 +106,8 @@ function handleCloseGroup() {
       >
         <MenuDropdown
           v-if="isMenuOpen"
-          :display-name="authStore.user?.displayName"
           :ignore-ref="menuButtonRef"
           @close="isMenuOpen = false"
-          @open-groups-modal="openGroupsModal"
-          @open-profile-modal="openProfileModal"
-          @logout="handleLogout"
         />
       </Transition>
     </div>
