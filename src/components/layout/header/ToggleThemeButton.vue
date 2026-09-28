@@ -8,7 +8,7 @@ const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 <template>
   <button
-    class="text-[#0088FF] p-1.5 rounded-lg active:scale-95 transition-transform overflow-hidden flex items-center justify-center"
+    class="p-1.5 rounded-lg text-gray-400 dark:text-slate-400 flex items-center justify-center active:scale-95 transition-transform overflow-hidden"
     @click="toggleDarkMode"
   >
     <Transition

@@ -7,7 +7,7 @@ import { Menu } from "@lucide/vue";
 import MenuDropdown from "./Menu.vue";
 import NotificationsButton from "./header/NotificationsButton.vue";
 import ToggleThemeButton from "./header/ToggleThemeButton.vue";
-import GroupActiveBadge from "./header/GroupActiveBadge.vue";
+import GroupActiveDisplay from "./header/GroupActiveDisplay.vue";
 
 const authStore = useAuthStore();
 
@@ -35,7 +35,7 @@ const menuButtonRef = ref(null);
           <Menu class="w-6 h-6" />
         </button>
 
-        <GroupActiveBadge />
+        <GroupActiveDisplay />
       </div>
 
       <div class="ml-auto space-x-3 flex items-center">

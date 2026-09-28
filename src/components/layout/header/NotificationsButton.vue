@@ -16,7 +16,7 @@ async function openNotificationsModal() {
 <template>
   <div
     v-if="authStore.loading"
-    class="text-[#0088FF] opacity-50 animate-pulse pointer-events-none"
+    class="text-gray-400 dark:text-slate-400 opacity-50 animate-pulse pointer-events-none"
   >
     <Bell class="w-6 h-6" />
   </div>
@@ -24,7 +24,7 @@ async function openNotificationsModal() {
   <button
     v-else-if="authStore.isAuthenticated"
     @click="openNotificationsModal"
-    class="relative text-[#0088FF] transition-opacity"
+    class="relative text-gray-400 dark:text-slate-400 transition-opacity"
   >
     <Bell class="w-6 h-6" />
     <span

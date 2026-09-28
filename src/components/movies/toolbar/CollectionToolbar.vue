@@ -69,7 +69,7 @@ const groupByOptions = computed(() => {
 </script>
 
 <template>
-  <div class="py-2 lg:py-6 space-y-3">
+  <div class="my-1 space-y-3">
     <div class="flex items-center gap-2">
       <SearchBar v-model:search-query="searchQuery" />
       <PickRandomMovieButton v-if="type === 'saved' && totalCount > 0" />
@@ -77,12 +77,12 @@ const groupByOptions = computed(() => {
 
     <div
       v-if="!isLoading && (totalCount > 0 || searchQuery)"
-      class="mt-2 flex items-center justify-between gap-2 text-xs"
+      class="flex items-center justify-between gap-2 text-xs"
     >
       <div
         ref="scrollContainer"
         @scroll="checkScrollPosition"
-        class="max-w-[calc(100%-90px)] py-0.5 sm:max-w-none flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
+        class="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth"
         :class="[
           showLeftGradient && showRightGradient ? 'mask-both' : '',
           showLeftGradient && !showRightGradient ? 'mask-left' : '',
@@ -114,12 +114,6 @@ const groupByOptions = computed(() => {
 
       <div class="flex items-center gap-2 shrink-0">
         <CollectionGridToggle />
-
-        <span
-          class="text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap"
-        >
-          {{ totalCount }} {{ totalCount === 1 ? "filme" : "filmes" }}
-        </span>
       </div>
     </div>
   </div>
