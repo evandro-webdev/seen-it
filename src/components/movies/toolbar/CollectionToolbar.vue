@@ -3,6 +3,7 @@ import { computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useGroupsStore } from "@/stores/groups";
 import { useCollectionFilter } from "@/stores/collectionFilter.js";
+import { useScrollMask } from "@/composables/useScrollMask.js";
 
 import { SlidersHorizontal, Layers } from "@lucide/vue";
 
@@ -27,6 +28,9 @@ const groupsStore = useGroupsStore();
 const filterStore = useCollectionFilter();
 
 const { sortBy, groupBy } = storeToRefs(filterStore);
+
+const { scrollContainer, showLeftGradient, showRightGradient, checkScrollPosition } =
+  useScrollMask();
 
 watch(
   () => groupsStore.activeGroup,
@@ -76,7 +80,14 @@ const groupByOptions = computed(() => {
       class="mt-2 flex items-center justify-between gap-2 text-xs"
     >
       <div
-        class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 max-w-[calc(100%-90px)] sm:max-w-none"
+        ref="scrollContainer"
+        @scroll="checkScrollPosition"
+        class="max-w-[calc(100%-90px)] py-0.5 sm:max-w-none flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth"
+        :class="[
+          showLeftGradient && showRightGradient ? 'mask-both' : '',
+          showLeftGradient && !showRightGradient ? 'mask-left' : '',
+          !showLeftGradient && showRightGradient ? 'mask-right' : '',
+        ]"
       >
         <div
           v-if="type === 'watched'"
@@ -113,3 +124,22 @@ const groupByOptions = computed(() => {
     </div>
   </div>
 </template>
+<style scoped>
+.mask-left {
+  mask-image: linear-gradient(to right, transparent 0%, black 32px);
+}
+
+.mask-right {
+  mask-image: linear-gradient(to left, transparent 0%, black 32px);
+}
+
+.mask-both {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+}
+</style>
