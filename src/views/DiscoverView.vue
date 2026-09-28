@@ -105,6 +105,7 @@ function clearSearch() {
         v-if="
           !searchMoviesStore.isSearching &&
           !genreMoviesStore.isLoading &&
+          !discoverMoviesStore.selectedCategory &&
           isOnline
         "
       />
