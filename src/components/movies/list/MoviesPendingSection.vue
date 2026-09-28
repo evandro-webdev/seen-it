@@ -1,5 +1,6 @@
 <script setup>
 import { useAuthStore } from "@/stores/auth";
+import { useMovieDetailsStore } from "@/stores/movieDetails.js";
 
 import MovieCard from "../cards/MovieCard.vue";
 
@@ -15,6 +16,7 @@ defineProps({
 });
 
 const authStore = useAuthStore();
+const movieDetailsStore = useMovieDetailsStore();
 </script>
 
 <template>
