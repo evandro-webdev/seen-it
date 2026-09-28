@@ -59,7 +59,7 @@ onClickOutside(
 <template>
   <div
     ref="menuRef"
-    class="absolute z-10 left-0 top-11 min-w-[200px] py-1 rounded-xl border border-gray-200 dark:border-[#242942] bg-[#f7f7f7] dark:bg-[#0f111c] shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col"
+    class="absolute z-10 left-0 top-11 min-w-[160px] py-1 rounded-xl border border-gray-200 dark:border-[#242942] bg-[#f7f7f7] dark:bg-[#0f111c] shadow-xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col"
   >
     <button
       @click="openProfileModal"
@@ -69,15 +69,6 @@ onClickOutside(
       <span class="font-medium text-sm truncate">
         {{ authStore.user?.displayName }}
       </span>
-    </button>
-
-    <button
-      @click="openGroupsModal"
-      type="button"
-      class="w-full py-3 px-4 text-left text-gray-700 dark:text-gray-200 flex items-center gap-3"
-    >
-      <UsersRound class="w-5 h-5 text-[#0088FF] shrink-0" />
-      <span class="text-sm font-medium">Grupos</span>
     </button>
 
     <button
