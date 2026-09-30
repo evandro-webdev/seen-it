@@ -11,8 +11,6 @@ import GroupList from "./GroupList.vue";
 
 const groupsStore = useGroupsStore();
 
-const groups = computed(() => groupsStore.groups);
-
 const currentView = ref("list");
 const selectedGroupForDetails = ref(null);
 
@@ -46,11 +44,6 @@ function resetView() {
     <ModalHeader
       v-if="currentView !== 'details'"
       :title="currentView === 'list' ? 'Seus grupos' : 'Criar grupo'"
-      :subtitle="
-        currentView === 'list'
-          ? `${groups.length} ${groups.length === 1 ? 'grupo' : 'grupos'}`
-          : ''
-      "
       :icon="UsersRound"
       @close="handleClose"
     />
@@ -61,7 +54,6 @@ function resetView() {
     >
       <GroupList
         v-if="currentView === 'list'"
-        :groups="groups"
         key="list"
         @open-details="handleOpenDetails"
         @create-group="currentView = 'create'"

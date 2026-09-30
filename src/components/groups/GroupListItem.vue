@@ -35,7 +35,7 @@ function handleSelectGroup() {
   toastStore.success(`Entrou em: ${props.group.name}`);
 }
 
-function handleOpenMenu(event) {
+function handleOpenDetails(event) {
   event.stopPropagation();
   emit("openDetails", props.group);
 }
@@ -113,7 +113,7 @@ function handleOpenMenu(event) {
 
       <button
         type="button"
-        @click="handleOpenMenu"
+        @click="handleOpenDetails"
         class="p-1.5 rounded-xl text-gray-400 dark:text-[#A4ADC5] active:bg-gray-200/50 dark:active:bg-gray-800/50 transition-colors"
         title="Opções do grupo"
       >
