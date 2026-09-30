@@ -16,6 +16,7 @@ import MoviesTrackedEmpty from "../ui/messages/MoviesTrackedEmpty.vue";
 import MoviesGroupedSection from "./MoviesGroupedSection.vue";
 import CollectionToolbar from "../toolbar/CollectionToolbar.vue";
 import MoviesPendingSection from "./MoviesPendingSection.vue";
+import GuestState from "../ui/messages/GuestState.vue";
 
 const props = defineProps({
   movies: {
@@ -75,15 +76,11 @@ const displayMovies = computed(() => {
   );
 });
 
-const { activeGroupSections } = useMovieGrouping(
-  displayMovies,
-  groupBy,
-  {
-    activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
-    currentUid: computed(() => authStore.user?.uid),
-    currentUserDisplayName: computed(() => authStore.user?.displayName),
-  },
-);
+const { activeGroupSections } = useMovieGrouping(displayMovies, groupBy, {
+  activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
+  currentUid: computed(() => authStore.user?.uid),
+  currentUserDisplayName: computed(() => authStore.user?.displayName),
+});
 
 function clearSearch() {
   searchQuery.value = "";
@@ -97,7 +94,10 @@ function clearSearch() {
       full-screen
     />
 
-    <AuthForm v-else-if="!authStore.isAuthenticated" />
+    <GuestState
+      v-else-if="!authStore.isAuthenticated"
+      :context="type"
+    />
 
     <template v-else>
       <CollectionToolbar
