@@ -1,11 +1,13 @@
 <script setup>
 import { computed } from "vue";
 import { useGroupsStore } from "@/stores/groups";
+import { useAuthStore } from "@/stores/auth";
 import { getGroupTheme } from "@/constants/colors.js";
 
-import { ChevronDown, Users } from "@lucide/vue";
+import { ChevronDown } from "@lucide/vue";
 
 const groupsStore = useGroupsStore();
+const authStore = useAuthStore();
 
 const groupTheme = computed(() => {
   if (!groupsStore.activeGroup?.theme) return null;
@@ -19,21 +21,16 @@ const activeGroupName = computed(() => {
 
 <template>
   <button
+    v-if="authStore.isAuthenticated"
     type="button"
     @click="groupsStore.openGroupsModal"
     class="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-transform duration-100 active:scale-95 select-none"
   >
     <div
-      v-if="groupsStore.activeGroup"
       class="w-2.5 h-2.5 rounded-full shrink-0"
       :style="{
-        backgroundColor: groupTheme?.primary || '#0088FF',
+        backgroundColor: groupTheme?.primary || '#90a1b9',
       }"
-    />
-
-    <Users
-      v-else
-      class="w-4 h-4 text-gray-400 shrink-0"
     />
 
     <span
