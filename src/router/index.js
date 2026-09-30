@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import DiscoverView from "../views/DiscoverView.vue";
 import WatchedView from "../views/WatchedView.vue";
 import SavedView from "../views/SavedView.vue";
+import ProfileView from "@/views/ProfileView.vue";
+import ProfileEditView from "@/views/ProfileEditView.vue";
 
 const routes = [
   {
@@ -23,6 +25,16 @@ const routes = [
     path: "/saved",
     name: "saved",
     component: SavedView,
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    component: ProfileView,
+  },
+  {
+    path: "/profile/edit",
+    name: "profile-edit",
+    component: ProfileEditView,
   },
 ];
 
