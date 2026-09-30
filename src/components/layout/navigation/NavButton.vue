@@ -45,7 +45,7 @@ function handleTabClick(navigate, isActive) {
       />
 
       <span
-        class="text-[10px] tracking-wide transition-colors duration-200"
+        class="text-xs tracking-wide transition-colors duration-200"
         :class="isActive ? 'font-semibold' : 'font-medium'"
       >
         {{ label }}
