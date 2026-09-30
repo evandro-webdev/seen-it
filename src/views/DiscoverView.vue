@@ -85,7 +85,7 @@ function clearSearch() {
   <div>
     <div class="my-1 lg:py-14 space-y-3">
       <SearchBar
-        v-model="searchQuery"
+        v-model:search-query="searchQuery" 
         @search="searchMoviesStore.searchForMovies(searchQuery)"
       />
 
