@@ -4,7 +4,7 @@ import { Check } from "@lucide/vue";
 const props = defineProps({
   modelValue: {
     type: String,
-    required: true,
+    default: "",
   },
   colorOptions: {
     type: Array,
