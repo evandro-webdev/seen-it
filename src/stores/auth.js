@@ -1,42 +1,36 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { auth, db, doc, runTransaction, getDoc } from "../services/firebase";
+import { auth } from "../services/firebase";
+
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile,
 } from "firebase/auth";
 
 import { useGroupsStore } from "./groups";
-import { generateUniqueUsername } from "@/utils/username";
 import { initOneSignal, logoutOneSignal } from "@/services/onesignal";
-import { loginSchema, registerSchema } from "@/schemas/auth.schema";
 
 import { getRandomUserColor } from "@/constants/colors";
+import { loginUser, registerUser } from "@/services/authService";
+import { getUserProfile, updateUserProfile } from "@/services/userService";
+import { getFirstName } from "@/utils/username";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const loading = ref(true);
 
-  const getFirstName = (fullName) =>
-    fullName ? fullName.trim().split(" ")[0] : "";
-
   onAuthStateChanged(auth, async (firebaseUser) => {
     try {
       if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const docSnap = await getDoc(userDocRef);
-        const userData = docSnap.exists() ? docSnap.data() : {};
+        const userData = await getUserProfile(firebaseUser.uid);
 
         user.value = {
           uid: firebaseUser.uid,
           displayName: firebaseUser.displayName || "",
           email: firebaseUser.email,
-          username: userData.username,
-          color: userData.color,
-          avatar_url: userData.avatar_url || null,
+          username: userData?.username,
+          color: userData?.color,
+          avatar_url: userData?.avatar_url || null,
         };
       } else {
         user.value = null;
@@ -47,7 +41,7 @@ export const useAuthStore = defineStore("auth", () => {
       if (firebaseUser) {
         user.value = {
           uid: firebaseUser.uid,
-          displayName: getFirstName(firebaseUser.displayName || ""),
+          displayName: getFirstName(firebaseUser.displayName),
           email: firebaseUser.email,
           color: getRandomUserColor(),
         };
@@ -60,50 +54,32 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   async function register(payload) {
-    const parseResult = registerSchema.safeParse(payload);
-
-    if (!parseResult.success) {
-      throw new Error("Dados de registro inválidos");
-    }
-
-    const { name, email, password } = parseResult.data;
-
-    const firstName = getFirstName(name);
-
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-
-    await updateProfile(userCredential.user, { displayName: firstName });
-    const autoUsername = await generateUniqueUsername(firstName);
-
-    await runTransaction(db, async (transaction) => {
-      const usernameRef = doc(db, "usernames", autoUsername);
-      const userRef = doc(db, "users", userCredential.user.uid);
-
-      transaction.set(usernameRef, { uid: userCredential.user.uid });
-      transaction.set(userRef, {
-        name,
-        email,
-        username: autoUsername,
-        color: getRandomUserColor(),
-        created_at: new Date(),
-      });
-    });
+    await registerUser(payload);
   }
 
   async function login(payload) {
-    const parseResult = loginSchema.safeParse(payload);
+    await loginUser(payload);
+  }
 
-    if (!parseResult.success) {
-      throw new Error("Dados de login inválidos");
-    }
+  async function logout() {
+    const groupsStore = useGroupsStore();
+    groupsStore.clearActiveGroup();
 
-    const { email, password } = parseResult.data;
+    await logoutOneSignal();
 
-    await signInWithEmailAndPassword(auth, email, password);
+    await signOut(auth);
+    user.value = null;
+  }
+
+  async function updateProfile(payload) {
+    if (!user.value?.uid) throw new Error("Você não está autenticado.");
+    
+    const updatedData = await updateUserProfile(user.value, payload);
+    
+    user.value = {
+      ...user.value,
+      ...updatedData,
+    };
   }
 
   async function setupNotifications() {
@@ -123,16 +99,6 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function logout() {
-    const groupsStore = useGroupsStore();
-    groupsStore.clearActiveGroup();
-
-    await logoutOneSignal();
-
-    await signOut(auth);
-    user.value = null;
-  }
-
   const isAuthenticated = computed(() => !!user.value);
 
   return {
@@ -142,6 +108,7 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     register,
     logout,
+    updateProfile,
     setupNotifications,
   };
 });
