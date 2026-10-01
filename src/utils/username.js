@@ -1,5 +1,9 @@
 import { db, doc, getDoc } from "@/services/firebase.js";
 
+export function getFirstName(fullName) {
+    return fullName ? fullName.trim().split(" ")[0] : "";
+  }
+
 export function slugifyUsername(str) {
   return str
     .toLowerCase()
