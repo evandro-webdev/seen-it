@@ -60,7 +60,7 @@ export function useMovieGrouping(movies, groupBy, options = {}) {
 
         if (!memberData && uid === currentUid) {
           memberData = {
-            name: options.currentUserDisplayName?.value || "Você",
+            name: options.currentUserName?.value || "Você",
             color: "#338CD5",
           };
         }
