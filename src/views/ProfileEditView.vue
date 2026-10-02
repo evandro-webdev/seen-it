@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast.js";
 import { USER_COLORS } from "@/constants/colors.js";
@@ -18,7 +17,6 @@ import ColorPicker from "@/components/forms/ColorPicker.vue";
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
 
 const router = useRouter();
-const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 
@@ -86,7 +84,7 @@ const onSubmit = handleSubmit(async (formValues) => {
   serverError.value = "";
 
   try {
-    await profileStore.updateProfile(formValues);
+    await authStore.updateProfile(formValues);
     toastStore.success("Perfil atualizado!");
     router.push({ name: "profile" });
   } catch (error) {
