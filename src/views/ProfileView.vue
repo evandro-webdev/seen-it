@@ -1,47 +1,27 @@
 <script setup>
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast.js";
-import { useGroupsStore } from "@/stores/groups";
+import { useRouter } from "vue-router";
 import { getUserColor } from "@/constants/colors.js";
 
-import {
-  User,
-  Pencil,
-  LogOut,
-  Loader2,
-  Film,
-  Users,
-  CheckCircle2,
-  Trophy,
-} from "@lucide/vue";
+import { User, Pencil, LogOut } from "@lucide/vue";
 
 import BaseButton from "@/components/ui/BaseButton.vue";
 import AuthForm from "@/components/auth/AuthForm.vue";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.vue";
+import FavoriteMoviesSection from "@/components/profile/FavoriteMoviesSection.vue";
+import AchievementsSection from "@/components/profile/AchievementsSection.vue";
+import StatsSection from "@/components/profile/StatsSection.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const groupsStore = useGroupsStore()
 const toastStore = useToastStore();
 
 const isLoggingOut = ref(false);
 const user = computed(() => authStore.user);
 
 const userColor = computed(() => getUserColor(user.value?.color));
-
-// TODO: Exibir dados verdadeiros e reativos
-const stats = computed(() => [
-  { label: "Assistidos", value: 42, icon: Film, color: "text-[#0088FF]" },
-  {
-    label: "Salvos",
-    value: 38,
-    icon: CheckCircle2,
-    color: "text-amber-500",
-  },
-  { label: "Grupos", value: groupsStore.groups.length, icon: Users, color: "text-emerald-500" },
-]);
 
 function goToEdit() {
   router.push({ name: "profile-edit" });
@@ -110,89 +90,17 @@ async function handleLogout() {
 
       <BaseButton
         label="Editar perfil"
+        :icon="Pencil"
         variant="secondary"
         size="sm"
-        class="!rounded-full !px-5 !py-2"
         @click="goToEdit"
-      >
-        <template #icon>
-          <Pencil class="w-3.5 h-3.5" />
-        </template>
-      </BaseButton>
+        class="!rounded-full !px-5 !py-2"
+      />
     </header>
 
-    <section class="grid grid-cols-3 gap-3">
-      <div
-        v-for="item in stats"
-        :key="item.label"
-        class="p-3 bg-gray-100 dark:bg-[#1A1F33] rounded-2xl flex flex-col items-center justify-center text-center space-y-1"
-      >
-        <component
-          :is="item.icon"
-          class="w-4 h-4"
-          :class="item.color"
-        />
-        <span
-          class="text-lg font-bold text-gray-900 dark:text-white leading-none"
-        >
-          {{ item.value }}
-        </span>
-        <span
-          class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-        >
-          {{ item.label }}
-        </span>
-      </div>
-    </section>
-
-    <section class="space-y-2.5">
-      <h2
-        class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1"
-      >
-        Filmes Favoritos (EM BREVE)
-      </h2>
-
-      <div class="grid grid-cols-3 gap-3">
-        <div
-          v-for="index in 3"
-          :key="index"
-          class="aspect-[2/3] rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/40 flex flex-col items-center justify-center text-gray-400 dark:text-slate-600 transition-colors"
-        >
-          <Film class="w-6 h-6 opacity-60" />
-        </div>
-      </div>
-    </section>
-
-    <section class="space-y-2.5">
-      <h2
-        class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1"
-      >
-        Conquistas (EM BREVE)
-      </h2>
-
-      <div class="space-y-2.5">
-        <div
-          v-for="index in 3"
-          :key="index"
-          class="p-3.5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/40 flex items-center gap-3.5 transition-colors"
-        >
-          <div
-            class="w-11 h-11 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-100/50 dark:bg-slate-800/40 flex items-center justify-center text-gray-400 dark:text-slate-600 shrink-0"
-          >
-            <Trophy class="w-5 h-5 opacity-60" />
-          </div>
-
-          <div class="min-w-0 flex-1 space-y-1">
-            <div
-              class="h-3.5 w-28 bg-gray-200 dark:bg-slate-800 rounded-md animate-pulse"
-            />
-            <div
-              class="h-2.5 w-44 bg-gray-100 dark:bg-slate-800/60 rounded-md animate-pulse"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
+    <StatsSection />
+    <FavoriteMoviesSection />
+    <AchievementsSection />
 
     <hr class="border-gray-200 dark:border-gray-800" />
 
@@ -200,14 +108,11 @@ async function handleLogout() {
       label="Sair da conta"
       variant="danger-outline"
       size="lg"
+      :icon="LogOut"
       :disabled="isLoggingOut"
-      block
+      :loading="isLoggingOut"
       @click="handleLogout"
-    >
-      <template #icon>
-        <Loader2 v-if="isLoggingOut" />
-        <LogOut v-else />
-      </template>
-    </BaseButton>
+      block
+    />
   </div>
 </template>
