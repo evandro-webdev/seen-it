@@ -1,14 +1,6 @@
-import {
-  doc,
-  db,
-  updateDoc,
-  updateFirebaseProfile,
-  getAuth,
-  getDoc,
-  writeBatch,
-} from "@/services/firebase";
+import { doc, db, updateDoc, getDoc, runTransaction } from "@/services/firebase";
 import { createClient } from "@supabase/supabase-js";
-import { getFirstName, slugifyUsername } from "@/utils/username";
+import { slugifyUsername } from "@/utils/username";
 import { profileSchema } from "@/schemas/profile.schema";
 
 import Compressor from "compressorjs";
@@ -32,17 +24,21 @@ export async function processUsernameChange(uid, currentUsername, newUsername) {
     throw new Error("O nome de usuário deve ter no mínimo 3 caracteres.");
   }
 
-  const usernameDocRef = doc(db, "usernames", cleanUsername);
-  const usernameDoc = await getDoc(usernameDocRef);
+  await runTransaction(db, async (transaction) => {
+    const newUsernameRef = doc(db, "usernames", cleanUsername);
+    const newUsernameDoc = await transaction.get(newUsernameRef);
 
-  if (usernameDoc.exists()) {
-    throw new Error("Este nome de usuário já está em uso.");
-  }
+    if (newUsernameDoc.exists()) {
+      throw new Error("Este nome de usuário já está em uso.");
+    }
 
-  const batch = writeBatch(db);
-  batch.delete(doc(db, "usernames", currentUsername));
-  batch.set(usernameDocRef, { uid });
-  await batch.commit();
+    if (currentUsername) {
+      const oldUsernameRef = doc(db, "usernames", currentUsername);
+      transaction.delete(oldUsernameRef);
+    }
+
+    transaction.set(newUsernameRef, { uid });
+  });
 
   return cleanUsername;
 }
@@ -83,6 +79,7 @@ export async function processAvatarUpload(uid, imageFile) {
 
 export async function updateUserProfile(user, payload) {
   const parseResult = profileSchema.safeParse(payload);
+
   if (!parseResult.success) {
     throw new Error("Dados de perfil inválidos.");
   }
@@ -105,15 +102,5 @@ export async function updateUserProfile(user, payload) {
 
   await updateDoc(doc(db, "users", user.uid), updates);
 
-  const auth = getAuth();
-  const firstName = getFirstName(name);
-
-  await updateFirebaseProfile(auth.currentUser, { displayName: firstName });
-
-  return {
-    displayName: firstName,
-    color,
-    ...(updates.username && { username: updates.username }),
-    ...(updates.avatar_url && { avatar_url: updates.avatar_url }),
-  };
+  return updates;
 }

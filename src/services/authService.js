@@ -1,13 +1,14 @@
-import { auth, db, doc, runTransaction } from "../services/firebase";
+import { auth, db, doc, runTransaction } from "@/services/firebase";
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
 } from "firebase/auth";
 
 import { getFirstName } from "@/utils/username";
 import { generateUniqueUsername } from "@/utils/username";
 import { loginSchema, registerSchema } from "@/schemas/auth.schema";
+import { getRandomUserColor } from "@/constants/colors";
 
 export async function registerUser(payload) {
   const parseResult = registerSchema.safeParse(payload);
@@ -18,16 +19,15 @@ export async function registerUser(payload) {
 
   const { name, email, password } = parseResult.data;
 
-  const firstName = getFirstName(name);
-
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
     password,
   );
 
-  await updateProfile(userCredential.user, { displayName: firstName });
+  const firstName = getFirstName(name);
   const autoUsername = await generateUniqueUsername(firstName);
+  const userColor = getRandomUserColor();
 
   await runTransaction(db, async (transaction) => {
     const usernameRef = doc(db, "usernames", autoUsername);
@@ -38,10 +38,20 @@ export async function registerUser(payload) {
       name,
       email,
       username: autoUsername,
-      color: getRandomUserColor(),
+      color: userColor,
+      avatar_url: null,
       created_at: new Date(),
     });
   });
+
+  return {
+    uid: userCredential.user.uid,
+    email,
+    name,
+    username: autoUsername,
+    color: userColor,
+    avatar_url: null,
+  };
 }
 
 export async function loginUser(payload) {
