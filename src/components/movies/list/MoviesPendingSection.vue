@@ -28,7 +28,7 @@ const movieDetailsStore = useMovieDetailsStore();
         class="w-2.5 h-2.5 rounded-full bg-[#10355E] dark:bg-[#B0D5FE] animate-pulse"
       ></span>
       <h2 class="text-base font-semibold text-[#10355E] dark:text-[#B0D5FE]">
-        {{ authStore.user?.displayName }}, você ainda não avaliou:
+        {{ authStore.user?.name }}, você ainda não avaliou:
       </h2>
     </div>
 

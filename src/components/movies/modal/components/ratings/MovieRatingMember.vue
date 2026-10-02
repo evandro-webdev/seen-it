@@ -37,7 +37,7 @@ const defaultAvatar = computed(() => {
 const name = computed(() => {
   return groupMembers.value
     ? groupMembers.value[props.uid]?.name
-    : authStore.user?.displayName;
+    : authStore.user?.name;
 });
 
 const userColor = computed(() => {

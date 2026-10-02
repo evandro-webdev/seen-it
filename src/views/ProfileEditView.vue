@@ -45,7 +45,7 @@ const hasChanges = computed(() => {
   if (!authStore.user) return false;
 
   return (
-    name.value !== (authStore.user.displayName || "") ||
+    name.value !== (authStore.user.name || "") ||
     username.value !== (authStore.user.username || "") ||
     selectedColor.value !== (authStore.user.color || "") ||
     selectedFile.value !== null
@@ -58,7 +58,7 @@ onMounted(() => {
     avatarPreview.value = authStore.user.avatar_url || null;
 
     setValues({
-      name: authStore.user.displayName || "",
+      name: authStore.user.name || "",
       username: authStore.user.username || "",
       color: authStore.user.color || "",
       imageFile: null,

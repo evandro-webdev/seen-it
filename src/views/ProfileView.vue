@@ -54,7 +54,7 @@ async function handleLogout() {
 
   <div
     v-else
-    class="w-full pt-6 space-y-6 pb-24 select-none"
+    class="w-full pt-6 space-y-6 select-none"
   >
     <header class="flex flex-col items-center text-center space-y-3">
       <div
@@ -64,7 +64,7 @@ async function handleLogout() {
         <img
           v-if="user?.avatar_url"
           :src="user.avatar_url"
-          :alt="user.displayName"
+          :alt="user.name"
           class="w-full h-full object-cover rounded-full"
         />
         <div
@@ -79,7 +79,7 @@ async function handleLogout() {
         <h1
           class="text-xl font-bold text-gray-900 dark:text-white leading-tight"
         >
-          {{ user?.displayName || "Usuário" }}
+          {{ user?.name || "Usuário" }}
         </h1>
         <span
           class="text-xs font-medium text-gray-500 dark:text-[#9EB2CD] block"

@@ -42,7 +42,7 @@ defineExpose({
     <div class="space-y-6">
       <p class="text-sm font-light text-gray-600 dark:text-gray-300">
         <strong class="font-semibold text-gray-800 dark:text-white">{{
-          authStore.user?.displayName
+          authStore.user?.name
         }}</strong
         >, que nota você dá para este filme?
       </p>

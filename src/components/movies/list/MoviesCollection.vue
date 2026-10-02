@@ -79,7 +79,7 @@ const displayMovies = computed(() => {
 const { activeGroupSections } = useMovieGrouping(displayMovies, groupBy, {
   activeGroupMembers: computed(() => groupsStore.activeGroupMembers),
   currentUid: computed(() => authStore.user?.uid),
-  currentUserDisplayName: computed(() => authStore.user?.displayName),
+  currentUserName: computed(() => authStore.user?.name),
 });
 
 function clearSearch() {
