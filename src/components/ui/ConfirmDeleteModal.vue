@@ -23,7 +23,7 @@ const emit = defineEmits(["confirm", "close"]);
     <Transition name="fade">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 p-4 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+        class="confirm-modal-backdrop fixed inset-0 z-50 p-4 bg-black/60 backdrop-blur-sm flex items-center justify-center"
         @click.self="emit('close')"
       >
         <div

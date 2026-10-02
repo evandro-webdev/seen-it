@@ -26,12 +26,15 @@ useModalHistory(
   () => props.isOpen,
   () => emit("close"),
 );
-
-onClickOutside(modalContentRef, () => {
-  if (props.isOpen && props.closeOnClickOutside) {
-    emit("close");
-  }
-});
+onClickOutside(
+  modalContentRef,
+  () => {
+    if (props.isOpen && props.closeOnClickOutside) {
+      emit("close");
+    }
+  },
+  { ignore: [".confirm-modal-backdrop"] },
+);
 
 function lockScroll() {
   document.body.style.overflow = "hidden";
@@ -57,7 +60,7 @@ function handleAfterLeave() {
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-end"
+        class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm flex justify-center items-end"
       >
         <div
           ref="modalContentRef"
