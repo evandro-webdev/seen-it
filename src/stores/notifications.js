@@ -111,7 +111,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     if (recipients.length === 0) return;
 
     const title = "Confira minha nota!";
-    const body = `${authStore.user.displayName} avaliou "${movie.title}".`;
+    const body = `${authStore.user.name} avaliou "${movie.title}".`;
 
     const payload = {
       type: "movie_rated",
@@ -134,7 +134,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     if (recipients.length === 0) return;
 
     const title = "Vamos assistir?";
-    const body = `${authStore.user.displayName} salvou o filme "${movie.title}"`;
+    const body = `${authStore.user.name} salvou o filme "${movie.title}"`;
 
     const payload = {
       type: "movie_rated",
@@ -154,7 +154,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     if (!recipients || recipients.length === 0) return;
 
     const title = "Novo grupo criado!";
-    const body = `${authStore.user.displayName} criou o grupo "${group.name}"`;
+    const body = `${authStore.user.name} criou o grupo "${group.name}"`;
 
     const payload = {
       type: "group_created",
@@ -175,7 +175,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
       return addDoc(collection(db, "notifications"), {
         user_id: uid,
         sender_id: authStore.user.uid,
-        sender_name: authStore.user.displayName,
+        sender_name: authStore.user.name,
         is_read: false,
         created_at: new Date(),
         ...notificationData,
