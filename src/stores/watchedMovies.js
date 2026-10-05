@@ -16,7 +16,6 @@ import { useNotificationsStore } from "./notifications.js";
 
 export const useWatchedMoviesStore = defineStore("watched_movies", () => {
   const watchedMovies = ref([]);
-  const watchedMoviesIds = ref([]);
   const isLoading = ref(false);
   let unsubscribeListener = null;
 
@@ -43,7 +42,6 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) {
       watchedMovies.value = [];
-      watchedMoviesIds.value = [];
       return;
     }
 
@@ -56,9 +54,6 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
           docId: doc.id,
           ...doc.data(),
         }));
-        watchedMoviesIds.value = watchedMovies.value.map((movie) =>
-          String(movie.id),
-        );
         isLoading.value = false;
       },
       (error) => {
@@ -76,7 +71,6 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
       } else {
         if (unsubscribeListener) unsubscribeListener();
         watchedMovies.value = [];
-        watchedMoviesIds.value = [];
       }
     },
     { immediate: true },
