@@ -4,7 +4,7 @@ import { ref, computed } from "vue";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 
 import { useGroupsStore } from "./groups";
-import { logoutOneSignal } from "@/services/onesignal";
+import { logoutOneSignal, setupUserNotifications } from "@/services/onesignal";
 
 import { auth } from "@/services/firebase";
 import { loginUser, registerUser } from "@/services/authService";
@@ -21,6 +21,8 @@ export const useAuthStore = defineStore("auth", () => {
       ("");
       return;
     }
+
+    await setupUserNotifications(firebaseUser.uid);
 
     try {
       const userData = await getUserProfile(firebaseUser.uid);
@@ -82,11 +84,17 @@ export const useAuthStore = defineStore("auth", () => {
     };
   }
 
+  const firstName = computed(() => {
+    if (!user.value?.name) return "";
+    return user.value.name.trim().split(" ")[0];
+  });
+
   const isAuthenticated = computed(() => !!user.value);
 
   return {
     user,
     loading,
+    firstName,
     isAuthenticated,
     login,
     register,
