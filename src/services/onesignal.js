@@ -5,7 +5,7 @@ export async function initOneSignal() {
   if (isInitialized) return;
   if (initPromise) return initPromise;
 
-  initPromise = new Promise((resolve) => {
+  initPromise = new Promise((resolve, reject) => {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async (OneSignal) => {
       try {
@@ -15,10 +15,11 @@ export async function initOneSignal() {
           serviceWorkerParam: { scope: "/" },
           serviceWorkerPath: "OneSignalSDKWorker.js",
         });
-      } catch (err) {
-      } finally {
         isInitialized = true;
         resolve();
+      } catch (err) {
+        initPromise = null;
+        reject(err);
       }
     });
   });
@@ -26,17 +27,41 @@ export async function initOneSignal() {
   return initPromise;
 }
 
+export async function setupUserNotifications(userId) {
+  if (!userId) return;
+
+  try {
+    await initOneSignal();
+
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try {
+        const currentExternalId = await OneSignal.User?.externalId;
+        if (currentExternalId !== userId) {
+          await OneSignal.login(userId);
+        }
+
+        await OneSignal.Notifications.requestPermission();
+      } catch (e) {
+        console.error("Erro no login/permissão do OneSignal:", e);
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao configurar notificações de usuário:", error);
+  }
+}
+
 export async function logoutOneSignal() {
   if (!isInitialized) return;
 
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
   return new Promise((resolve) => {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async (OneSignal) => {
       try {
-        if (OneSignal.User && OneSignal.User.externalId) {
+        if (OneSignal.User?.externalId) {
           await OneSignal.logout();
         }
       } catch (e) {
+        console.error("Erro ao fazer logout do OneSignal:", e);
       } finally {
         resolve();
       }
