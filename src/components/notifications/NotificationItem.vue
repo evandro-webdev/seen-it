@@ -1,10 +1,11 @@
 <script setup>
 import { computed } from "vue";
-import { ChevronRight } from "@lucide/vue";
 import { useDarkMode } from "@/composables/useDarkMode";
 import { formatRelativeTime } from "@/utils/formatters";
 import { useGroupsStore } from "@/stores/groups";
 import { getUserColor } from "@/constants/colors";
+
+import { ChevronRight } from "@lucide/vue";
 
 const props = defineProps({
   notification: {

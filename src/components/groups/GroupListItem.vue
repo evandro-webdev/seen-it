@@ -70,15 +70,15 @@ function handleOpenDetails(event) {
           </h3>
 
           <span
-            v-if="hasUnreadNotifications"
-            class="relative flex h-2.5 w-2.5 shrink-0"
+            v-if="hasUnreadNotifications && !isActive"
+            class="absolute -top-1 left-1 flex h-2.5 w-2.5 shrink-0"
             title="Novas notificações"
           >
             <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-40"
             />
             <span
-              class="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"
+              class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"
             />
           </span>
         </div>

@@ -24,6 +24,7 @@ watch(
   (newUid, oldUid) => {
     if (newUid) {
       groupsStore.setupGroupsListener();
+
       if (groupsStore.activeGroup) {
         groupsStore.loadGroupMembers();
       }
@@ -32,12 +33,15 @@ watch(
       watchedMoviesStore.setupWatchedMoviesListener();
 
       notificationsStore.listenToNotifications();
-      authStore.setupNotifications();
     } else if (oldUid && !newUid) {
       groupsStore.groups = [];
+      savedMoviesStore.stopListening?.();
+      watchedMoviesStore.stopListening?.();
+
       notificationsStore.stopListening();
     }
   },
+  { immediate: true },
 );
 </script>
 
