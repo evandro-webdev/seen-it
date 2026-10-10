@@ -33,11 +33,15 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
     return `groups/${activeGroup.id}/watched_movies`;
   }
 
-  function setupWatchedMoviesListener() {
+  function stopListeners() {
     if (unsubscribeListener) {
       unsubscribeListener();
       unsubscribeListener = null;
     }
+  }
+
+  function setupListeners() {
+    stopListeners();
 
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) {
@@ -67,7 +71,7 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
     [() => groupsStore.activeGroup?.id, () => authStore.user?.uid],
     ([groupId, userId]) => {
       if (groupId || userId) {
-        setupWatchedMoviesListener();
+        setupListeners();
       } else {
         if (unsubscribeListener) unsubscribeListener();
         watchedMovies.value = [];
@@ -238,7 +242,8 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
   return {
     watchedMovies,
     isLoading,
-    setupWatchedMoviesListener,
+    setupListeners,
+    stopListeners,
     saveWatchedMovie,
     removeMyRating,
     isAlreadyWatched,

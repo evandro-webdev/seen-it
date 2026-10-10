@@ -35,11 +35,15 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     return `groups/${activeGroup.id}/saved_movies`;
   }
 
-  async function setupSavedMoviesListener() {
+  function stopListeners() {
     if (unsubscribeListener) {
       unsubscribeListener();
       unsubscribeListener = null;
     }
+  }
+
+  async function setupListeners() {
+    stopListeners();
 
     const collectionPath = getTargetCollectionPath();
     if (!collectionPath) {
@@ -76,7 +80,7 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     [() => groupsStore.activeGroup?.id, () => authStore.user?.uid],
     ([groupId, userId]) => {
       if (groupId || userId) {
-        setupSavedMoviesListener();
+        setupListeners();
       } else {
         if (unsubscribeListener) unsubscribeListener();
         savedMovies.value = [];
@@ -161,7 +165,8 @@ export const useSavedMoviesStore = defineStore("savedMovies", () => {
     savedMovies,
     savedMoviesIds,
     isLoading,
-    setupSavedMoviesListener,
+    setupListeners,
+    stopListeners,
     isAlreadySaved,
     toggleSaved,
     pickRandomMovie,

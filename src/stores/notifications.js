@@ -21,24 +21,24 @@ export const useNotificationsStore = defineStore("notifications", () => {
   const groupsStore = useGroupsStore();
   const authStore = useAuthStore();
 
-  let unsubscribe = null;
+  let unsubscribeListener = null;
 
-  function stopListening() {
-    if (unsubscribe) {
-      unsubscribe();
-      unsubscribe = null;
+  function stopListeners() {
+    if (unsubscribeListener) {
+      unsubscribeListener();
+      unsubscribeListener = null;
     }
   }
 
-  function listenToNotifications() {
-    stopListening();
+  function setupListeners() {
+    stopListeners();
 
     const uid = authStore.user?.uid;
     if (!uid) return;
 
     loading.value = true;
 
-    unsubscribe = createNotificationsListener(
+    unsubscribeListener = createNotificationsListener(
       uid,
       (notifications) => {
         allNotifications.value = notifications;
@@ -183,7 +183,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
     notifications: activeNotifications,
     unreadCount,
     unreadGroupsMap,
-    listenToNotifications,
+    setupListeners,
     openNotificationsModal,
     closeNotificationsModal,
     dispatchSavedMovieNotification,
@@ -192,6 +192,6 @@ export const useNotificationsStore = defineStore("notifications", () => {
     markAsRead,
     markAllAsRead,
     cleanOldNotifications,
-    stopListening,
+    stopListeners,
   };
 });
