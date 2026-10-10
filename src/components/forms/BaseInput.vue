@@ -1,26 +1,18 @@
 <script setup>
 import { computed } from "vue";
 
+defineOptions({
+  inheritAttrs: false,
+});
+
 const props = defineProps({
   label: {
-    type: String,
-    default: "",
-  },
-  type: {
-    type: String,
-    default: "text",
-  },
-  placeholder: {
     type: String,
     default: "",
   },
   icon: {
     type: [Object, Function],
     default: null,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
   },
   required: {
     type: Boolean,
@@ -72,10 +64,7 @@ const paddingClasses = computed(() => {
 
       <input
         v-model="modelValue"
-        :type="type"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :required="required"
+        v-bind="$attrs"
         class="w-full py-3.5 text-sm rounded-xl border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border-gray-200 dark:border-[#242C3C] bg-gray-50 dark:bg-[#151926] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         :class="[
           paddingClasses,
