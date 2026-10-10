@@ -1,90 +1,83 @@
 import { defineStore } from "pinia";
-import {
-  addDoc,
-  collection,
-  db,
-  query,
-  where,
-  doc,
-  getDocs,
-  updateDoc,
-  arrayUnion,
-  orderBy,
-  startAt,
-  endAt,
-  limit,
-  writeBatch,
-  onSnapshot,
-  arrayRemove,
-} from "../services/firebase";
-import { ref } from "vue";
-import { slugifyUsername } from "@/utils/username";
-import { createGroupSchema } from "@/schemas/group.schema";
-
+import { computed, ref } from "vue";
 import { useAuthStore } from "./auth.js";
 import { useNotificationsStore } from "./notifications";
+import { createGroupSchema } from "@/schemas/group.schema";
+import {
+  createGroupsListener,
+  fetchGroupMembers,
+  createGroupDocument,
+  searchUsersByUsernameQuery,
+  deleteGroupDocument,
+} from "@/services/groupService.js";
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]);
-
-  const activeGroup = ref(getInitialActiveGroup());
+  const activeGroupId = ref(getInitialActiveGroupId());
   const activeGroupMembers = ref({});
 
   const isGroupsModalOpen = ref(false);
   const isLoading = ref(false);
-  let unsubscribeListener = null;
 
   const authStore = useAuthStore();
   const notificationsStore = useNotificationsStore();
 
-  function getInitialActiveGroup() {
-    try {
-      const item = localStorage.getItem("activeGroup");
-      return item ? JSON.parse(item) : null;
-    } catch (e) {
-      localStorage.removeItem("activeGroup");
-      return null;
-    }
+  let unsubscribeListener = null;
+
+  const activeGroup = computed(() => {
+    if (!activeGroupId.value) return null;
+    return groups.value.find((g) => g.id === activeGroupId.value) || null;
+  });
+
+  function getInitialActiveGroupId() {
+    return localStorage.getItem("activeGroupId");
   }
 
   function setActiveGroup(group) {
-    activeGroup.value = group;
-    if (group) {
-      localStorage.setItem("activeGroup", JSON.stringify(group));
-      loadGroupMembers();
-    } else {
+    if (!group) {
       clearActiveGroup();
+      return;
     }
+
+    activeGroupId.value = group.id;
+    localStorage.setItem("activeGroupId", group.id);
+    loadGroupMembers();
   }
 
-  function setupGroupsListener() {
+  function clearActiveGroup() {
+    activeGroupId.value = null;
+    activeGroupMembers.value = {};
+    localStorage.removeItem("activeGroupId");
+  }
+
+  function openGroupsModal() {
+    isGroupsModalOpen.value = true;
+  }
+  function closeGroupsModal() {
+    isGroupsModalOpen.value = false;
+  }
+
+  function stopListeners() {
     if (unsubscribeListener) {
       unsubscribeListener();
       unsubscribeListener = null;
     }
+  }
 
-    const currentUserId = authStore.user?.uid;
-    if (!currentUserId) {
-      groups.value = [];
-      return;
-    }
+  function setupListeners() {
+    stopListeners();
 
     isLoading.value = true;
 
-    const q = query(
-      collection(db, "groups"),
-      where("members", "array-contains", currentUserId),
-    );
-
-    unsubscribeListener = onSnapshot(
-      q,
-      (snapshot) => {
-        groups.value = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
+    unsubscribeListener = createGroupsListener(
+      authStore.user?.uid,
+      (updatedGroups) => {
+        groups.value = updatedGroups;
         isLoading.value = false;
+
+        if (activeGroupId.value) {
+          loadGroupMembers();
+        }
       },
       (error) => {
         console.error("Erro ao buscar grupos do usuário:", error);
@@ -94,37 +87,11 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function loadGroupMembers(targetMemberIds = null) {
-    const isCustomTarget = Array.isArray(targetMemberIds);
-
-    const memberIds = isCustomTarget
-      ? targetMemberIds
-      : activeGroup.value?.members;
-
-    if (!memberIds || !memberIds.length) {
-      if (!isCustomTarget) activeGroupMembers.value = {};
-      return {};
-    }
+    const memberIds = targetMemberIds ?? activeGroup.value?.members;
 
     try {
-      const q = query(
-        collection(db, "users"),
-        where("__name__", "in", memberIds),
-      );
-
-      const snapshot = await getDocs(q);
-
-      const membersMap = {};
-      snapshot.forEach((docSnap) => {
-        membersMap[docSnap.id] = {
-          uid: docSnap.id,
-          ...docSnap.data(),
-        };
-      });
-
-      if (!isCustomTarget) {
-        activeGroupMembers.value = membersMap;
-      }
-
+      const membersMap = await fetchGroupMembers(memberIds);
+      if (!targetMemberIds) activeGroupMembers.value = membersMap;
       return membersMap;
     } catch (error) {
       console.error("Erro ao carregar membros do grupo:", error);
@@ -133,170 +100,53 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function createGroup(payload) {
-    const currentUserId = authStore.user?.uid;
-
-    if (!currentUserId) {
-      throw new Error("Você precisa estar autenticado para criar um grupo.");
-    }
-
     const parseResult = createGroupSchema.safeParse(payload);
-
+    
     if (!parseResult.success) {
       throw new Error("Dados inválidos. Tente novamente.");
     }
 
-    const { groupName, invitedMembers, theme } = parseResult.data;
-
-    const invitedMembersIds = invitedMembers.map((m) => m.uid);
-
-    const allMembersIds = Array.from(
-      new Set([currentUserId, ...invitedMembersIds]),
+    const { group, invitedMembersIds } = await createGroupDocument(
+      parseResult.data,
+      authStore.user?.uid,
     );
-
-    const newGroupPayload = {
-      name: groupName,
-      members: allMembersIds,
-      theme: theme,
-      created_by: currentUserId,
-      created_at: new Date(),
-    };
-
-    const groupRef = await addDoc(collection(db, "groups"), newGroupPayload);
-
-    const updatePromises = allMembersIds.map((memberId) =>
-      updateDoc(doc(db, "users", memberId), {
-        my_groups: arrayUnion(groupRef.id),
-      }),
-    );
-
-    await Promise.all(updatePromises);
-
-    const createdGroup = {
-      id: groupRef.id,
-      ...newGroupPayload,
-    };
 
     await notificationsStore.dispatchCreatedGroupNotification(
-      createdGroup,
+      group,
       invitedMembersIds,
     );
 
-    setActiveGroup(createdGroup);
-
+    setActiveGroup(group);
     closeGroupsModal();
   }
 
+  // todo: extract to another store or composable
   async function searchUsersByUsername(searchQuery) {
-    const cleanQuery = slugifyUsername(searchQuery);
-
-    if (!cleanQuery || cleanQuery.length < 2) return [];
-
-    const usersRef = collection(db, "users");
-
-    const q = query(
-      usersRef,
-      orderBy("username"),
-      startAt(cleanQuery),
-      endAt(cleanQuery + "\uf8ff"),
-      limit(8),
-    );
-
-    const querySnapshot = await getDocs(q);
-    const results = [];
-
-    querySnapshot.forEach((docSnap) => {
-      if (docSnap.id === authStore.user?.uid) return;
-
-      const data = docSnap.data();
-
-      results.push({
-        uid: docSnap.id,
-        name: data.name,
-        username: data.username,
-        avatar_url: data.avatar_url,
-        color: data.color,
-      });
-    });
-
-    return results;
+    return searchUsersByUsernameQuery(searchQuery, authStore.user?.uid);
   }
 
   async function deleteGroup(groupId) {
-    const currentUserId = authStore.user?.uid;
-    const targetGroup =
-      groups?.value.find((g) => g.id === groupId) || activeGroup;
+    const targetGroup = groups.value.find((g) => g.id === groupId);
 
-    if (
-      !currentUserId ||
-      !targetGroup ||
-      targetGroup.created_by !== currentUserId
-    ) {
-      throw new Error("Operação não permitida.");
+    if (!targetGroup) {
+      throw new Error("Grupo não encontrado.");
     }
 
-    const batch = writeBatch(db);
+    await deleteGroupDocument(groupId, targetGroup, authStore.user?.uid);
 
-    const savedMoviesRef = collection(db, `groups/${groupId}/saved_movies`);
-    const watchedMoviesRef = collection(db, `groups/${groupId}/watched_movies`);
-    const groupNotificationsQuery = query(
-      collection(db, "notifications"),
-      where("group_id", "==", groupId),
-    );
-
-    const [savedSnap, watchedSnap, groupNotificationsSnap] = await Promise.all([
-      getDocs(savedMoviesRef),
-      getDocs(watchedMoviesRef),
-      getDocs(groupNotificationsQuery),
-    ]);
-
-    savedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
-    watchedSnap.forEach((docSnap) => batch.delete(docSnap.ref));
-    groupNotificationsSnap.forEach((docSnap) => batch.delete(docSnap.ref));
-
-    const membersIds = Array.isArray(targetGroup.members)
-      ? targetGroup.members
-      : Object.keys(targetGroup.members || {});
-
-    membersIds.forEach((memberId) => {
-      const userDocRef = doc(db, "users", memberId);
-
-      batch.update(userDocRef, {
-        my_groups: arrayRemove(groupId),
-      });
-    });
-
-    const groupDocRef = doc(db, "groups", groupId);
-    batch.delete(groupDocRef);
-
-    await batch.commit();
-
-    if (activeGroup.value?.id === groupId) {
-      clearActiveGroup();
-    }
-  }
-
-  function clearActiveGroup() {
-    activeGroup.value = null;
-    activeGroupMembers.value = {};
-    localStorage.removeItem("activeGroup");
-  }
-
-  function openGroupsModal() {
-    isGroupsModalOpen.value = true;
-  }
-
-  function closeGroupsModal() {
-    isGroupsModalOpen.value = false;
+    if (activeGroup.value?.id === groupId) clearActiveGroup();
   }
 
   return {
     groups,
     isGroupsModalOpen,
     activeGroup,
+    isLoading,
     activeGroupMembers,
     openGroupsModal,
     closeGroupsModal,
-    setupGroupsListener,
+    setupListeners,
+    stopListeners,
     createGroup,
     deleteGroup,
     setActiveGroup,
