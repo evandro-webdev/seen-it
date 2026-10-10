@@ -3,12 +3,12 @@ import { ref, watch } from "vue";
 import { useGroupsStore } from "@/stores/groups.js";
 import { useToastStore } from "@/stores/toast.js";
 
-import { useForm, useField } from "vee-validate";
+import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { createGroupSchema } from "@/schemas/group.schema.js";
+import { getRandomGroupTheme, GROUP_THEMES } from "@/constants/colors.js";
 
 import { ArrowLeft, Loader2, Popcorn, UsersRound } from "@lucide/vue";
-import { getRandomGroupTheme, GROUP_THEMES } from "@/constants/colors.js";
 
 import BaseButton from "../ui/BaseButton.vue";
 import BaseInput from "../forms/BaseInput.vue";
@@ -22,10 +22,35 @@ const toastStore = useToastStore();
 const searchQuery = ref("");
 const searchResults = ref([]);
 const isSearching = ref(false);
-const isSubmitting = ref(false);
 const serverError = ref("");
 
-const { handleSubmit, resetForm } = useForm({
+let debounceTimer = null;
+
+watch(searchQuery, async (newQuery) => {
+  clearTimeout(debounceTimer);
+  const cleanQuery = newQuery.trim();
+
+  if (cleanQuery.length < 2) {
+    searchResults.value = [];
+    isSearching.value = false;
+    return;
+  }
+
+  isSearching.value = true;
+
+  debounceTimer = setTimeout(async () => {
+    try {
+      searchResults.value = await groupsStore.searchUsersByUsername(cleanQuery);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      searchResults.value = [];
+    } finally {
+      isSearching.value = false;
+    }
+  }, 300);
+});
+
+const { handleSubmit, isSubmitting, errors, resetForm, defineField } = useForm({
   validationSchema: toTypedSchema(createGroupSchema),
   initialValues: {
     groupName: "",
@@ -34,57 +59,22 @@ const { handleSubmit, resetForm } = useForm({
   },
 });
 
-const {
-  value: groupName,
-  errorMessage: groupNameError,
-  meta: groupNameMeta,
-} = useField("groupName");
-
-const { value: members, errorMessage: membersError } =
-  useField("invitedMembers");
-const { value: selectedTheme, errorMessage: themeError } = useField("theme");
-
-watch(searchQuery, async (newQuery) => {
-  const cleanQuery = newQuery.trim();
-
-  if (cleanQuery.length < 2) {
-    searchResults.value = [];
-    return;
-  }
-
-  isSearching.value = true;
-  try {
-    const results = await groupsStore.searchUsersByUsername(cleanQuery);
-    searchResults.value = results.filter(
-      (user) => !members.value.some((m) => m.uid === user.uid),
-    );
-  } catch (error) {
-    console.error("Erro ao buscar usuários:", error);
-  } finally {
-    isSearching.value = false;
-  }
-});
+const [groupName] = defineField("groupName");
+const [members] = defineField("invitedMembers");
+const [selectedTheme] = defineField("theme");
 
 const onSubmit = handleSubmit(async (formValues) => {
-  if (isSubmitting.value) return;
-
   serverError.value = "";
-  isSubmitting.value = true;
 
   try {
     await groupsStore.createGroup(formValues);
 
-    const createdGroupName = formValues.groupName;
+    toastStore.success(`Grupo ${formValues.groupName} criado com sucesso.`);
     resetForm();
     searchQuery.value = "";
-
-    toastStore.success(`Grupo ${createdGroupName} criado com sucesso.`);
     emit("closeForm");
   } catch (error) {
     serverError.value = error.message || "Erro ao criar o grupo.";
-    console.error("Erro ao criar grupo:", error.message);
-  } finally {
-    isSubmitting.value = false;
   }
 });
 </script>
@@ -99,21 +89,21 @@ const onSubmit = handleSubmit(async (formValues) => {
       label="Nome do grupo"
       placeholder="Digite o nome do grupo"
       :icon="Popcorn"
-      :error="groupNameMeta.touched ? groupNameError : ''"
+      :error="errors.groupName"
     />
 
     <div>
       <UserPicker
-        v-model="members"
+        v-model:members="members"
         v-model:search-query="searchQuery"
         :search-results="searchResults"
-        @select-user="searchQuery = ''"
+        :is-searching="isSearching"
       />
       <span
-        v-if="membersError"
+        v-if="errors.invitedMembers"
         class="text-xs text-red-500 font-medium mt-1 block"
       >
-        {{ membersError }}
+        {{ errors.invitedMembers }}
       </span>
     </div>
 
@@ -124,10 +114,10 @@ const onSubmit = handleSubmit(async (formValues) => {
         label="Escolha a cor do grupo:"
       />
       <span
-        v-if="themeError"
+        v-if="errors.theme"
         class="text-xs text-red-500 font-medium mt-2 block"
       >
-        {{ themeError }}
+        {{ errors.theme }}
       </span>
     </div>
 
