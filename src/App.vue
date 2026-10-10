@@ -23,22 +23,18 @@ watch(
   () => authStore.user?.uid,
   (newUid, oldUid) => {
     if (newUid) {
-      groupsStore.setupGroupsListener();
-
-      if (groupsStore.activeGroup) {
-        groupsStore.loadGroupMembers();
-      }
-
-      savedMoviesStore.setupSavedMoviesListener();
-      watchedMoviesStore.setupWatchedMoviesListener();
-
-      notificationsStore.listenToNotifications();
+      groupsStore.setupListeners();
+      savedMoviesStore.setupListeners();
+      watchedMoviesStore.setupListeners();
+      notificationsStore.setupListeners();
     } else if (oldUid && !newUid) {
       groupsStore.groups = [];
-      savedMoviesStore.stopListening?.();
-      watchedMoviesStore.stopListening?.();
+      groupsStore.clearActiveGroup();
 
-      notificationsStore.stopListening();
+      groupsStore.stopListeners();
+      savedMoviesStore.stopListeners();
+      watchedMoviesStore.stopListeners();
+      notificationsStore.stopListeners();
     }
   },
   { immediate: true },
