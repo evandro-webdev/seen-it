@@ -29,7 +29,7 @@ defineEmits(['remove'])
       <button
         type="button"
         @click="$emit('remove', member.uid)"
-        class="transition-colors ml-1 hover:text-red-500"
+        class="transition-colors ml-1"
       >
         <X class="w-4 h-4" />
       </button>
