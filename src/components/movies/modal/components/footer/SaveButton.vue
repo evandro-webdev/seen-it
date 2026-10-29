@@ -16,9 +16,9 @@ const movieDetailsStore = useMovieDetailsStore();
 const movie = computed(() => movieDetailsStore.selectedMovie);
 const isLoading = ref(false);
 
-const isAlreadySaved = computed(() => {
+const isSaved = computed(() => {
   if (!movie.value?.id) return false;
-  return savedMoviesStore.isAlreadySaved(movie.value.id);
+  return savedMoviesStore.isSaved(movie.value.id);
 });
 
 const savedBy = computed(() => {
@@ -48,15 +48,15 @@ async function handleToggleSaved() {
 }
 
 const buttonIcon = computed(() => {
-  return isAlreadySaved.value ? BookmarkCheck : Bookmark;
+  return isSaved.value ? BookmarkCheck : Bookmark;
 });
 
 const buttonVariant = computed(() => {
-  return isAlreadySaved.value ? "secondary" : "ghost";
+  return isSaved.value ? "secondary" : "ghost";
 });
 
 const buttonLabel = computed(() => {
-  if (!isAlreadySaved.value) return "Salvar";
+  if (!isSaved.value) return "Salvar";
 
   const firstName = savedBy.value?.name?.trim().split(" ")[0];
 

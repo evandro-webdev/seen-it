@@ -181,7 +181,7 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
       await notificationsStore.dispatchWatchedMovieNotification(movie);
     }
 
-    if (savedMoviesStore.isAlreadySaved(movie.id)) {
+    if (savedMoviesStore.isSaved(movie.id)) {
       await savedMoviesStore.toggleSaved(movie);
     }
   }
