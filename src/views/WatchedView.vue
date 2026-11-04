@@ -11,9 +11,8 @@ const filterStore = useCollectionFilter();
 
 const { sortBy } = storeToRefs(filterStore);
 
-//fix
 function getMovieTimestamp(movie) {
-  return new Date(movie.created_at).getTime();
+  return movie.created_at?.toMillis?.() || 0;
 }
 
 const sortedMovies = computed(() => {

@@ -113,7 +113,7 @@ export const useWatchedMoviesStore = defineStore("watched_movies", () => {
       release_date: movie.release_date || "",
       cast,
       director,
-      created_at: new Date(),
+      created_at: serverTimestamp(),
     };
 
     if (activeGroupId) {
