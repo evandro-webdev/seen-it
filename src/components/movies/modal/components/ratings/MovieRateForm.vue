@@ -22,8 +22,8 @@ const authStore = useAuthStore();
 const movieDetailsStore = useMovieDetailsStore();
 const movie = computed(() => movieDetailsStore.selectedMovie);
 
-const rating = ref(movie?.reviews?.[authStore.user?.uid]?.rating ?? 5.0);
-const comment = ref(movie?.reviews?.[authStore.user?.uid]?.comment ?? '');
+const rating = ref(movie?.value.reviews?.[authStore.user?.uid]?.rating ?? 5.0);
+const comment = ref(movie?.value.reviews?.[authStore.user?.uid]?.comment ?? '');
 
 function getFormData() {
   return {
