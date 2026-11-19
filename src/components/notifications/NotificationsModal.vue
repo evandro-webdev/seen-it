@@ -29,7 +29,7 @@ async function handleNotificationClick(notification) {
     notification.type === "movie_rated" ||
     notification.type === "movie_saved"
   ) {
-    await movieDetailStore.openMovie(notification.entity_id);
+    await movieDetailStore.openModal(notification.entity_id);
   }
 }
 
