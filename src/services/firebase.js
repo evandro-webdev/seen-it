@@ -22,6 +22,7 @@ import {
   endAt,
   increment,
   arrayRemove,
+  serverTimestamp,
 } from "firebase/firestore";
 
 import { getAuth, updateProfile as updateFirebaseProfile } from "firebase/auth";
@@ -65,4 +66,5 @@ export {
   endAt,
   increment,
   arrayRemove,
+  serverTimestamp,
 };
