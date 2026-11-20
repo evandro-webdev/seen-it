@@ -5,6 +5,7 @@ import { Flame, Clapperboard, Award } from "@lucide/vue";
 
 import MoviesHeroCarousel from "./MoviesHeroCarousel.vue";
 import MoviesRow from "../list/MoviesRow.vue";
+import TrendingActorsRow from "../list/TrendingActorsRow.vue";
 
 const discoverMoviesStore = useDiscoverMoviesStore();
 </script>
@@ -19,6 +20,8 @@ const discoverMoviesStore = useDiscoverMoviesStore();
       category="popular"
       :movies="discoverMoviesStore.popularMovies"
     />
+
+    <TrendingActorsRow />
 
     <MoviesRow
       :icon="Clapperboard"

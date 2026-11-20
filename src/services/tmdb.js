@@ -100,3 +100,7 @@ export async function getMoviesByGenre(genreId, page = 1) {
       `&sort_by=popularity.desc`
   );
 }
+
+export async function getTrendingPeople(){
+    return fetchTMDB(`/trending/person/week`);
+}
